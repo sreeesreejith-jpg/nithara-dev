@@ -1,10 +1,10 @@
 :root {
-    --bg-dark: #0a0f1e;
-    --card-bg: rgba(20, 25, 45, 0.85);
-    --text-main: #e2e8f0;
-    --text-muted: #94a3b8;
-    --emi-red: #ff3b3b;
-    --glass-border: rgba(255, 255, 255, 0.08);
+    --bg-dark: #f8fafc;
+    --card-bg: rgba(255, 255, 255, 0.9);
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --emi-red: #ef4444;
+    --glass-border: rgba(0, 0, 0, 0.08);
 }
 
 * {
@@ -305,24 +305,31 @@ footer {
     font-size: 0.7rem;
     color: var(--text-muted);
 }
+
 /* FORCE INPUT VISIBILITY FIX */
-input, select, textarea {
-    background-color: #1e293b !important;
-    color: #ffffff !important;
-    caret-color: white !important;
+/* FORCE INPUT VISIBILITY FIX - Light Mode */
+input,
+select,
+textarea {
+    background-color: #f1f5f9 !important;
+    color: #1e293b !important;
+    caret-color: #ef4444 !important;
+    border: 1px solid #e2e8f0 !important;
 }
 
-input:focus, select:focus, textarea:focus {
-    background-color: #334155 !important;
-    color: #ffffff !important;
-    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2) !important;
+input:focus,
+select:focus,
+textarea:focus {
+    background-color: #ffffff !important;
+    color: #1e293b !important;
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2) !important;
 }
 
 /* Chrome/Android Autofill Fix */
 input:-webkit-autofill,
-input:-webkit-autofill:hover, 
-input:-webkit-autofill:focus, 
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
-    -webkit-box-shadow: 0 0 0 30px #1e293b inset !important;
-    -webkit-text-fill-color: white !important;
+    -webkit-box-shadow: 0 0 0 30px #f1f5f9 inset !important;
+    -webkit-text-fill-color: #1e293b !important;
 }

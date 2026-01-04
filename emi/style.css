@@ -1,16 +1,16 @@
 :root {
-    --bg-color: #0f172a;
-    --card-bg: rgba(30, 41, 59, 0.7);
-    --input-bg: rgba(15, 23, 42, 0.5);
-    --text-main: #f8fafc;
-    --text-muted: #94a3b8;
-    --accent-1: #38bdf8;
-    /* Cyan */
+    --bg-color: #f8fafc;
+    --card-bg: #ffffff;
+    --input-bg: #f1f5f9;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --accent-1: #0ea5e9;
+    /* Sky 500 */
     --accent-2: #f472b6;
     /* Pink */
     --accent-3: #a78bfa;
     /* Purple */
-    --border-color: rgba(148, 163, 184, 0.2);
+    --border-color: #e2e8f0;
     --font-family: 'Outfit', sans-serif;
 }
 
@@ -537,24 +537,31 @@ tr:last-child td {
         opacity: 1;
     }
 }
+
 /* FORCE INPUT VISIBILITY FIX */
-input, select, textarea {
-    background-color: #1e293b !important;
-    color: #ffffff !important;
-    caret-color: white !important;
+/* FORCE INPUT VISIBILITY FIX - Light Mode */
+input,
+select,
+textarea {
+    background-color: #f1f5f9 !important;
+    color: #1e293b !important;
+    caret-color: #0ea5e9 !important;
+    border: 1px solid #e2e8f0 !important;
 }
 
-input:focus, select:focus, textarea:focus {
-    background-color: #334155 !important;
-    color: #ffffff !important;
-    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2) !important;
+input:focus,
+select:focus,
+textarea:focus {
+    background-color: #ffffff !important;
+    color: #1e293b !important;
+    box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.2) !important;
 }
 
 /* Chrome/Android Autofill Fix */
 input:-webkit-autofill,
-input:-webkit-autofill:hover, 
-input:-webkit-autofill:focus, 
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
-    -webkit-box-shadow: 0 0 0 30px #1e293b inset !important;
-    -webkit-text-fill-color: white !important;
+    -webkit-box-shadow: 0 0 0 30px #f1f5f9 inset !important;
+    -webkit-text-fill-color: #1e293b !important;
 }

@@ -1,8 +1,7 @@
 (function () {
     /**
      * Capacitor Hardware Back Button Handler
-     * 
-     * Robust implementation to prevent loops and ensure correct navigation.
+     * Refined for robust navigation and app exit.
      */
     function setupBackButton() {
         // Safe access to the Capacitor App plugin
@@ -10,52 +9,59 @@
 
         // If the plugin isn't ready yet, retry after a short delay
         if (!App) {
-            // console.log("Nithara: App plugin not found yet, retrying...");
             setTimeout(setupBackButton, 200);
             return;
         }
 
-        // console.log("Nithara: Back button handler attached successfully.");
-
-        // Remove existing listeners to ensure we don't have duplicates/conflicts
+        // Remove existing listeners to avoid duplicates
         if (App.removeAllListeners) {
             App.removeAllListeners();
         }
 
-        // Add our custom listener
+        // Add custom listener
         App.addListener('backButton', function (data) {
             const path = window.location.pathname;
 
-            // Define sub-app directories
+            // Define sub-app directories (folder names)
             const subApps = [
-                '/salary/',
-                '/emi/',
-                '/pay-revision/',
-                '/dcrg/',
-                '/housing/',
-                '/sip/',
-                '/calculator/'
+                'salary',
+                'emi',
+                'pay-revision',
+                'dcrg',
+                'housing',
+                'sip',
+                'calculator'
             ];
 
-            const isSubPage = subApps.some(folder => path.indexOf(folder) !== -1);
+            // Check if we are currently in a sub-app
+            // look for '/salary/' explicitly to avoid partial matches
+            const isSubPage = subApps.some(folder => path.includes('/' + folder + '/'));
 
             if (isSubPage) {
-                // CASE 1: We are on a Sub-Page (e.g., Salary)
-                // Action: Go BACK to the Home Portal.
-                // We use 'replace' to avoid creating a history loop (Home -> Salary -> Home -> Salary...)
-                // We assume the home page is one level up (../index.html)
+                // CASE 1: In a Sub-App -> Navigate BACK to Home
+                // Use 'replace' to modify history, effectively stepping back up
                 window.location.replace('../index.html');
 
             } else {
-                // CASE 2: We are on the Home Page (root)
-                // Action: EXIT the App.
-                // This prevents going back to a previously visited sub-page (breaking the loop).
-                App.exitApp();
+                // CASE 2: At Home (or unknown root) -> EXIT App
+                // Try Capacitor exit method first
+                try {
+                    App.exitApp();
+                } catch (e) {
+                    console.error("App.exitApp failed:", e);
+                }
+
+                // Fallback for older WebView interfaces or if Capacitor fails
+                if (navigator.app && navigator.app.exitApp) {
+                    navigator.app.exitApp();
+                } else if (navigator.device && navigator.device.exitApp) {
+                    navigator.device.exitApp();
+                }
             }
         });
     }
 
-    // Attempt to initialize immediately, or wait for load
+    // Initialize
     if (document.readyState === 'complete') {
         setupBackButton();
     } else {

@@ -1,13 +1,13 @@
 :root {
-    --bg-color: #0f0f1a;
-    --calc-bg: #1a1a2e;
-    --btn-bg: #262640;
-    --btn-text: #e0e0e0;
-    --accent-color: #00d2ff;
-    --accent-glow: rgba(0, 210, 255, 0.4);
-    --op-color: #7b2cbf;
-    --op-glow: rgba(123, 44, 191, 0.4);
-    --equal-bg: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);
+    --bg-color: #f8fafc;
+    --calc-bg: #ffffff;
+    --btn-bg: #f1f5f9;
+    --btn-text: #1e293b;
+    --accent-color: #0ea5e9;
+    --accent-glow: rgba(14, 165, 233, 0.2);
+    --op-color: #7c3aed;
+    --op-glow: rgba(124, 58, 237, 0.2);
+    --equal-bg: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%);
     --font-main: 'Outfit', sans-serif;
 }
 
@@ -26,7 +26,7 @@ body {
     justify-content: center;
     align-items: center;
     overflow: hidden;
-    color: white;
+    color: #1e293b;
 }
 
 .app-container {
@@ -74,7 +74,7 @@ body {
 /* Cursor and Expression Styling */
 .history {
     font-size: 1.2rem;
-    color: rgba(255, 255, 255, 0.6);
+    color: #64748b;
     margin-bottom: 15px;
     min-height: 1.6rem;
     width: 100%;
@@ -108,14 +108,21 @@ body {
 }
 
 @keyframes blink {
-    from, to { opacity: 1; }
-    50% { opacity: 0; }
+
+    from,
+    to {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
 }
 
 .current-input {
     font-size: 3.5rem;
     font-weight: 600;
-    color: white;
+    color: #1e293b;
     text-shadow: 0 0 15px rgba(255, 255, 255, 0.15);
     transition: all 0.3s ease;
 }
@@ -124,7 +131,8 @@ body {
 .keypad {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    grid-template-rows: repeat(5, 70px) 60px; /* 5 rows + wide equals */
+    grid-template-rows: repeat(5, 70px) 60px;
+    /* 5 rows + wide equals */
     gap: 12px;
     padding-bottom: 10px;
 }
@@ -189,7 +197,7 @@ body {
         grid-template-rows: repeat(5, 60px) 50px;
         gap: 8px;
     }
-    
+
     .current-input {
         font-size: 2.8rem;
     }
@@ -199,11 +207,12 @@ body {
         border-radius: 16px;
     }
 }
+
 .footer-email {
     text-align: center;
     padding: 10px 0;
     font-size: 0.8rem;
-    color: rgba(255, 255, 255, 0.4);
+    color: #64748b;
     letter-spacing: 0.5px;
     margin-top: auto;
 }
