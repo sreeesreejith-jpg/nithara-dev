@@ -1,13 +1,18 @@
 :root {
-    --accent-glow: rgba(79, 70, 229, 0.15);
+    --accent-glow: rgba(79, 70, 229, 0.1);
     --primary: #4f46e5;
     --primary-hover: #4338ca;
-    --bg-color: #f8fafc; /* Light Slate 50 */
-    --card-bg: #ffffff; /* White */
-    --text-main: #1e293b; /* Dark Slate 800 */
-    --text-muted: #64748b; /* Slate 500 */
+    --bg-color: #f8fafc;
+    /* Premium Light Gray */
+    --card-bg: #ffffff;
+    --text-main: #0f172a;
+    /* Slate 900 for best readability */
+    --text-muted: #475569;
+    /* Slate 600 */
     --accent-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
     --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --border-color: #e2e8f0;
+    --input-bg: #f1f5f9;
     --font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
@@ -208,8 +213,10 @@ h1 {
 input,
 select,
 textarea {
-    background-color: #f1f5f9 !important; /* Slate 100 */
-    color: #1e293b !important; /* Slate 800 */
+    background-color: #f1f5f9 !important;
+    /* Slate 100 */
+    color: #1e293b !important;
+    /* Slate 800 */
     border: 1px solid #e2e8f0;
     caret-color: #4f46e5 !important;
     border-radius: 0.5rem;

@@ -3,8 +3,8 @@
     --primary-hover: #2563eb;
     --bg-color: #f8fafc;
     --card-bg: #ffffff;
-    --text-main: #1e293b;
-    --text-muted: #64748b;
+    --text-main: #0f172a;
+    --text-muted: #475569;
     --accent-gradient: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
     --before-color: #64748b;
     --after-color: #3b82f6;
@@ -431,7 +431,7 @@ input,
 select,
 textarea {
     background-color: #f1f5f9 !important;
-    color: #1e293b !important;
+    color: #0f172a !important;
     caret-color: #3b82f6 !important;
     border: 1px solid #e2e8f0 !important;
 }
@@ -440,7 +440,7 @@ input:focus,
 select:focus,
 textarea:focus {
     background-color: #ffffff !important;
-    color: #1e293b !important;
+    color: #0f172a !important;
     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
 }
 

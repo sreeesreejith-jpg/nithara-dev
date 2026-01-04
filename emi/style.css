@@ -2,8 +2,8 @@
     --bg-color: #f8fafc;
     --card-bg: #ffffff;
     --input-bg: #f1f5f9;
-    --text-main: #1e293b;
-    --text-muted: #64748b;
+    --text-main: #0f172a;
+    --text-muted: #475569;
     --accent-1: #0ea5e9;
     /* Sky 500 */
     --accent-2: #f472b6;
@@ -544,7 +544,7 @@ input,
 select,
 textarea {
     background-color: #f1f5f9 !important;
-    color: #1e293b !important;
+    color: #0f172a !important;
     caret-color: #0ea5e9 !important;
     border: 1px solid #e2e8f0 !important;
 }
@@ -553,7 +553,7 @@ input:focus,
 select:focus,
 textarea:focus {
     background-color: #ffffff !important;
-    color: #1e293b !important;
+    color: #0f172a !important;
     box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.2) !important;
 }
 

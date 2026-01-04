@@ -3,8 +3,10 @@
     --primary-hover: #059669;
     --bg-color: #f8fafc;
     --card-bg: #ffffff;
-    --text-main: #1e293b;
-    --text-muted: #64748b;
+    --text-main: #0f172a;
+    --text-muted: #475569;
+    --border-color: #e2e8f0;
+    --input-bg: #f1f5f9;
     --accent-gradient: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
     --sec-gradient: linear-gradient(135deg, #ef4444 0%, #f97316 100%);
     --font-family: 'Outfit', sans-serif;
@@ -440,7 +442,7 @@ input,
 select,
 textarea {
     background-color: #f1f5f9 !important;
-    color: #1e293b !important;
+    color: #0f172a !important;
     caret-color: #10b981 !important;
     border: 1px solid #e2e8f0 !important;
 }
@@ -449,7 +451,7 @@ input:focus,
 select:focus,
 textarea:focus {
     background-color: #ffffff !important;
-    color: #1e293b !important;
+    color: #0f172a !important;
     box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2) !important;
 }
 
