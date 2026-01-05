@@ -108,14 +108,31 @@
 
     <script>
         function forceExit() {
+            // Priority 1: Capacitor
             const App = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App;
-            if (App && App.exitApp) {
-                App.exitApp();
-            } else if (navigator.app && navigator.app.exitApp) {
-                navigator.app.exitApp();
-            } else {
-                window.close();
-            }
+            try {
+                if (App && App.exitApp) {
+                    App.exitApp();
+                }
+            } catch (e) { }
+
+            // Priority 2: Cordova/Legacy
+            try {
+                if (navigator.app && navigator.app.exitApp) {
+                    navigator.app.exitApp();
+                }
+            } catch (e) { }
+
+            // Priority 3: Browser Close
+            window.close();
+
+            // Visual Fallback
+            document.body.innerHTML = "<div style='background:#0f172a; height:100vh; display:flex; align-items:center; justify-content:center; color:white; font-family:sans-serif;'><h1>Closing App...</h1></div>";
+
+            // Last resort: Redirect away
+            setTimeout(() => {
+                window.location.href = "about:blank";
+            }, 300);
         }
         document.getElementById('exit-btn').addEventListener('click', forceExit);
     </script>

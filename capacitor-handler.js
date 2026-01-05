@@ -16,13 +16,20 @@
         }
 
         function forceExit() {
-            if (App && App.exitApp) {
-                App.exitApp();
-            } else if (navigator.app && navigator.app.exitApp) {
-                navigator.app.exitApp();
-            } else {
-                window.close();
-            }
+            try {
+                if (App && App.exitApp) {
+                    App.exitApp();
+                }
+            } catch (e) { }
+            try {
+                if (navigator.app && navigator.app.exitApp) {
+                    navigator.app.exitApp();
+                }
+            } catch (e) { }
+            window.close();
+            setTimeout(() => {
+                window.location.href = "about:blank";
+            }, 300);
         }
 
         App.addListener('backButton', function () {
