@@ -65,8 +65,7 @@
                     <div class="input-group">
                         <label for="basicPay">Basic Pay (BP)</label>
                         <div class="input-wrapper">
-                            <input type="number" id="basicPay" value="60700" placeholder="Enter Basic Pay"
-                                autocomplete="off">
+                            <input type="number" id="basicPay" placeholder="Enter Basic Pay" autocomplete="off">
                             <ul id="custom-dropdown" class="custom-dropdown">
                                 <!-- Items populated by JS -->
                             </ul>
@@ -81,13 +80,15 @@
                     <div class="input-group">
                         <label for="retirementAge">Age at Retirement/VRS</label>
                         <div class="input-wrapper">
-                            <input type="number" id="retirementAge" value="56">
+                            <input type="number" id="retirementAge">
                         </div>
                     </div>
-                    <div class="input-group full-width" style="display: none;">
+                    <div class="input-group full-width">
                         <label for="avgEmoluments">Average Emoluments</label>
-                        <div class="input-wrapper readonly">
-                            <input type="text" id="avgEmoluments" readonly>
+                        <div class="input-wrapper">
+                            <input type="number" id="avgEmoluments">
+                            <small class="input-hint">Default is last month's pay (BP+DA). For exact results, you may
+                                manually enter the 10-month average emoluments.</small>
                         </div>
                     </div>
                     <div class="input-group full-width">

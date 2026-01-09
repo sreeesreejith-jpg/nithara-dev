@@ -163,7 +163,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const calcDcrg = document.getElementById('calcDcrg');
     const dispCommFactor = document.getElementById('dispCommFactor');
 
-    const inputs = [basicPayInput, daPercentageInput, serviceYearsInput, retirementAgeInput];
+    const inputs = [basicPayInput, daPercentageInput, serviceYearsInput, retirementAgeInput, avgEmolumentsInput];
 
     /**
      * Format number without commas
@@ -175,7 +175,7 @@ document.addEventListener('DOMContentLoaded', () => {
     /**
      * Main calculation function
      */
-    const calculateAll = () => {
+    const calculateAll = (source) => {
         const bp = parseFloat(basicPayInput.value) || 0;
         const da = parseFloat(daPercentageInput.value) || 0;
         let years = parseFloat(serviceYearsInput.value) || 0;
@@ -185,8 +185,15 @@ document.addEventListener('DOMContentLoaded', () => {
         // Note: Rules say min 10, but we process whatever is there for instant feedback
 
         // 1. Average Emoluments
-        const avgEmoluments = bp + (bp * da / 100);
-        avgEmolumentsInput.value = Math.round(avgEmoluments);
+        let avgEmoluments;
+        if (source === 'ae') {
+            // If user manually edited AE, use that value
+            avgEmoluments = parseFloat(avgEmolumentsInput.value) || 0;
+        } else {
+            // Default calculation (BP + DA)
+            avgEmoluments = bp + (bp * da / 100);
+            avgEmolumentsInput.value = Math.round(avgEmoluments);
+        }
 
         // 2. Pension Calculation
         // Formula: (Average Emoluments / 2) * (Completed Service / 30)
@@ -197,8 +204,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 3. Pension Commutation
         // Formula: 40% of Pension * Factor * 12
-        const age = parseInt(retirementAgeInput.value) || 56;
-        const commFactor = commutationFactors[age] || 11.1; // Default to 11.1 (Age 56) if not found
+        const age = parseInt(retirementAgeInput.value);
+        const commFactor = (age && commutationFactors[age]) ? commutationFactors[age] : 0;
 
         const commutationAmount = pension * 0.40 * commFactor * 12;
         const balancePension = pension * 0.60;
@@ -218,7 +225,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const totalLumpSum = commutationAmount + dcrg;
 
         // Update Dashboard
-        const displayValue = (val) => (val > 0) ? formatAmount(val) : "";
+        const displayValue = (val) => (val > 0) ? formatAmount(val) : "0";
 
         if (totalBenefitsHeader) totalBenefitsHeader.textContent = displayValue(totalLumpSum);
         if (commuteHeader) commuteHeader.textContent = displayValue(commutationAmount);
@@ -236,7 +243,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Attach listeners
     inputs.forEach(input => {
-        input.addEventListener('input', calculateAll);
+        input.addEventListener('input', () => {
+            const source = (input.id === 'avgEmoluments') ? 'ae' : 'other';
+            calculateAll(source);
+        });
     });
 
     // Initial calculation
