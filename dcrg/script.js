@@ -156,6 +156,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const balanceHeader = document.getElementById('balanceHeader');
 
     // Details elements 
+    const calcLastPay = document.getElementById('calcLastPay');
+    const calcQS = document.getElementById('calcQS');
     const calcAvgEmoluments = document.getElementById('calcAvgEmoluments');
     const calcBasicPension = document.getElementById('calcBasicPension');
     const calcCommutation = document.getElementById('calcCommutation');
@@ -181,47 +183,55 @@ document.addEventListener('DOMContentLoaded', () => {
         let years = parseFloat(serviceYearsInput.value) || 0;
 
         // Validation & Constraints
-        if (years > 35) years = 35;
+        if (years > 33) years = 33; // Max DCRG service is 33
         // Note: Rules say min 10, but we process whatever is there for instant feedback
 
-        // 1. Average Emoluments
+        // 1. Last Pay (for DCRG)
+        const lastPay = bp + (bp * da / 100);
+
+        // 2. Average Emoluments (for Pension)
         let avgEmoluments;
         if (source === 'ae') {
             // If user manually edited AE, use that value
             avgEmoluments = parseFloat(avgEmolumentsInput.value) || 0;
         } else {
-            // Default calculation (BP + DA)
-            avgEmoluments = bp + (bp * da / 100);
+            // Default calculation (Basic Pay ONLY for Pension)
+            avgEmoluments = bp;
             avgEmolumentsInput.value = Math.round(avgEmoluments);
         }
 
-        // 2. Pension Calculation
-        // Formula: (Average Emoluments / 2) * (Completed Service / 30)
-        let pensionFactor = years / 30;
+        // 3. Pension Calculation
+        // Rules: Max 30 years counts for full pension
+        let pensionQS = (years > 30) ? 30 : years;
+        let pensionFactor = pensionQS / 30;
         if (pensionFactor > 1.0) pensionFactor = 1.0;
 
-        const pension = (avgEmoluments / 2) * pensionFactor;
+        let pension = (avgEmoluments / 2) * pensionFactor;
 
-        // 3. Pension Commutation
-        // Formula: 40% of Pension * Factor * 12
+        // Apply Service Pension Limits
+        if (pension < 11500 && pension > 0) pension = 11500;
+        if (pension > 83400) pension = 83400;
+
+        // 4. Pension Commutation
+        // Formula: 40% of Basic Pension * Factor * 12
         const age = parseInt(retirementAgeInput.value);
         const commFactor = (age && commutationFactors[age]) ? commutationFactors[age] : 0;
 
-        const commutationAmount = pension * 0.40 * commFactor * 12;
-        const balancePension = pension * 0.60;
-        const netTotalPension = balancePension;
+        const commutablePension = pension * 0.40;
+        const commutationAmount = commutablePension * commFactor * 12;
 
-        // 4. DCRG Calculation
-        // Formula: (Average Emoluments) * (Completed Service / 2)
-        // Rule: Factor (Years / 2) must not exceed 16.5
-        let dcrgFactor = years / 2;
-        if (dcrgFactor > 16.5) dcrgFactor = 16.5;
+        const balancePension = pension - commutablePension; // Reduced pension is 60%
 
-        let dcrg = avgEmoluments * dcrgFactor;
-        // Limit DCRG to 16 Lakhs
-        if (dcrg > 1600000) dcrg = 1600000;
+        // 6. DCRG Calculation
+        // Formula: (Last Pay) * (Qualifying Service / 2)
+        // Rule: Max 33 years
+        let dcrgQS = (years > 33) ? 33 : years;
+        let dcrg = lastPay * (dcrgQS / 2);
 
-        // 5. Total Benefits
+        // Limit DCRG to 17 Lakhs (11th Pay Revision)
+        if (dcrg > 1700000) dcrg = 1700000;
+
+        // 7. Total Benefits
         const totalLumpSum = commutationAmount + dcrg;
 
         // Update Dashboard
@@ -233,6 +243,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (balanceHeader) balanceHeader.textContent = displayValue(balancePension);
 
         // Update Details List
+        if (calcLastPay) calcLastPay.textContent = formatAmount(lastPay);
+        if (calcQS) calcQS.textContent = years;
         if (calcAvgEmoluments) calcAvgEmoluments.textContent = formatAmount(avgEmoluments);
         if (calcBasicPension) calcBasicPension.textContent = formatAmount(pension);
         if (calcCommutation) calcCommutation.textContent = formatAmount(commutationAmount);

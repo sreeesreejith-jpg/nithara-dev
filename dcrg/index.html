@@ -84,11 +84,11 @@
                         </div>
                     </div>
                     <div class="input-group full-width">
-                        <label for="avgEmoluments">Average Emoluments</label>
+                        <label for="avgEmoluments">Avg 10 Months Basic Pay</label>
                         <div class="input-wrapper">
                             <input type="number" id="avgEmoluments">
-                            <small class="input-hint">Default is last month's pay (BP+DA). For exact results, you may
-                                manually enter the 10-month average emoluments.</small>
+                            <small class="input-hint">Default is Current Basic Pay. For exact results, you may
+                                manually enter the actual 10-month average basic pay.</small>
                         </div>
                     </div>
                     <div class="input-group full-width">
@@ -104,31 +104,49 @@
             <section class="card" id="details-section">
                 <h2>Calculation Details</h2>
                 <div class="details-list">
+                    <!-- Basis Group -->
+                    <div class="detail-group-header">Computation Basis</div>
                     <div class="detail-item">
-                        <span class="detail-label">1. Average Emoluments</span>
+                        <span class="detail-label">Last Pay + DA</span>
+                        <span class="detail-value" id="calcLastPay">0</span>
+                        <small class="detail-desc">Used for DCRG</small>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Avg 10 Mo. Basic Pay</span>
                         <span class="detail-value" id="calcAvgEmoluments">0</span>
-                        <small class="detail-desc">Basic Pay + DA</small>
+                        <small class="detail-desc">Used for Pension</small>
                     </div>
                     <div class="detail-item">
-                        <span class="detail-label">2. Basic Pension</span>
-                        <span class="detail-value" id="calcBasicPension">0</span>
-                        <small class="detail-desc">(Avg Emoluments / 2) × Factor</small>
+                        <span class="detail-label">Qualifying Service</span>
+                        <span class="detail-value" id="calcQS">0</span>
+                        <small class="detail-desc">Pension (Max 30) | DCRG (Max 33)</small>
+                    </div>
+
+                    <!-- Lump Sum Group -->
+                    <div class="detail-group-header">Lump Sum Benefits</div>
+                    <div class="detail-item highlight-row">
+                        <span class="detail-label">DCRG Amount</span>
+                        <span class="detail-value text-accent" id="calcDcrg">0</span>
+                        <small class="detail-desc">Last Pay × (QS / 2) [Max ₹17L]</small>
                     </div>
                     <div class="detail-item">
-                        <span class="detail-label">3. Commutation Amount</span>
+                        <span class="detail-label">Commutation Value</span>
                         <span class="detail-value" id="calcCommutation">0</span>
-                        <small class="detail-desc">Pension × 40% × <span id="dispCommFactor"
+                        <small class="detail-desc">40% Pension × <span id="dispCommFactor"
                                 class="highlight-factor">Factor</span> × 12</small>
                     </div>
+
+                    <!-- Monthly Group -->
+                    <div class="detail-group-header">Monthly Benefits</div>
                     <div class="detail-item">
-                        <span class="detail-label">4. Reduced Pension</span>
-                        <span class="detail-value" id="calcReducedPension">0</span>
-                        <small class="detail-desc">Pension - Commuted Portion</small>
+                        <span class="detail-label">Full Basic Pension</span>
+                        <span class="detail-value" id="calcBasicPension">0</span>
+                        <small class="detail-desc">(Avg Pay / 2) × Factor</small>
                     </div>
-                    <div class="detail-item">
-                        <span class="detail-label">5. DCRG Amount</span>
-                        <span class="detail-value" id="calcDcrg">0</span>
-                        <small class="detail-desc">Avg Emoluments × Years/2</small>
+                    <div class="detail-item highlight-row">
+                        <span class="detail-label">Reduced Pension</span>
+                        <span class="detail-value text-success" id="calcReducedPension">0</span>
+                        <small class="detail-desc">Full Pension - Commuted Portion</small>
                     </div>
                 </div>
             </section>
