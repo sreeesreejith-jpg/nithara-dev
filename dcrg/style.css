@@ -390,30 +390,46 @@ body {
 }
 
 /* Print Button Styles */
-.print-button {
-    margin-top: 20px;
-    padding: 12px 24px;
-    background: #ffffff;
-    color: #2e1065;
+.print-button,
+.share-button {
+    padding: 12px 20px;
     border: none;
     border-radius: var(--radius-md);
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-weight: 700;
     cursor: pointer;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
-    margin-left: auto;
-    margin-right: auto;
     transition: transform 0.2s, background 0.2s;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    flex: 1;
 }
 
-.print-button:active {
+.print-button {
+    background: #ffffff;
+    color: #2e1065;
+}
+
+.share-button {
+    background: #10b981;
+    color: white;
+}
+
+.button-group {
+    display: flex;
+    gap: 12px;
+    margin-top: 25px;
+    width: 100%;
+}
+
+.print-button:active,
+.share-button:active {
     transform: scale(0.95);
 }
 
-/* Media Query for Print */
+/* Media Query for Print and PDF Mode */
 @media print {
     body {
         background: white !important;
@@ -428,11 +444,14 @@ body {
 
     .report-header {
         display: block !important;
+        text-align: center;
+        border-bottom: 2px solid black;
+        margin-bottom: 20px;
     }
 
     .home-button,
     .placeholder-message,
-    .print-button,
+    .button-group,
     .print-config,
     .disclaimer,
     .developer-credit,
@@ -441,34 +460,15 @@ body {
         display: none !important;
     }
 
-    /* Conditional Hiding */
-    body.hide-service .service-card,
-    body.hide-details .calc-card,
-    body.hide-summary .summary-card {
-        display: none !important;
-    }
-
     .card,
     .sticky-dashboard {
         background: white !important;
         color: black !important;
         box-shadow: none !important;
-        border: 1px solid #eee !important;
+        border: 1px solid black !important;
         margin-bottom: 20px !important;
         break-inside: avoid;
         padding: 20px !important;
-    }
-
-    .service-card {
-        border-top: 3px solid #3b82f6 !important;
-    }
-
-    .calc-card {
-        border-top: 3px solid #10b981 !important;
-    }
-
-    .summary-card {
-        border-top: 3px solid #8b5cf6 !important;
     }
 
     .detail-label,
@@ -478,14 +478,16 @@ body {
     .detail-group-header,
     .label,
     .value,
-    .sub-label {
+    .sub-label,
+    .text-success,
+    .text-accent,
+    .highlight-factor {
         color: black !important;
     }
 
-    /* Make inputs look like text in print */
     .input-group input {
         border: none !important;
-        text-align: left !important;
+        text-align: right !important;
         padding: 0 !important;
         font-weight: 700 !important;
         background: transparent !important;
@@ -494,11 +496,12 @@ body {
 
     .blinking {
         animation: none !important;
+        opacity: 1 !important;
     }
 
     h2 {
         color: black !important;
-        border-bottom: 1px solid #eee;
+        border-bottom: 1px solid black;
         padding-bottom: 5px;
         font-size: 1.1rem !important;
     }
@@ -506,6 +509,96 @@ body {
     h2::before {
         display: none !important;
     }
+}
+
+/* Styles for pdf-mode (used by html2pdf) */
+body.pdf-mode {
+    background: white !important;
+    color: black !important;
+    padding: 20px !important;
+}
+
+body.pdf-mode .container {
+    max-width: 100% !important;
+    margin: 0 !important;
+}
+
+body.pdf-mode .report-header {
+    display: block !important;
+    text-align: center;
+    border-bottom: 2px solid black;
+    margin-bottom: 20px;
+}
+
+body.pdf-mode .home-button,
+body.pdf-mode .placeholder-message,
+body.pdf-mode .button-group,
+body.pdf-mode .print-config,
+body.pdf-mode .disclaimer,
+body.pdf-mode .developer-credit,
+body.pdf-mode .input-hint,
+body.pdf-mode .custom-dropdown {
+    display: none !important;
+}
+
+/* Conditional Hiding */
+body.hide-service .service-card,
+body.hide-details .calc-card,
+body.hide-summary .summary-card,
+body.hide-service #input-section,
+body.hide-details #details-section,
+body.hide-summary #benefits-section {
+    display: none !important;
+}
+
+body.pdf-mode .card,
+body.pdf-mode .sticky-dashboard {
+    background: white !important;
+    color: black !important;
+    box-shadow: none !important;
+    border: 1px solid black !important;
+    margin-bottom: 20px !important;
+    break-inside: avoid;
+    padding: 20px !important;
+}
+
+body.pdf-mode .detail-label,
+body.pdf-mode .detail-value,
+body.pdf-mode .detail-step,
+body.pdf-mode .detail-desc,
+body.pdf-mode .detail-group-header,
+body.pdf-mode .label,
+body.pdf-mode .value,
+body.pdf-mode .sub-label,
+body.pdf-mode .text-success,
+body.pdf-mode .text-accent,
+body.pdf-mode .highlight-factor {
+    color: black !important;
+}
+
+body.pdf-mode .input-group input {
+    border: none !important;
+    text-align: right !important;
+    padding: 0 !important;
+    font-weight: 700 !important;
+    background: transparent !important;
+    color: black !important;
+}
+
+body.pdf-mode .blinking {
+    animation: none !important;
+    opacity: 1 !important;
+}
+
+body.pdf-mode h2 {
+    color: black !important;
+    border-bottom: 1px solid black;
+    padding-bottom: 5px;
+    font-size: 1.1rem !important;
+}
+
+body.pdf-mode h2::before {
+    display: none !important;
 }
 
 /* Footer & Extras */

@@ -278,58 +278,116 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Print logic
+    // Function to prepare document for PDF/Print
+    const prepareForPDF = () => {
+        const nameInput = document.getElementById('reportName');
+        const printName = document.getElementById('printEmployeeName');
+        const printDate = document.getElementById('printDate');
+        const reportTitle = nameInput && nameInput.value ? `DCRG_Report_${nameInput.value.replace(/\s+/g, '_')}` : 'Pension_DCRG_Report';
+
+        if (printName) {
+            printName.textContent = nameInput && nameInput.value ? `Employee: ${nameInput.value}` : '';
+        }
+        if (printDate) {
+            printDate.textContent = new Date().toLocaleDateString('en-IN', {
+                day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
+            });
+        }
+
+        const checkService = document.getElementById('checkService');
+        const checkDetails = document.getElementById('checkDetails');
+        const checkSummary = document.getElementById('checkSummary');
+
+        if (checkService && !checkService.checked) document.body.classList.add('hide-service');
+        if (checkDetails && !checkDetails.checked) document.body.classList.add('hide-details');
+        if (checkSummary && !checkSummary.checked) document.body.classList.add('hide-summary');
+
+        document.body.classList.add('pdf-mode');
+        return reportTitle;
+    };
+
+    const cleanupAfterPDF = () => {
+        document.body.classList.remove('hide-service', 'hide-details', 'hide-summary', 'pdf-mode');
+    };
+
+    // Print / PDF logic
     const printBtn = document.getElementById('printBtn');
     if (printBtn) {
         printBtn.addEventListener('click', () => {
             const originalText = printBtn.innerHTML;
-            printBtn.innerHTML = "<span>⏳</span> Preparing...";
+            printBtn.innerHTML = "<span>⏳</span> Generating PDF...";
             printBtn.disabled = true;
 
-            // Set Report Details
-            const nameInput = document.getElementById('reportName');
-            const printName = document.getElementById('printEmployeeName');
-            const printDate = document.getElementById('printDate');
-
-            if (printName) {
-                printName.textContent = nameInput && nameInput.value ? `Employee: ${nameInput.value}` : '';
-            }
-            if (printDate) {
-                printDate.textContent = new Date().toLocaleDateString('en-IN', {
-                    day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
-                });
-            }
-
-            // Apply Print Selections
-            const checkService = document.getElementById('checkService');
-            const checkDetails = document.getElementById('checkDetails');
-            const checkSummary = document.getElementById('checkSummary');
-
-            if (checkService && !checkService.checked) document.body.classList.add('hide-service');
-            if (checkDetails && !checkDetails.checked) document.body.classList.add('hide-details');
-            if (checkSummary && !checkSummary.checked) document.body.classList.add('hide-summary');
-
-            // Handle cleanup reliably
-            const cleanup = () => {
-                document.body.classList.remove('hide-service', 'hide-details', 'hide-summary');
-                printBtn.innerHTML = originalText;
-                printBtn.disabled = false;
+            const reportTitle = prepareForPDF();
+            const element = document.querySelector('.container');
+            const opt = {
+                margin: [10, 5],
+                filename: `${reportTitle}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
 
-            // Modern browsers use afterprint.
-            window.addEventListener('afterprint', cleanup, { once: true });
+            html2pdf().set(opt).from(element).save().then(() => {
+                cleanupAfterPDF();
+                printBtn.innerHTML = originalText;
+                printBtn.disabled = false;
+            }).catch(err => {
+                console.error("PDF generation failed:", err);
+                window.print();
+                cleanupAfterPDF();
+                printBtn.innerHTML = originalText;
+                printBtn.disabled = false;
+            });
+        });
+    }
 
-            // Small delay to ensure the UI has time to hide/show elements before print starts
-            setTimeout(() => {
-                try {
-                    window.print();
-                    // Fallback cleanup in case afterprint doesn't fire
-                    setTimeout(cleanup, 3000);
-                } catch (e) {
-                    alert("Print not supported on this browser.");
-                    cleanup();
+    // Share logic
+    const shareBtn = document.getElementById('shareBtn');
+    if (shareBtn) {
+        shareBtn.addEventListener('click', async () => {
+            const originalText = shareBtn.innerHTML;
+            shareBtn.innerHTML = "<span>⏳</span> Preparing...";
+            shareBtn.disabled = true;
+
+            try {
+                const reportTitle = prepareForPDF();
+                const element = document.querySelector('.container');
+                const opt = {
+                    margin: [10, 5],
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                };
+
+                const pdfBlob = await html2pdf().set(opt).from(element).output('blob');
+                cleanupAfterPDF();
+
+                const fileName = `${reportTitle}.pdf`;
+                const file = new File([pdfBlob], fileName, { type: 'application/pdf' });
+
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    await navigator.share({
+                        files: [file],
+                        title: 'Pension & DCRG Report',
+                        text: 'Sharing my Pension & DCRG calculation report.'
+                    });
+                } else {
+                    // Fallback to regular download if sharing is not supported
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(pdfBlob);
+                    link.download = fileName;
+                    link.click();
+                    alert("Sharing not supported on this browser/device. PDF downloaded instead.");
                 }
-            }, 250);
+            } catch (err) {
+                console.error("Sharing failed:", err);
+                alert("Sharing failed. Please try saving the PDF instead.");
+                cleanupAfterPDF();
+            } finally {
+                shareBtn.innerHTML = originalText;
+                shareBtn.disabled = false;
+            }
         });
     }
 

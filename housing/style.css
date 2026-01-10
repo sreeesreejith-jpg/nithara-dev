@@ -324,10 +324,185 @@ textarea:focus {
 }
 
 /* Chrome/Android Autofill Fix */
-input:-webkit-autofill,
-input:-webkit-autofill:hover,
-input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
     -webkit-box-shadow: 0 0 0 30px #1e293b inset !important;
     -webkit-text-fill-color: var(--text-main) !important;
+}
+
+/* Button & Share Styles */
+.button-group {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+.print-button,
+.share-button {
+    padding: 12px;
+    border: none;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex: 1;
+    transition: transform 0.2s;
+}
+
+.print-button {
+    background: #ffffff;
+    color: #1e293b;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.share-button {
+    background: #10b981;
+    color: white;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.print-button:active,
+.share-button:active {
+    transform: scale(0.95);
+}
+
+.report-header {
+    display: none;
+}
+
+/* Media Query for Print and PDF Mode */
+@media print {
+    body {
+        background: white !important;
+        color: black !important;
+        display: block !important;
+    }
+
+    .container {
+        max-width: 100% !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        background: white !important;
+    }
+
+    .home-icon,
+    .button-group,
+    .disclaimer,
+    footer,
+    .placeholder-message,
+    .background-animate {
+        display: none !important;
+    }
+
+    .report-header {
+        display: block !important;
+        text-align: center;
+        margin-bottom: 2rem;
+        border-bottom: 2px solid black;
+        padding-bottom: 1rem;
+    }
+
+    .report-header h1 {
+        color: black !important;
+        background: none !important;
+    }
+
+    .card {
+        background: white !important;
+        border: 2px solid black !important;
+        box-shadow: none !important;
+        color: black !important;
+        margin-bottom: 20px !important;
+    }
+
+    input {
+        background: transparent !important;
+        border: none !important;
+        color: black !important;
+        text-align: right !important;
+        font-weight: 700 !important;
+    }
+
+    .emi-red-bold,
+    h3,
+    label,
+    span,
+    div,
+    h1,
+    h2 {
+        color: black !important;
+    }
+
+    .input-section-compact,
+    .balance-card-grid>div {
+        border-top: 1px solid black !important;
+    }
+
+    .row {
+        border-bottom: 1px solid black !important;
+    }
+}
+
+body.pdf-mode {
+    background: white !important;
+    color: black !important;
+    display: block !important;
+    padding: 20px !important;
+}
+
+body.pdf-mode .container {
+    max-width: 100% !important;
+    margin: 0 !important;
+}
+
+body.pdf-mode .home-icon,
+body.pdf-mode .button-group,
+body.pdf-mode .disclaimer,
+body.pdf-mode footer,
+body.pdf-mode .placeholder-message,
+body.pdf-mode .background-animate {
+    display: none !important;
+}
+
+body.pdf-mode .report-header {
+    display: block !important;
+    text-align: center;
+    margin-bottom: 2rem;
+    border-bottom: 2px solid black;
+    padding-bottom: 1rem;
+}
+
+body.pdf-mode .report-header h1 {
+    color: black !important;
+    background: none !important;
+}
+
+body.pdf-mode .card {
+    background: white !important;
+    border: 2px solid black !important;
+}
+
+body.pdf-mode input {
+    background: transparent !important;
+    border: none !important;
+    color: black !important;
+    text-align: right !important;
+}
+
+body.pdf-mode .emi-red-bold,
+body.pdf-mode h3,
+body.pdf-mode label,
+body.pdf-mode span,
+body.pdf-mode div,
+body.pdf-mode h1,
+body.pdf-mode h2 {
+    color: black !important;
+}
+
+body.pdf-mode .row {
+    border-bottom: 1px solid black !important;
 }
