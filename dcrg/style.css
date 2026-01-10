@@ -515,19 +515,31 @@ body {
 body.pdf-mode {
     background: white !important;
     color: black !important;
-    padding: 20px !important;
+    padding: 20px 30px !important;
+    margin: 0 !important;
+    width: 760px !important;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 9999;
 }
 
 body.pdf-mode .container {
     max-width: 100% !important;
     margin: 0 !important;
+    padding: 0 !important;
 }
 
 body.pdf-mode .report-header {
     display: block !important;
     text-align: center;
     border-bottom: 2px solid black;
-    margin-bottom: 20px;
+    margin-bottom: 2rem;
+}
+
+body.pdf-mode .report-header h1 {
+    margin: 0;
+    font-size: 2rem;
 }
 
 body.pdf-mode .home-button,
@@ -551,6 +563,19 @@ body.hide-summary #benefits-section {
     display: none !important;
 }
 
+/* Force Grid Layouts */
+body.pdf-mode .input-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 20px !important;
+}
+
+body.pdf-mode .stats-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 15px !important;
+}
+
 body.pdf-mode .card,
 body.pdf-mode .sticky-dashboard {
     background: white !important;
@@ -560,6 +585,7 @@ body.pdf-mode .sticky-dashboard {
     margin-bottom: 20px !important;
     break-inside: avoid;
     padding: 20px !important;
+    max-width: none !important;
 }
 
 body.pdf-mode .detail-label,
@@ -600,6 +626,7 @@ body.pdf-mode h2 {
 body.pdf-mode h2::before {
     display: none !important;
 }
+
 
 /* Footer & Extras */
 .disclaimer {

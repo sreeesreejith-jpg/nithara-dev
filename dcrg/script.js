@@ -311,34 +311,62 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Print / PDF logic
+    const generatePDFBlob = async () => {
+        window.scrollTo(0, 0);
+        const reportTitle = prepareForPDF();
+        const element = document.querySelector('.container');
+
+        // Optimize for A4
+        const opt = {
+            margin: 10,
+            filename: `${reportTitle}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: {
+                scale: 2,
+                useCORS: true,
+                backgroundColor: '#ffffff',
+                logging: false,
+                scrollY: 0,
+                scrollX: 0
+            },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+
+        try {
+            const pdfBlob = await html2pdf().set(opt).from(element).output('blob');
+            cleanupAfterPDF();
+            return { blob: pdfBlob, title: reportTitle };
+        } catch (err) {
+            cleanupAfterPDF();
+            throw err;
+        }
+    };
+
     const printBtn = document.getElementById('printBtn');
     if (printBtn) {
-        printBtn.addEventListener('click', () => {
+        printBtn.addEventListener('click', async () => {
             const originalText = printBtn.innerHTML;
             printBtn.innerHTML = "<span>⏳</span> Generating PDF...";
             printBtn.disabled = true;
 
-            const reportTitle = prepareForPDF();
-            const element = document.querySelector('.container');
-            const opt = {
-                margin: [10, 5],
-                filename: `${reportTitle}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
-
-            html2pdf().set(opt).from(element).save().then(() => {
-                cleanupAfterPDF();
-                printBtn.innerHTML = originalText;
-                printBtn.disabled = false;
-            }).catch(err => {
+            try {
+                const { blob, title } = await generatePDFBlob();
+                if (window.NitharaApp) {
+                    await window.NitharaApp.handlePDF(blob, `${title}.pdf`, 'Pension & DCRG Report');
+                } else {
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = `${title}.pdf`;
+                    link.click();
+                }
+            } catch (err) {
                 console.error("PDF generation failed:", err);
+                alert("Generation failed. Trying standard print.");
                 window.print();
-                cleanupAfterPDF();
+            } finally {
                 printBtn.innerHTML = originalText;
                 printBtn.disabled = false;
-            });
+            }
         });
     }
 
@@ -351,39 +379,22 @@ document.addEventListener('DOMContentLoaded', () => {
             shareBtn.disabled = true;
 
             try {
-                const reportTitle = prepareForPDF();
-                const element = document.querySelector('.container');
-                const opt = {
-                    margin: [10, 5],
-                    image: { type: 'jpeg', quality: 0.98 },
-                    html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
-                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-                };
-
-                const pdfBlob = await html2pdf().set(opt).from(element).output('blob');
-                cleanupAfterPDF();
-
-                const fileName = `${reportTitle}.pdf`;
-                const file = new File([pdfBlob], fileName, { type: 'application/pdf' });
-
-                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                const { blob, title } = await generatePDFBlob();
+                if (window.NitharaApp) {
+                    await window.NitharaApp.handlePDF(blob, `${title}.pdf`, 'Pension & DCRG Report');
+                } else if (navigator.share) {
+                    const file = new File([blob], `${title}.pdf`, { type: 'application/pdf' });
                     await navigator.share({
                         files: [file],
                         title: 'Pension & DCRG Report',
                         text: 'Sharing my Pension & DCRG calculation report.'
                     });
                 } else {
-                    // Fallback to regular download if sharing is not supported
-                    const link = document.createElement('a');
-                    link.href = URL.createObjectURL(pdfBlob);
-                    link.download = fileName;
-                    link.click();
-                    alert("Sharing not supported on this browser/device. PDF downloaded instead.");
+                    alert("Sharing not supported on this browser.");
                 }
             } catch (err) {
                 console.error("Sharing failed:", err);
-                alert("Sharing failed. Please try saving the PDF instead.");
-                cleanupAfterPDF();
+                alert("Sharing failed.");
             } finally {
                 shareBtn.innerHTML = originalText;
                 shareBtn.disabled = false;

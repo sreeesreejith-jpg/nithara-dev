@@ -414,15 +414,24 @@ header p {
     }
 }
 
+/* Styles for pdf-mode (used by html2pdf) */
 body.pdf-mode {
     background: white !important;
     color: black !important;
     display: block !important;
-    padding: 20px !important;
+    /* Force A4 width context */
+    padding: 20px 30px !important;
+    margin: 0 !important;
+    width: 760px !important;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 9999;
 }
 
 body.pdf-mode .container {
-    max-width: 100% !important;
+    width: 100% !important;
+    max-width: none !important;
     box-shadow: none !important;
     border: none !important;
     background: white !important;
@@ -452,6 +461,8 @@ body.pdf-mode .report-header h1 {
     color: black !important;
     -webkit-text-fill-color: initial !important;
     background: none !important;
+    margin: 0;
+    font-size: 2rem;
 }
 
 body.pdf-mode .input-wrapper {
@@ -468,7 +479,17 @@ body.pdf-mode .summary-container {
     opacity: 1 !important;
     transform: none !important;
     background: white !important;
-    border: 2px solid black !important;
+    border: 1px solid black !important;
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 1.5rem !important;
+}
+
+/* Force Grid Layouts */
+body.pdf-mode .calculator-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 1.25rem !important;
 }
 
 body.pdf-mode .donut-chart,

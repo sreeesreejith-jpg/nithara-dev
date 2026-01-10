@@ -669,73 +669,113 @@ input[type=number] {
     }
 }
 
+/* Styles for pdf-mode (used by html2pdf) */
 body.pdf-mode {
     background: white !important;
     color: black !important;
     background-image: none !important;
     display: block !important;
-    padding: 20px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 800px !important;
+    /* Use fixed pixel width for scale stability */
 }
 
 body.pdf-mode .container {
-    max-width: 100% !important;
-    padding: 0 !important;
-}
+    body.pdf-mode .container {
+        width: 100% !important;
+        max-width: none !important;
+        padding: 20px !important;
+        margin: 0 !important;
+    }
 
-body.pdf-mode .home-icon,
-body.pdf-mode .button-group,
-body.pdf-mode .disclaimer,
-body.pdf-mode footer,
-body.pdf-mode .placeholder-message {
-    display: none !important;
-}
+    body.pdf-mode .home-icon,
+    body.pdf-mode .button-group,
+    body.pdf-mode .disclaimer,
+    body.pdf-mode footer,
+    body.pdf-mode .placeholder-message {
+        display: none !important;
+    }
 
-body.pdf-mode .report-header {
-    display: block !important;
-    text-align: center;
-    margin-bottom: 2rem;
-    border-bottom: 2px solid black;
-    padding-bottom: 1rem;
-}
+    body.pdf-mode .report-header {
+        display: block !important;
+        text-align: center;
+        margin-bottom: 2rem;
+        border-bottom: 2px solid black;
+        padding-bottom: 1rem;
+    }
 
-body.pdf-mode .report-header h1 {
-    color: black !important;
-    background: none !important;
-}
+    body.pdf-mode .report-header h1 {
+        color: black !important;
+        background: none !important;
+        margin: 0;
+        font-size: 2rem;
+    }
 
-body.pdf-mode .revision-section,
-body.pdf-mode .summary-card,
-body.pdf-mode .input-main-card {
-    background: white !important;
-    border: 2px solid black !important;
-}
+    body.pdf-mode .revision-section,
+    body.pdf-mode .summary-card,
+    body.pdf-mode .input-main-card {
+        background: white !important;
+        border: 1px solid black !important;
+        margin-bottom: 1rem !important;
+        page-break-inside: avoid;
+    }
 
-body.pdf-mode .section-title {
-    background: white !important;
-    color: black !important;
-    border-bottom: 2px solid black !important;
-}
+    body.pdf-mode .section-title {
+        background: white !important;
+        color: black !important;
+        border-bottom: 1px solid black !important;
+    }
 
-body.pdf-mode input {
-    background: transparent !important;
-    border: none !important;
-    color: black !important;
-    text-align: right !important;
-}
+    /* Force Grid Layouts to Desktop consistency */
+    body.pdf-mode .revision-grid {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 1rem !important;
+    }
 
-body.pdf-mode .value,
-body.pdf-mode .calc-val,
-body.pdf-mode .total-val,
-body.pdf-mode .label,
-body.pdf-mode span,
-body.pdf-mode strong,
-body.pdf-mode h1,
-body.pdf-mode h2,
-body.pdf-mode h3,
-body.pdf-mode div {
-    color: black !important;
-}
+    body.pdf-mode .summary-cards {
+        display: grid !important;
+        grid-template-columns: 1fr 1.5fr !important;
+        gap: 1rem !important;
+    }
 
-body.pdf-mode .row-input {
-    border-bottom: 1px solid black !important;
-}
+    body.pdf-mode .summary-details {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 1rem !important;
+    }
+
+    body.pdf-mode input {
+        background: transparent !important;
+        border: none !important;
+        color: black !important;
+        text-align: right !important;
+        box-shadow: none !important;
+    }
+
+    body.pdf-mode .value,
+    body.pdf-mode .calc-val,
+    body.pdf-mode .total-val,
+    body.pdf-mode .label,
+    body.pdf-mode span,
+    body.pdf-mode strong,
+    body.pdf-mode h1,
+    body.pdf-mode h2,
+    body.pdf-mode h3,
+    body.pdf-mode div {
+        color: black !important;
+    }
+
+    body.pdf-mode .row-input {
+        border-bottom: 1px solid #ddd !important;
+    }
+
+    body.pdf-mode .section-header {
+        border-bottom: 1px solid black !important;
+    }
+
+    /* Hide units/icons in PDF if needed to look cleaner */
+    body.pdf-mode .unit {
+        color: #666 !important;
+    }
