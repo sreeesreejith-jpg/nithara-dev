@@ -124,34 +124,87 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.classList.remove('pdf-mode');
     };
 
+    const generatePDFResult = async () => {
+        const reportTitle = prepareForPDF();
+        const element = document.querySelector('.container');
+        const opt = {
+            margin: [10, 5],
+            filename: `${reportTitle}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+
+        try {
+            // Check if running in Capacitor Native Environment
+            const isCapacitor = window.Capacitor && window.Capacitor.isNativePlatform();
+
+            if (isCapacitor) {
+                // Generate Base64 for Capacitor
+                const pdfDataUri = await html2pdf().set(opt).from(element).outputPdf('datauristring');
+                cleanupAfterPDF();
+                return { dataUri: pdfDataUri, title: reportTitle, isNative: true };
+            } else {
+                // Generate Blob for Browser
+                const pdfBlob = await html2pdf().set(opt).from(element).output('blob');
+                cleanupAfterPDF();
+                return { blob: pdfBlob, title: reportTitle, isNative: false };
+            }
+        } catch (err) {
+            cleanupAfterPDF();
+            throw err;
+        }
+    };
+
+    const handleNativeSave = async (dataUri, filename) => {
+        try {
+            const { Filesystem } = window.Capacitor.Plugins;
+            const { Share } = window.Capacitor.Plugins;
+            const base64Data = dataUri.split(',')[1];
+
+            const fileResult = await Filesystem.writeFile({
+                path: filename,
+                data: base64Data,
+                directory: 'CACHE'
+            });
+
+            await Share.share({
+                title: 'Amortization Report',
+                text: 'Here is your report',
+                url: fileResult.uri,
+                dialogTitle: 'Save or Share PDF'
+            });
+
+        } catch (e) {
+            console.error('Native save failed', e);
+            alert('Error saving PDF: ' + e.message);
+        }
+    };
+
     const printBtn = document.getElementById('printBtn');
     if (printBtn) {
-        printBtn.addEventListener('click', () => {
+        printBtn.addEventListener('click', async () => {
             const originalText = printBtn.innerHTML;
             printBtn.innerHTML = "<span>⏳</span> Generating...";
             printBtn.disabled = true;
 
-            const reportTitle = prepareForPDF();
-            const element = document.querySelector('.container');
-            const opt = {
-                margin: [10, 5],
-                filename: `${reportTitle}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
-
-            html2pdf().set(opt).from(element).save().then(() => {
-                cleanupAfterPDF();
-                printBtn.innerHTML = originalText;
-                printBtn.disabled = false;
-            }).catch(err => {
+            try {
+                const result = await generatePDFResult();
+                if (result.isNative) {
+                    await handleNativeSave(result.dataUri, `${result.title}.pdf`);
+                } else {
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(result.blob);
+                    link.download = `${result.title}.pdf`;
+                    link.click();
+                }
+            } catch (err) {
                 console.error(err);
-                window.print();
-                cleanupAfterPDF();
+                alert("PDF Generation failed.");
+            } finally {
                 printBtn.innerHTML = originalText;
                 printBtn.disabled = false;
-            });
+            }
         });
     }
 
@@ -163,38 +216,22 @@ document.addEventListener('DOMContentLoaded', () => {
             shareBtn.disabled = true;
 
             try {
-                const reportTitle = prepareForPDF();
-                const element = document.querySelector('.container');
-                const opt = {
-                    margin: [10, 5],
-                    image: { type: 'jpeg', quality: 0.98 },
-                    html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
-                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-                };
-
-                const pdfBlob = await html2pdf().set(opt).from(element).output('blob');
-                cleanupAfterPDF();
-
-                const fileName = `${reportTitle}.pdf`;
-                const file = new File([pdfBlob], fileName, { type: 'application/pdf' });
-
-                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                const result = await generatePDFResult();
+                if (result.isNative) {
+                    await handleNativeSave(result.dataUri, `${result.title}.pdf`);
+                } else if (navigator.share) {
+                    const file = new File([result.blob], `${result.title}.pdf`, { type: 'application/pdf' });
                     await navigator.share({
                         files: [file],
                         title: 'EMI Amortization Report',
                         text: 'Sharing my EMI amortization report.'
                     });
                 } else {
-                    const link = document.createElement('a');
-                    link.href = URL.createObjectURL(pdfBlob);
-                    link.download = fileName;
-                    link.click();
-                    alert("Sharing not supported. PDF downloaded instead.");
+                    alert("Sharing not supported on this browser.");
                 }
             } catch (err) {
                 console.error(err);
                 alert("Sharing failed.");
-                cleanupAfterPDF();
             } finally {
                 shareBtn.innerHTML = originalText;
                 shareBtn.disabled = false;

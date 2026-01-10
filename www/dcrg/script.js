@@ -7,12 +7,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const basicPayInput = document.getElementById('basicPay');
     const daPercentageInput = document.getElementById('daPercentage');
     const serviceYearsInput = document.getElementById('serviceYears');
+    const retirementAgeInput = document.getElementById('retirementAge');
     const avgEmolumentsInput = document.getElementById('avgEmoluments');
 
     // Display elements
     const pensionAmountDisplay = document.getElementById('pensionAmount');
     const drAmountDisplay = document.getElementById('drAmount');
 
+    // Global variable to store stages
     // Global variable to store stages
     let payStagesList = [
         23000, 23700, 24400, 25100, 25800, 26500, 27200, 27900, 28700, 29500,
@@ -26,89 +28,118 @@ document.addEventListener('DOMContentLoaded', () => {
         153200, 156600, 160000, 163400, 166800
     ];
 
-    function populatePayStages(stages) {
-        const dataList = document.getElementById('pay-stages');
-        if (dataList && stages) {
-            dataList.innerHTML = '';
-            stages.forEach(stage => {
-                const option = document.createElement('option');
-                option.value = stage;
-                dataList.appendChild(option);
+    // Global variable to store commutation factors
+    let commutationFactors = {
+        "17": 19.2, "18": 19.11, "19": 19.01, "20": 18.91,
+        "21": 18.81, "22": 18.7, "23": 18.59, "24": 18.47, "25": 18.34,
+        "26": 18.21, "27": 18.07, "28": 17.93, "29": 17.78, "30": 17.62,
+        "31": 17.46, "32": 17.29, "33": 17.11, "34": 16.92, "35": 16.72,
+        "36": 16.52, "37": 16.31, "38": 16.09, "39": 15.87, "40": 15.64,
+        "41": 15.4, "42": 15.15, "43": 14.9, "44": 14.64, "45": 14.37,
+        "46": 14.1, "47": 13.82, "48": 13.54, "49": 13.25, "50": 12.95,
+        "51": 12.66, "52": 12.35, "53": 12.05, "54": 11.73, "55": 11.42,
+        "56": 11.1, "57": 10.78, "58": 10.46, "59": 10.13, "60": 9.81,
+        "61": 9.48, "62": 9.15, "63": 8.82, "64": 8.5, "65": 8.17,
+        "66": 7.85, "67": 7.53, "68": 7.22, "69": 6.91, "70": 6.6,
+        "71": 6.3, "72": 6.01, "73": 5.72, "74": 5.44, "75": 5.17,
+        "76": 4.9, "77": 4.65, "78": 4.4, "79": 4.17, "80": 3.94,
+        "81": 3.72, "82": 3.52, "83": 3.32, "84": 3.13
+    };
+
+    // --- Custom Dropdown Logic ---
+    const dropdown = document.getElementById('custom-dropdown');
+
+    // Store current value
+    basicPayInput.dataset.lastValid = basicPayInput.value;
+
+    function renderDropdown(filterText = "") {
+        dropdown.innerHTML = "";
+        const filtered = filterText
+            ? payStagesList.filter(stage => stage.toString().startsWith(filterText))
+            : payStagesList;
+
+        if (filtered.length === 0) {
+            dropdown.classList.remove('show');
+            return;
+        }
+
+        filtered.forEach(stage => {
+            const li = document.createElement('li');
+            li.textContent = stage;
+            li.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                selectValue(stage);
             });
+            dropdown.appendChild(li);
+        });
+    }
+
+    function selectValue(val) {
+        basicPayInput.value = val;
+        basicPayInput.dataset.lastValid = val;
+        dropdown.classList.remove('show');
+        calculateAll(); // Call calculation directly
+    }
+
+    function showDropdown() {
+        renderDropdown("");
+        dropdown.classList.add('show');
+
+        const currentVal = parseInt(basicPayInput.value);
+        if (currentVal) {
+            const items = Array.from(dropdown.querySelectorAll('li'));
+            const match = items.find(li => li.textContent == currentVal);
+            if (match) {
+                match.scrollIntoView({ block: 'center' });
+                match.classList.add('active');
+            }
         }
     }
 
-    // Initial population
-    populatePayStages(payStagesList);
+    function hideDropdown() {
+        setTimeout(() => {
+            dropdown.classList.remove('show');
+        }, 150);
+    }
 
+    // Input Listeners
+    basicPayInput.addEventListener('focus', function () {
+        this.select();
+        showDropdown();
+    });
+
+    basicPayInput.addEventListener('click', function () {
+        this.select();
+        showDropdown();
+    });
+
+    basicPayInput.addEventListener('input', function () {
+        // Filter live
+        renderDropdown(this.value);
+        dropdown.classList.add('show');
+        calculateAll();
+    });
+
+    basicPayInput.addEventListener('blur', function () {
+        if (this.value.trim() === "") {
+            this.value = this.dataset.lastValid || "";
+            calculateAll();
+        }
+        hideDropdown();
+    });
+
+    // Fetch external data (optional)
     fetch('../data/pay_stages.json')
         .then(response => response.json())
         .then(data => {
             if (data.payStages) {
                 payStagesList = data.payStages;
-                populatePayStages(payStagesList);
             }
         })
         .catch(err => console.log('Using embedded pay stages'));
 
-    // Smart Navigation & Auto-List Logic for DCRG Basic Pay
-    basicPayInput.dataset.lastValid = basicPayInput.value || "60700";
+    // Commutation factors are now embedded above. Fetch removed to support local usage.
 
-    function activateGhostMode() {
-        if (this.value.trim() !== "") {
-            this.dataset.lastValid = this.value;
-            this.placeholder = this.value;
-            this.value = '';
-        }
-    }
-
-    function deactivateGhostMode() {
-        if (this.value.trim() === "") {
-            this.value = this.dataset.lastValid;
-        } else {
-            this.dataset.lastValid = this.value;
-        }
-        this.dispatchEvent(new Event('input'));
-    }
-
-    basicPayInput.addEventListener('focus', activateGhostMode);
-    basicPayInput.addEventListener('click', activateGhostMode);
-    basicPayInput.addEventListener('blur', deactivateGhostMode);
-
-    basicPayInput.addEventListener('keydown', function (e) {
-        if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
-            if (payStagesList.length === 0) return;
-
-            e.preventDefault();
-
-            let currentValStr = this.value;
-            if (currentValStr === '') {
-                currentValStr = this.dataset.lastValid || "0";
-            }
-
-            const currentVal = parseInt(currentValStr) || 0;
-
-            let currentIndex = payStagesList.indexOf(currentVal);
-
-            if (currentIndex === -1) {
-                currentIndex = payStagesList.findIndex(val => val >= currentVal);
-                if (currentIndex === -1) currentIndex = payStagesList.length - 1;
-            }
-
-            let nextIndex = currentIndex;
-            if (e.key === 'ArrowUp') {
-                nextIndex = currentIndex + 1;
-            } else {
-                nextIndex = currentIndex - 1;
-            }
-
-            if (nextIndex >= 0 && nextIndex < payStagesList.length) {
-                this.value = payStagesList[nextIndex];
-                this.dataset.lastValid = this.value;
-                this.dispatchEvent(new Event('input'));
-            }
-        }
-    });
     const totalMonthlyPensionDisplay = document.getElementById('totalMonthlyPension');
     const commutationAmountDisplay = document.getElementById('commutationAmount');
     const balancePensionDisplay = document.getElementById('balancePension');
@@ -124,7 +155,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const dcrgHeader = document.getElementById('dcrgHeader');
     const balanceHeader = document.getElementById('balanceHeader');
 
-    const inputs = [basicPayInput, daPercentageInput, serviceYearsInput];
+    // Details elements 
+    const calcLastPay = document.getElementById('calcLastPay');
+    const calcQS = document.getElementById('calcQS');
+    const calcAvgEmoluments = document.getElementById('calcAvgEmoluments');
+    const calcBasicPension = document.getElementById('calcBasicPension');
+    const calcCommutation = document.getElementById('calcCommutation');
+    const calcReducedPension = document.getElementById('calcReducedPension');
+    const calcDcrg = document.getElementById('calcDcrg');
+    const dispCommFactor = document.getElementById('dispCommFactor');
+
+    // Step Elements
+    const stepDcrg = document.getElementById('stepDcrg');
+    const stepCommutation = document.getElementById('stepCommutation');
+    const stepPension = document.getElementById('stepPension');
+    const stepReduced = document.getElementById('stepReduced');
+
+    const inputs = [basicPayInput, daPercentageInput, serviceYearsInput, retirementAgeInput, avgEmolumentsInput];
 
     /**
      * Format number without commas
@@ -136,57 +183,274 @@ document.addEventListener('DOMContentLoaded', () => {
     /**
      * Main calculation function
      */
-    const calculateAll = () => {
+    const calculateAll = (source) => {
         const bp = parseFloat(basicPayInput.value) || 0;
         const da = parseFloat(daPercentageInput.value) || 0;
         let years = parseFloat(serviceYearsInput.value) || 0;
 
         // Validation & Constraints
-        if (years > 35) years = 35;
+        if (years > 33) years = 33; // Max DCRG service is 33
         // Note: Rules say min 10, but we process whatever is there for instant feedback
 
-        // 1. Average Emoluments
-        const avgEmoluments = bp + (bp * da / 100);
-        avgEmolumentsInput.value = Math.round(avgEmoluments);
+        // 1. Last Pay (for DCRG)
+        const lastPay = bp + (bp * da / 100);
 
-        // 2. Pension Calculation
-        // Formula: (Average Emoluments / 2) * (Completed Service / 30)
-        let pensionFactor = years / 30;
+        // 2. Average Emoluments (for Pension)
+        let avgEmoluments;
+        if (source === 'ae') {
+            // If user manually edited AE, use that value
+            avgEmoluments = parseFloat(avgEmolumentsInput.value) || 0;
+        } else {
+            // Default calculation (Basic Pay ONLY for Pension)
+            avgEmoluments = bp;
+            avgEmolumentsInput.value = Math.round(avgEmoluments);
+        }
+
+        // 3. Pension Calculation
+        // Rules: Max 30 years counts for full pension
+        let pensionQS = (years > 30) ? 30 : years;
+        let pensionFactor = pensionQS / 30;
         if (pensionFactor > 1.0) pensionFactor = 1.0;
 
-        const pension = (avgEmoluments / 2) * pensionFactor;
+        let pension = (avgEmoluments / 2) * pensionFactor;
 
-        // 3. Pension Commutation
-        // Formula: 40% of Pension * 11.42 * 12
-        const commutationAmount = pension * 0.40 * 11.42 * 12;
-        const balancePension = pension * 0.60;
-        const netTotalPension = balancePension;
+        // Apply Service Pension Limits
+        if (pension < 11500 && pension > 0) pension = 11500;
+        if (pension > 83400) pension = 83400;
 
-        // 4. DCRG Calculation
-        // Formula: (Average Emoluments) * (Completed Service / 2)
-        // Rule: Factor (Years / 2) must not exceed 16.5
-        let dcrgFactor = years / 2;
-        if (dcrgFactor > 16.5) dcrgFactor = 16.5;
+        // 4. Pension Commutation
+        // Formula: 40% of Basic Pension * Factor * 12
+        const age = parseInt(retirementAgeInput.value);
+        const commFactor = (age && commutationFactors[age]) ? commutationFactors[age] : 0;
 
-        let dcrg = avgEmoluments * dcrgFactor;
-        // Limit DCRG to 16 Lakhs
-        if (dcrg > 1600000) dcrg = 1600000;
+        const commutablePension = pension * 0.40;
+        const commutationAmount = commutablePension * commFactor * 12;
 
-        // 5. Total Benefits
+        const balancePension = pension - commutablePension; // Reduced pension is 60%
+
+        // 6. DCRG Calculation
+        // Formula: (Last Pay) * (Qualifying Service / 2)
+        // Rule: Max 33 years
+        let dcrgQS = (years > 33) ? 33 : years;
+        let dcrg = lastPay * (dcrgQS / 2);
+
+        if (dcrg > 1700000) dcrg = 1700000;
+
+        // 7. Total Benefits
         const totalLumpSum = commutationAmount + dcrg;
 
         // Update Dashboard
-        const displayValue = (val) => (val > 0) ? formatAmount(val) : "";
+        const displayValue = (val) => (val > 0) ? formatAmount(val) : "0";
 
         if (totalBenefitsHeader) totalBenefitsHeader.textContent = displayValue(totalLumpSum);
         if (commuteHeader) commuteHeader.textContent = displayValue(commutationAmount);
         if (dcrgHeader) dcrgHeader.textContent = displayValue(dcrg);
         if (balanceHeader) balanceHeader.textContent = displayValue(balancePension);
+
+        // Update Details List
+        if (calcLastPay) calcLastPay.textContent = formatAmount(lastPay);
+        if (calcQS) calcQS.textContent = years;
+        if (calcAvgEmoluments) calcAvgEmoluments.textContent = formatAmount(avgEmoluments);
+        if (calcBasicPension) calcBasicPension.textContent = formatAmount(pension);
+        if (calcCommutation) calcCommutation.textContent = formatAmount(commutationAmount);
+        if (calcReducedPension) calcReducedPension.textContent = formatAmount(balancePension);
+        if (calcDcrg) calcDcrg.textContent = formatAmount(dcrg);
+        if (dispCommFactor) dispCommFactor.textContent = commFactor.toFixed(2);
+
+        // Update Steps with Actual Values
+        if (stepDcrg) stepDcrg.textContent = `${formatAmount(lastPay)} × ${dcrgQS / 2}`;
+        if (stepCommutation) stepCommutation.textContent = `${formatAmount(commutablePension)} × ${commFactor} × 12`;
+        if (stepPension) stepPension.textContent = `(${formatAmount(avgEmoluments)} / 2) × ${pensionFactor.toFixed(2)}`;
+        if (stepReduced) stepReduced.textContent = `${formatAmount(pension)} × 60%`;
+
+        // Visibility Condition: Show sections only if Basic Pay and Service Years are valid
+        const detailsSection = document.getElementById('details-section');
+        const benefitsSection = document.getElementById('benefits-section');
+
+        if (detailsSection && benefitsSection) {
+            if (bp > 0 && years > 0) {
+                detailsSection.classList.remove('hidden');
+                benefitsSection.classList.remove('hidden');
+            } else {
+                detailsSection.classList.add('hidden');
+                benefitsSection.classList.add('hidden');
+            }
+        }
     };
+
+    // Function to prepare document for PDF/Print
+    const prepareForPDF = () => {
+        const nameInput = document.getElementById('reportName');
+        const printName = document.getElementById('printEmployeeName');
+        const printDate = document.getElementById('printDate');
+        const reportTitle = nameInput && nameInput.value ? `DCRG_Report_${nameInput.value.replace(/\s+/g, '_')}` : 'Pension_DCRG_Report';
+
+        if (printName) {
+            printName.textContent = nameInput && nameInput.value ? `Employee: ${nameInput.value}` : '';
+        }
+        if (printDate) {
+            printDate.textContent = new Date().toLocaleDateString('en-IN', {
+                day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
+            });
+        }
+
+        const checkService = document.getElementById('checkService');
+        const checkDetails = document.getElementById('checkDetails');
+        const checkSummary = document.getElementById('checkSummary');
+
+        if (checkService && !checkService.checked) document.body.classList.add('hide-service');
+        if (checkDetails && !checkDetails.checked) document.body.classList.add('hide-details');
+        if (checkSummary && !checkSummary.checked) document.body.classList.add('hide-summary');
+
+        document.body.classList.add('pdf-mode');
+        return reportTitle;
+    };
+
+    const cleanupAfterPDF = () => {
+        document.body.classList.remove('hide-service', 'hide-details', 'hide-summary', 'pdf-mode');
+    };
+
+    // Print / PDF logic
+    // Print / PDF logic
+    const generatePDFResult = async () => {
+        window.scrollTo(0, 0);
+        const reportTitle = prepareForPDF();
+        const element = document.querySelector('.container');
+
+        // Optimize for A4
+        const opt = {
+            margin: 10,
+            filename: `${reportTitle}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: {
+                scale: 2,
+                useCORS: true,
+                backgroundColor: '#ffffff',
+                logging: false,
+                scrollY: 0,
+                scrollX: 0
+            },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+
+        try {
+            // Check if running in Capacitor Native Environment
+            const isCapacitor = window.Capacitor && window.Capacitor.isNativePlatform();
+
+            if (isCapacitor) {
+                // Generate Base64 for Capacitor
+                const pdfDataUri = await html2pdf().set(opt).from(element).outputPdf('datauristring');
+                cleanupAfterPDF();
+                return { dataUri: pdfDataUri, title: reportTitle, isNative: true };
+            } else {
+                // Generate Blob for Browser
+                const pdfBlob = await html2pdf().set(opt).from(element).output('blob');
+                cleanupAfterPDF();
+                return { blob: pdfBlob, title: reportTitle, isNative: false };
+            }
+        } catch (err) {
+            cleanupAfterPDF();
+            throw err;
+        }
+    };
+
+    const handleNativeSave = async (dataUri, filename) => {
+        try {
+            const { Filesystem } = window.Capacitor.Plugins;
+            const { Share } = window.Capacitor.Plugins;
+
+            // Strip prefix for Filesystem write if present
+            const base64Data = dataUri.split(',')[1];
+
+            // Write to Cache Directory
+            const fileResult = await Filesystem.writeFile({
+                path: filename,
+                data: base64Data,
+                directory: 'CACHE' // 'CACHE' or 'DOCUMENTS'
+            });
+
+            // Share the file
+            await Share.share({
+                title: 'Pension & DCRG Report',
+                text: 'Here is your report',
+                url: fileResult.uri,
+                dialogTitle: 'Save or Share PDF'
+            });
+
+        } catch (e) {
+            console.error('Native save failed', e);
+            alert('Error saving PDF: ' + e.message);
+        }
+    };
+
+    const printBtn = document.getElementById('printBtn');
+    if (printBtn) {
+        printBtn.addEventListener('click', async () => {
+            const originalText = printBtn.innerHTML;
+            printBtn.innerHTML = "<span>⏳</span> Generating PDF...";
+            printBtn.disabled = true;
+
+            try {
+                const result = await generatePDFResult();
+
+                if (result.isNative) {
+                    await handleNativeSave(result.dataUri, `${result.title}.pdf`);
+                } else {
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(result.blob);
+                    link.download = `${result.title}.pdf`;
+                    link.click();
+                }
+            } catch (err) {
+                console.error("PDF generation failed:", err);
+                alert("Generation failed. Trying standard print.");
+                window.print();
+            } finally {
+                printBtn.innerHTML = originalText;
+                printBtn.disabled = false;
+            }
+        });
+    }
+
+    // Share logic
+    const shareBtn = document.getElementById('shareBtn');
+    if (shareBtn) {
+        shareBtn.addEventListener('click', async () => {
+            const originalText = shareBtn.innerHTML;
+            shareBtn.innerHTML = "<span>⏳</span> Preparing...";
+            shareBtn.disabled = true;
+
+            try {
+                const result = await generatePDFResult();
+
+                if (result.isNative) {
+                    await handleNativeSave(result.dataUri, `${result.title}.pdf`);
+                } else if (navigator.share) {
+                    const file = new File([result.blob], `${result.title}.pdf`, { type: 'application/pdf' });
+                    await navigator.share({
+                        files: [file],
+                        title: 'Pension & DCRG Report',
+                        text: 'Sharing my Pension & DCRG calculation report.'
+                    });
+                } else {
+                    alert("Sharing not supported on this browser.");
+                }
+            } catch (err) {
+                console.error("Sharing failed:", err);
+                alert("Sharing failed.");
+            } finally {
+                shareBtn.innerHTML = originalText;
+                shareBtn.disabled = false;
+            }
+        });
+    }
 
     // Attach listeners
     inputs.forEach(input => {
-        input.addEventListener('input', calculateAll);
+        input.addEventListener('input', () => {
+            const source = (input.id === 'avgEmoluments') ? 'ae' : 'other';
+            calculateAll(source);
+        });
     });
 
     // Initial calculation

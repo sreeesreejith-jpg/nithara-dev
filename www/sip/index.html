@@ -14,9 +14,14 @@
     <link rel="icon" type="image/png" href="icon.png">
     <meta name="theme-color" content="#10b981">
     <script src="../capacitor-handler.js"></script>
+    <script src="../js/html2pdf.bundle.min.js"></script>
 </head>
 
 <body>
+    <div class="report-header">
+        <h1>SIP Calculation Report</h1>
+        <p id="printDate"></p>
+    </div>
     <div class="container">
         <header>
             <div class="header-content">
@@ -74,6 +79,15 @@
                 </div>
             </div>
         </main>
+
+        <div class="button-group">
+            <button id="printBtn" class="print-button">
+                <span>🖨️</span> Save PDF
+            </button>
+            <button id="shareBtn" class="share-button">
+                <span>📤</span> Share Report
+            </button>
+        </div>
 
         <p class="disclaimer">* Calculations are approximate</p>
         <footer>email: sreee.sreejith@gmail.com

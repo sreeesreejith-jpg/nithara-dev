@@ -12,9 +12,14 @@
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="icon.png">
     <script src="../capacitor-handler.js"></script>
+    <script src="../js/html2pdf.bundle.min.js"></script>
 </head>
 
 <body>
+    <div class="report-header">
+        <h1>EMI Calculation Report</h1>
+        <p id="printDate"></p>
+    </div>
     <script>
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('sw.js')
@@ -108,6 +113,15 @@
         </div>
         <div class="actions">
             <a href="amortization.html" class="btn-secondary" id="btn-amortization">Amortization Details</a>
+        </div>
+
+        <div class="button-group">
+            <button id="printBtn" class="print-button">
+                <span>🖨️</span> Save PDF
+            </button>
+            <button id="shareBtn" class="share-button">
+                <span>📤</span> Share Report
+            </button>
         </div>
         <p class="disclaimer">* Calculations are approximate</p>
         <footer class="footer">email: sreee.sreejith@gmail.com

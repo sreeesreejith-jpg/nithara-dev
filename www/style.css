@@ -230,9 +230,9 @@ textarea:focus {
 }
 
 .footer-email {
-    text-align: center;
-    padding: 1.5rem;
-    font-size: 0.85rem;
+    text-align: right;
+    padding: 1rem 1.5rem;
+    font-size: 0.75rem;
     color: var(--text-muted);
     opacity: 0.8;
     letter-spacing: 0.5px;

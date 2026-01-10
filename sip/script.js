@@ -69,7 +69,7 @@ const cleanupAfterPDF = () => {
     document.body.classList.remove('pdf-mode');
 };
 
-const generatePDFBlob = async () => {
+const generatePDFResult = async () => {
     // Reset scroll to top before capture
     window.scrollTo(0, 0);
 
@@ -93,12 +93,48 @@ const generatePDFBlob = async () => {
     };
 
     try {
-        const pdfBlob = await html2pdf().set(opt).from(element).output('blob');
-        cleanupAfterPDF();
-        return { blob: pdfBlob, title: reportTitle };
+        // Check if running in Capacitor Native Environment
+        const isCapacitor = window.Capacitor && window.Capacitor.isNativePlatform();
+
+        if (isCapacitor) {
+            // Generate Base64 for Capacitor
+            const pdfDataUri = await html2pdf().set(opt).from(element).outputPdf('datauristring');
+            cleanupAfterPDF();
+            return { dataUri: pdfDataUri, title: reportTitle, isNative: true };
+        } else {
+            // Generate Blob for Browser
+            const pdfBlob = await html2pdf().set(opt).from(element).output('blob');
+            cleanupAfterPDF();
+            return { blob: pdfBlob, title: reportTitle, isNative: false };
+        }
     } catch (err) {
         cleanupAfterPDF();
         throw err;
+    }
+};
+
+const handleNativeSave = async (dataUri, filename) => {
+    try {
+        const { Filesystem } = window.Capacitor.Plugins;
+        const { Share } = window.Capacitor.Plugins;
+        const base64Data = dataUri.split(',')[1];
+
+        const fileResult = await Filesystem.writeFile({
+            path: filename,
+            data: base64Data,
+            directory: 'CACHE'
+        });
+
+        await Share.share({
+            title: 'SIP Report',
+            text: 'Here is your report',
+            url: fileResult.uri,
+            dialogTitle: 'Save or Share PDF'
+        });
+
+    } catch (e) {
+        console.error('Native save failed', e);
+        alert('Error saving PDF: ' + e.message);
     }
 };
 
@@ -110,13 +146,13 @@ if (printBtn) {
         printBtn.disabled = true;
 
         try {
-            const { blob, title } = await generatePDFBlob();
-            if (window.NitharaApp) {
-                await window.NitharaApp.handlePDF(blob, `${title}.pdf`, 'SIP Report');
+            const result = await generatePDFResult();
+            if (result.isNative) {
+                await handleNativeSave(result.dataUri, `${result.title}.pdf`);
             } else {
                 const link = document.createElement('a');
-                link.href = URL.createObjectURL(blob);
-                link.download = `${title}.pdf`;
+                link.href = URL.createObjectURL(result.blob);
+                link.download = `${result.title}.pdf`;
                 link.click();
             }
         } catch (err) {
@@ -138,11 +174,11 @@ if (shareBtn) {
         shareBtn.disabled = true;
 
         try {
-            const { blob, title } = await generatePDFBlob();
-            if (window.NitharaApp) {
-                await window.NitharaApp.handlePDF(blob, `${title}.pdf`, 'SIP Report');
+            const result = await generatePDFResult();
+            if (result.isNative) {
+                await handleNativeSave(result.dataUri, `${result.title}.pdf`);
             } else if (navigator.share) {
-                const file = new File([blob], `${title}.pdf`, { type: 'application/pdf' });
+                const file = new File([result.blob], `${result.title}.pdf`, { type: 'application/pdf' });
                 await navigator.share({
                     files: [file],
                     title: 'SIP Calculation Report',

@@ -44,9 +44,18 @@ body {
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
     text-align: center;
     max-width: 600px;
-    margin: 0 auto 30px;
+    margin: 30px auto 0;
+    /* Changed margin to push it down if it's at the bottom */
     border-radius: var(--radius-lg);
     border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.home-button {
+    display: inline-block;
+    text-decoration: none;
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    color: var(--text-main);
 }
 
 .sticky-dashboard a {
@@ -56,6 +65,10 @@ body {
     left: 10px;
     top: 10px;
     z-index: 1001;
+}
+
+.hidden {
+    display: none !important;
 }
 
 .main-benefit .label {
@@ -166,6 +179,31 @@ body {
     border: 1px solid var(--border);
 }
 
+/* Section Themes */
+.service-card {
+    border-top: 4px solid var(--primary);
+}
+
+.calc-card {
+    border-top: 4px solid #10b981;
+    /* Emerald */
+    background: linear-gradient(135deg, #064e3b 0%, #0f172a 100%) !important;
+}
+
+.calc-card h2::before {
+    background: #10b981;
+}
+
+.summary-card {
+    border-top: 4px solid #8b5cf6;
+    /* Violet */
+    background: linear-gradient(135deg, #2e1065 0%, #0f172a 100%) !important;
+}
+
+.summary-card .value {
+    color: #a78bfa !important;
+}
+
 .card h2 {
     font-size: 1.25rem;
     font-weight: 700;
@@ -234,6 +272,362 @@ body {
     cursor: default;
 }
 
+.input-hint {
+    display: block;
+    font-size: 0.8rem;
+    margin-top: 6px;
+    font-style: italic;
+    line-height: 1.3;
+    text-align: left;
+    font-weight: 700;
+    animation: red-white-blink 1s infinite alternate;
+}
+
+@keyframes red-white-blink {
+    from {
+        color: #ff4d4d;
+    }
+
+    /* Red */
+    to {
+        color: #ffffff;
+    }
+
+    /* White */
+}
+
+#calcReducedPension {
+    color: white !important;
+}
+
+/* Print Configuration Styles */
+.print-config {
+    margin-top: 25px;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: left;
+}
+
+.print-field {
+    margin-bottom: 15px;
+}
+
+.print-field label {
+    display: block;
+    font-size: 0.8rem;
+    color: #94a3b8;
+    margin-bottom: 5px;
+}
+
+.print-field input {
+    width: 100%;
+    padding: 10px;
+    background: #1e293b;
+    border: 1px solid #3b82f6;
+    border-radius: 8px;
+    color: white;
+    outline: none;
+}
+
+.print-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+}
+
+.options-label {
+    width: 100%;
+    font-size: 0.8rem;
+    color: #94a3b8;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.print-options label {
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 8px 12px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: background 0.2s;
+}
+
+.print-options label:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.print-options input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+/* Report Header (Print only) */
+.report-header {
+    display: none;
+    text-align: center;
+    margin-bottom: 30px;
+    border-bottom: 2px solid #2563eb;
+    padding-bottom: 20px;
+}
+
+.report-header h1 {
+    font-size: 1.5rem;
+    color: #2563eb;
+    margin-bottom: 5px;
+}
+
+.report-header p {
+    color: #64748b;
+    font-size: 0.9rem;
+}
+
+/* Print Button Styles */
+.print-button,
+.share-button {
+    padding: 12px 20px;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: transform 0.2s, background 0.2s;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    flex: 1;
+}
+
+.print-button {
+    background: #ffffff;
+    color: #2e1065;
+}
+
+.share-button {
+    background: #10b981;
+    color: white;
+}
+
+.button-group {
+    display: flex;
+    gap: 12px;
+    margin-top: 25px;
+    width: 100%;
+}
+
+.print-button:active,
+.share-button:active {
+    transform: scale(0.95);
+}
+
+/* Media Query for Print and PDF Mode */
+@media print {
+    body {
+        background: white !important;
+        color: black !important;
+        padding: 20px !important;
+    }
+
+    .container {
+        max-width: 100%;
+        margin: 0;
+    }
+
+    .report-header {
+        display: block !important;
+        text-align: center;
+        border-bottom: 2px solid black;
+        margin-bottom: 20px;
+    }
+
+    .home-button,
+    .placeholder-message,
+    .button-group,
+    .print-config,
+    .disclaimer,
+    .developer-credit,
+    .input-hint,
+    .custom-dropdown {
+        display: none !important;
+    }
+
+    .card,
+    .sticky-dashboard {
+        background: white !important;
+        color: black !important;
+        box-shadow: none !important;
+        border: 1px solid black !important;
+        margin-bottom: 20px !important;
+        break-inside: avoid;
+        padding: 20px !important;
+    }
+
+    .detail-label,
+    .detail-value,
+    .detail-step,
+    .detail-desc,
+    .detail-group-header,
+    .label,
+    .value,
+    .sub-label,
+    .text-success,
+    .text-accent,
+    .highlight-factor {
+        color: black !important;
+    }
+
+    .input-group input {
+        border: none !important;
+        text-align: right !important;
+        padding: 0 !important;
+        font-weight: 700 !important;
+        background: transparent !important;
+        color: black !important;
+    }
+
+    .blinking {
+        animation: none !important;
+        opacity: 1 !important;
+    }
+
+    h2 {
+        color: black !important;
+        border-bottom: 1px solid black;
+        padding-bottom: 5px;
+        font-size: 1.1rem !important;
+    }
+
+    h2::before {
+        display: none !important;
+    }
+}
+
+/* Styles for pdf-mode (used by html2pdf) */
+body.pdf-mode {
+    background: white !important;
+    color: black !important;
+    padding: 20px 30px !important;
+    margin: 0 !important;
+    width: 760px !important;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 9999;
+}
+
+body.pdf-mode .container {
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+body.pdf-mode .report-header {
+    display: block !important;
+    text-align: center;
+    border-bottom: 2px solid black;
+    margin-bottom: 2rem;
+}
+
+body.pdf-mode .report-header h1 {
+    margin: 0;
+    font-size: 2rem;
+}
+
+body.pdf-mode .home-button,
+body.pdf-mode .placeholder-message,
+body.pdf-mode .button-group,
+body.pdf-mode .print-config,
+body.pdf-mode .disclaimer,
+body.pdf-mode .developer-credit,
+body.pdf-mode .input-hint,
+body.pdf-mode .custom-dropdown {
+    display: none !important;
+}
+
+/* Conditional Hiding */
+body.hide-service .service-card,
+body.hide-details .calc-card,
+body.hide-summary .summary-card,
+body.hide-service #input-section,
+body.hide-details #details-section,
+body.hide-summary #benefits-section {
+    display: none !important;
+}
+
+/* Force Grid Layouts */
+body.pdf-mode .input-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 20px !important;
+}
+
+body.pdf-mode .stats-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 15px !important;
+}
+
+body.pdf-mode .card,
+body.pdf-mode .sticky-dashboard {
+    background: white !important;
+    color: black !important;
+    box-shadow: none !important;
+    border: 1px solid black !important;
+    margin-bottom: 20px !important;
+    break-inside: avoid;
+    padding: 20px !important;
+    max-width: none !important;
+}
+
+body.pdf-mode .detail-label,
+body.pdf-mode .detail-value,
+body.pdf-mode .detail-step,
+body.pdf-mode .detail-desc,
+body.pdf-mode .detail-group-header,
+body.pdf-mode .label,
+body.pdf-mode .value,
+body.pdf-mode .sub-label,
+body.pdf-mode .text-success,
+body.pdf-mode .text-accent,
+body.pdf-mode .highlight-factor {
+    color: black !important;
+}
+
+body.pdf-mode .input-group input {
+    border: none !important;
+    text-align: right !important;
+    padding: 0 !important;
+    font-weight: 700 !important;
+    background: transparent !important;
+    color: black !important;
+}
+
+body.pdf-mode .blinking {
+    animation: none !important;
+    opacity: 1 !important;
+}
+
+body.pdf-mode h2 {
+    color: black !important;
+    border-bottom: 1px solid black;
+    padding-bottom: 5px;
+    font-size: 1.1rem !important;
+}
+
+body.pdf-mode h2::before {
+    display: none !important;
+}
+
+
 /* Footer & Extras */
 .disclaimer {
     text-align: center;
@@ -283,4 +677,152 @@ body {
     .secondary-highlight .value {
         font-size: 1.4rem;
     }
+}
+
+/* --- Custom Dropdown Styles --- */
+.input-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.custom-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    max-height: 250px;
+    /* LIMIT HEIGHT! */
+    overflow-y: auto;
+    background: #0f172a;
+    /* Deeper Midnight Blue */
+    border: 1px solid #3b82f6;
+    /* Solid Blue Border */
+    border-radius: 0.5rem;
+    padding: 0;
+    margin-top: 5px;
+    z-index: 1000;
+    list-style: none;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.7);
+    display: none;
+    /* Hidden by default */
+}
+
+.custom-dropdown.show {
+    display: block;
+}
+
+.custom-dropdown li {
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    font-size: 1.1rem;
+    color: #cbd5e1;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    text-align: center;
+}
+
+.custom-dropdown li:last-child {
+    border-bottom: none;
+}
+
+.custom-dropdown li:hover,
+.custom-dropdown li.active {
+    background: rgba(59, 130, 246, 0.2);
+    color: white;
+}
+
+/* Calculation Details List */
+.details-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.detail-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.detail-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.detail-label {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+}
+
+.detail-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.detail-desc {
+    display: block;
+    width: 100%;
+    font-size: 0.75rem;
+    color: #475569;
+    margin-top: 4px;
+    text-align: right;
+}
+
+.detail-step {
+    display: block;
+    width: 100%;
+    font-size: 0.85rem;
+    color: #94a3b8;
+    /* Lighter than desc for visibility */
+    text-align: right;
+    margin-top: 6px;
+    font-weight: 500;
+}
+
+.detail-item {
+    flex-wrap: wrap;
+}
+
+.detail-label,
+.detail-value {
+    width: 50%;
+}
+
+.detail-value {
+    text-align: right;
+}
+
+.highlight-factor {
+    color: #ffffff;
+    /* White as requested */
+    font-weight: 700;
+    font-size: 0.9em;
+    padding: 0 4px;
+}
+
+/* New Grouping Styles */
+.detail-group-header {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: #475569;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-top: 10px;
+    padding-bottom: 5px;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.05);
+}
+
+.detail-group-header:first-child {
+    margin-top: 0;
+}
+
+
+.text-accent {
+    color: #60a5fa !important;
+}
+
+.text-success {
+    color: #34d399 !important;
 }

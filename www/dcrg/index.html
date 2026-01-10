@@ -28,45 +28,37 @@
         }
     </script>
     <script src="../capacitor-handler.js"></script>
+    <!-- PDF Generation Library -->
+    <script src="../js/html2pdf.bundle.min.js"></script>
 </head>
 
 <body>
     <div class="container main-content-padding">
-        <div class="sticky-dashboard">
-            <a href="../index.html">🏠</a>
-            <div class="main-benefit">
-                <span class="label">Total Pension Benefits (Lump Sum)</span>
-                <span class="value blinking" id="totalBenefitsHeader">0</span>
-                <small class="sub-label">(Commutation + DCRG)</small>
+        <!-- Home Link -->
+        <a href="../index.html" class="home-button">🏠</a>
 
-                <div class="secondary-highlight">
-                    <span class="value" id="balanceHeader">0</span>
-                    <span class="label">Balance Pension Next Month Onwards</span>
-                </div>
-            </div>
-            <div class="stats-grid">
-                <div class="stat-item">
-                    <span class="label">Commuted pension</span>
-                    <span class="value" id="commuteHeader">0</span>
-                </div>
-                <div class="stat-item">
-                    <span class="label">DCRG</span>
-                    <span class="value" id="dcrgHeader">0</span>
-                </div>
-            </div>
+        <!-- Report Header (Print only) -->
+        <div class="report-header">
+            <h1>Pension & DCRG Report</h1>
+            <p id="printEmployeeName"></p>
+            <p>Generated on: <span id="printDate"></span></p>
         </div>
 
+        <!-- Placeholder Message -->
         <p class="placeholder-message">Fill the fields with your own data.</p>
+
         <main>
-            <!-- Section 1: Inputs -->
-            <section class="card" id="input-section">
+            <!-- Section 1 (was 2): inputs -->
+            <section class="card service-card" id="input-section">
                 <h2>Service Details</h2>
                 <div class="input-grid">
                     <div class="input-group">
                         <label for="basicPay">Basic Pay (BP)</label>
                         <div class="input-wrapper">
-                            <input type="number" id="basicPay" min="0" step="100" list="pay-stages" value="60700">
-                            <datalist id="pay-stages"></datalist>
+                            <input type="number" id="basicPay" placeholder="Enter Basic Pay" autocomplete="off">
+                            <ul id="custom-dropdown" class="custom-dropdown">
+                                <!-- Items populated by JS -->
+                            </ul>
                         </div>
                     </div>
                     <div class="input-group">
@@ -75,10 +67,10 @@
                             <input type="number" id="daPercentage" min="0" step="1">
                         </div>
                     </div>
-                    <div class="input-group full-width" style="display: none;">
-                        <label for="avgEmoluments">Average Emoluments</label>
-                        <div class="input-wrapper readonly">
-                            <input type="text" id="avgEmoluments" readonly>
+                    <div class="input-group">
+                        <label for="retirementAge">Age at Retirement/VRS</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="retirementAge">
                         </div>
                     </div>
                     <div class="input-group full-width">
@@ -87,9 +79,109 @@
                             <input type="number" id="serviceYears" min="10" max="35">
                         </div>
                     </div>
+                    <div class="input-group full-width">
+                        <label for="avgEmoluments">Avg 10 Months Basic Pay</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="avgEmoluments">
+                            <small class="input-hint">10 month average basic pay is used for calculation; if unknown,
+                                Current Basic Pay is used.</small>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 2 (was 3): Calculation Details -->
+            <section class="card calc-card hidden" id="details-section">
+                <h2>Calculation Details</h2>
+                <div class="details-list">
+                    <!-- Basis Group -->
+                    <div class="detail-group-header">Computation Basis</div>
+                    <div class="detail-item">
+                        <span class="detail-label">Last Basic pay + DA</span>
+                        <span class="detail-value" id="calcLastPay">0</span>
+                        <small class="detail-desc">Used for DCRG</small>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Avg 10 Months Basic Pay</span>
+                        <span class="detail-value" id="calcAvgEmoluments">0</span>
+                        <small class="detail-desc">Used for Pension</small>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Qualifying Service</span>
+                        <span class="detail-value" id="calcQS">0</span>
+                        <small class="detail-desc">Pension (Max 30) | DCRG (Max 33)</small>
+                    </div>
+
+                    <!-- Monthly Group -->
+                    <div class="detail-group-header">Monthly Benefits</div>
+                    <div class="detail-item">
+                        <span class="detail-label">Full Basic Pension</span>
+                        <span class="detail-value" id="calcBasicPension">0</span>
+                        <div class="detail-step" id="stepPension"></div>
+                        <small class="detail-desc">(Avg Pay / 2) × Factor</small>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Reduced Pension</span>
+                        <span class="detail-value text-success" id="calcReducedPension">0</span>
+                        <div class="detail-step" id="stepReduced"></div>
+                        <small class="detail-desc">60% of Full (Basic) Pension</small>
+                    </div>
+
+                    <!-- Lump Sum Group -->
+                    <div class="detail-group-header">Lump Sum Benefits</div>
+                    <div class="detail-item">
+                        <span class="detail-label">Pension Commutation</span>
+                        <span class="detail-value" id="calcCommutation">0</span>
+                        <div class="detail-step" id="stepCommutation"></div>
+                        <small class="detail-desc">40% Pension × Commutation Factor (<span id="dispCommFactor"
+                                class="highlight-factor">Factor</span>) × 12</small>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">DCRG Amount</span>
+                        <span class="detail-value text-accent" id="calcDcrg">0</span>
+                        <div class="detail-step" id="stepDcrg"></div>
+                        <small class="detail-desc">Last Pay × (QS / 2) [Max ₹17L]</small>
+                    </div>
                 </div>
             </section>
         </main>
+
+        <!-- Section 3 (was 1): Summary -->
+        <div class="sticky-dashboard summary-card hidden" id="benefits-section">
+            <div class="main-benefit">
+                <span class="label">Summary</span>
+                <span class="value blinking" id="totalBenefitsHeader">0</span>
+                <small class="sub-label">(Commutation + DCRG)</small>
+
+                <div class="secondary-highlight">
+                    <span class="value" id="balanceHeader">0</span>
+                    <span class="label">Balance Pension Next Month Onwards</span>
+                </div>
+            </div>
+
+            <div class="print-config">
+                <div class="print-field">
+                    <label for="reportName">Employee Name (Optional)</label>
+                    <input type="text" id="reportName" placeholder="Enter name for report">
+                </div>
+                <div class="print-options">
+                    <span class="options-label">Include in Report:</span>
+                    <label><input type="checkbox" id="checkService" checked> Service Details</label>
+                    <label><input type="checkbox" id="checkDetails" checked> Calculation Details</label>
+                    <label><input type="checkbox" id="checkSummary" checked> Summary</label>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button id="printBtn" class="print-button">
+                    <span>🖨️</span> Save PDF
+                </button>
+                <button id="shareBtn" class="share-button">
+                    <span>📤</span> Share Report
+                </button>
+            </div>
+        </div>
+
         <p class="disclaimer">* Calculations are approximate</p>
         <footer class="developer-credit">email: sreee.sreejith@gmail.com</footer>
 

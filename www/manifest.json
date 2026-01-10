@@ -1,7 +1,7 @@
 {
     "name": "Nithara Apps",
     "short_name": "Nithara",
-    "id": "com.sreeejith.nithara.app",
+    "id": "com.sreejith.nithara",
     "description": "Your centralized suite of professional financial and utility tools.",
     "start_url": "./index.html",
     "display": "standalone",

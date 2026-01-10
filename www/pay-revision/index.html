@@ -15,9 +15,14 @@
     <link rel="icon" type="image/png" href="../icon-192.png">
     <meta name="theme-color" content="#3b82f6">
     <script src="../capacitor-handler.js"></script>
+    <script src="../js/html2pdf.bundle.min.js"></script>
 </head>
 
 <body>
+    <div class="report-header">
+        <h1>Pay Revision Report</h1>
+        <p id="printDate"></p>
+    </div>
     <div class="container">
         <header>
             <div class="header-content">
@@ -53,8 +58,16 @@
         <div class="input-main-card">
             <div class="input-field primary-input">
                 <label>Please Enter Basic Pay</label>
-                <input type="number" id="basic-pay-in" value="60700" step="100" list="pay-stages">
-                <datalist id="pay-stages"></datalist>
+                <div class="input-wrapper">
+                    <input type="number" id="basic-pay-in" value="60700" step="100" autocomplete="off">
+                    <ul id="custom-dropdown" class="custom-dropdown">
+                        <!-- Items populated by JS -->
+                    </ul>
+                </div>
+            </div>
+            <div class="revised-bp-row">
+                <span class="label">Revised Basic Pay</span>
+                <span id="revised-bp-val" class="value">0</span>
             </div>
         </div>
 
@@ -151,12 +164,22 @@
         </main>
 
         <p class="disclaimer">* Calculations are approximate</p>
+
+        <div class="button-group">
+            <button id="printBtn" class="print-button">
+                <span>🖨️</span> Save PDF
+            </button>
+            <button id="shareBtn" class="share-button">
+                <span>📤</span> Share Report
+            </button>
+        </div>
+
         <footer>email: sreee.sreejith@gmail.com
 
         </footer>
     </div>
 
-    <script src="script.js?v=1.0"></script>
+    <script src="script.js?v=1.1"></script>
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {

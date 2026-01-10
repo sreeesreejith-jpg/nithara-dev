@@ -30,96 +30,104 @@ document.addEventListener('DOMContentLoaded', () => {
         153200, 156600, 160000, 163400, 166800
     ];
 
-    function populatePayStages(stages) {
-        const dataList = document.getElementById('pay-stages');
-        if (dataList && stages) {
-            dataList.innerHTML = '';
-            stages.forEach(stage => {
-                const option = document.createElement('option');
-                option.value = stage;
-                dataList.appendChild(option);
+    // --- Custom Dropdown Logic ---
+    const basicPayInput = document.getElementById('basic-pay-in');
+    const dropdown = document.getElementById('custom-dropdown');
+
+    // Store current value to dataset for reference
+    basicPayInput.dataset.lastValid = basicPayInput.value;
+
+    function renderDropdown(filterText = "") {
+        dropdown.innerHTML = "";
+
+        // Filter logic: If empty, show all. If text, show matches.
+        const filtered = filterText
+            ? payStagesList.filter(stage => stage.toString().startsWith(filterText))
+            : payStagesList;
+
+        if (filtered.length === 0) {
+            dropdown.classList.remove('show');
+            return;
+        }
+
+        filtered.forEach(stage => {
+            const li = document.createElement('li');
+            li.textContent = stage;
+            li.addEventListener('mousedown', (e) => {
+                // Use mousedown to prevent blur from firing before click
+                e.preventDefault();
+                selectValue(stage);
             });
+            dropdown.appendChild(li);
+        });
+    }
+
+    function selectValue(val) {
+        basicPayInput.value = val;
+        basicPayInput.dataset.lastValid = val; // Update ghost ref
+        dropdown.classList.remove('show');
+        calculate(); // Trigger calc
+    }
+
+    function showDropdown() {
+        renderDropdown(""); // Show all initially or filter based on current val? 
+        dropdown.classList.add('show');
+
+        // Auto-scroll to current value if exists
+        const currentVal = parseInt(basicPayInput.value);
+        if (currentVal) {
+            const items = Array.from(dropdown.querySelectorAll('li'));
+            const match = items.find(li => li.textContent == currentVal);
+            if (match) {
+                match.scrollIntoView({ block: 'center' });
+                match.classList.add('active');
+            }
         }
     }
 
-    // Initial population
-    populatePayStages(payStagesList);
+    function hideDropdown() {
+        setTimeout(() => {
+            dropdown.classList.remove('show');
+        }, 150);
+    }
 
+    // Input Listeners
+    basicPayInput.addEventListener('focus', function () {
+        this.select();
+        showDropdown();
+    });
+
+    basicPayInput.addEventListener('click', function () {
+        this.select();
+        showDropdown();
+    });
+
+    basicPayInput.addEventListener('input', function () {
+        // If typing manual value
+        calculate();
+        // Filter the list live
+        renderDropdown(this.value);
+        dropdown.classList.add('show');
+    });
+
+    basicPayInput.addEventListener('blur', function () {
+        if (this.value.trim() === "") {
+            this.value = this.dataset.lastValid || "";
+            calculate();
+        }
+        hideDropdown();
+    });
+
+    // Fetch external data if available
     fetch('../data/pay_stages.json')
         .then(response => response.json())
         .then(data => {
             if (data.payStages) {
                 payStagesList = data.payStages;
-                populatePayStages(payStagesList);
             }
         })
         .catch(err => console.log('Using embedded pay stages'));
 
-    // Handle Up/Down Arrow Navigation & Clear-on-Focus (Ghost Value Pattern)
-    const basicPayInput = document.getElementById('basic-pay-in');
-
-    // Store current value to dataset for reference
-    basicPayInput.dataset.lastValid = basicPayInput.value;
-
-    function activateGhostMode() {
-        if (this.value.trim() !== "") {
-            this.dataset.lastValid = this.value;
-            this.placeholder = this.value;
-            this.value = '';
-        }
-    }
-
-    function deactivateGhostMode() {
-        if (this.value.trim() === "") {
-            this.value = this.dataset.lastValid; // Restore if nothing selected
-        } else {
-            this.dataset.lastValid = this.value; // Update if new value selected
-        }
-        // Calculate immediately to ensure UI is in sync
-        calculate();
-    }
-
-    basicPayInput.addEventListener('focus', activateGhostMode);
-    basicPayInput.addEventListener('click', activateGhostMode);
-    basicPayInput.addEventListener('blur', deactivateGhostMode);
-
-    basicPayInput.addEventListener('keydown', function (e) {
-        if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
-            if (payStagesList.length === 0) return;
-
-            e.preventDefault();
-
-            // Use current value or ghost value (stored in dataset)
-            let currentValStr = this.value;
-            if (currentValStr === '') {
-                currentValStr = this.dataset.lastValid || "0";
-            }
-
-            const currentVal = parseInt(currentValStr) || 0;
-
-            let currentIndex = payStagesList.indexOf(currentVal);
-
-            // If not found (custom value), find closest
-            if (currentIndex === -1) {
-                currentIndex = payStagesList.findIndex(val => val >= currentVal);
-                if (currentIndex === -1) currentIndex = payStagesList.length - 1;
-            }
-
-            let nextIndex = currentIndex;
-            if (e.key === 'ArrowUp') {
-                nextIndex = currentIndex + 1;
-            } else {
-                nextIndex = currentIndex - 1;
-            }
-
-            // Boundary checks
-            if (nextIndex >= 0 && nextIndex < payStagesList.length) {
-                this.value = payStagesList[nextIndex];
-                this.dataset.lastValid = this.value; // Update ghost ref
-                calculate(); // Trigger calculation
-            }
-        }
-    });
 
     function calculate() {
         const bp = parseFloat(document.getElementById('basic-pay-in').value) || 0;
@@ -179,8 +187,160 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('gross-new-val').textContent = grossNew;
         document.getElementById('gross-old-val').textContent = grossOld;
         document.getElementById('growth-val').textContent = `${growth} (${growthPerc}%)`;
+        document.getElementById('revised-bp-val').textContent = bpFixed;
     }
 
     // Initial calculation
     calculate();
+
+    // PDF & Sharing Logic
+    const prepareForPDF = () => {
+        const printDate = document.getElementById('printDate');
+        if (printDate) {
+            printDate.textContent = "Generated on: " + new Date().toLocaleDateString('en-IN', {
+                day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
+            });
+        }
+        document.body.classList.add('pdf-mode');
+        return "PayRevision_Report_" + new Date().getTime();
+    };
+
+    const cleanupAfterPDF = () => {
+        document.body.classList.remove('pdf-mode');
+    };
+
+    const generatePDFBlob = async () => {
+        // Reset scroll to top before capture
+        window.scrollTo(0, 0);
+
+        const reportTitle = prepareForPDF();
+        const element = document.querySelector('.container');
+
+        // Optimize for A4
+        const opt = {
+            margin: 10,
+            filename: `${reportTitle}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: {
+                scale: 2,
+                useCORS: true,
+                backgroundColor: '#ffffff',
+                logging: false,
+                scrollY: 0,
+                scrollX: 0
+            },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+
+        try {
+            // Check if running in Capacitor Native Environment
+            const isCapacitor = window.Capacitor && window.Capacitor.isNativePlatform();
+
+            if (isCapacitor) {
+                // Generate Base64 for Capacitor
+                const pdfDataUri = await html2pdf().set(opt).from(element).outputPdf('datauristring');
+                cleanupAfterPDF();
+                return { dataUri: pdfDataUri, title: reportTitle, isNative: true };
+            } else {
+                // Generate Blob for Browser
+                const pdfBlob = await html2pdf().set(opt).from(element).output('blob');
+                cleanupAfterPDF();
+                return { blob: pdfBlob, title: reportTitle, isNative: false };
+            }
+        } catch (err) {
+            cleanupAfterPDF();
+            throw err;
+        }
+    };
+
+    const handleNativeSave = async (dataUri, filename) => {
+        try {
+            const { Filesystem } = window.Capacitor.Plugins;
+            const { Share } = window.Capacitor.Plugins;
+
+            // Strip prefix for Filesystem write if present
+            const base64Data = dataUri.split(',')[1];
+
+            // Write to Cache Directory
+            const fileResult = await Filesystem.writeFile({
+                path: filename,
+                data: base64Data,
+                directory: 'CACHE' // 'CACHE' or 'DOCUMENTS'
+            });
+
+            // Share the file
+            await Share.share({
+                title: 'Pay Revision Report',
+                text: 'Here is your Pay Revision Report',
+                url: fileResult.uri,
+                dialogTitle: 'Save or Share PDF'
+            });
+
+        } catch (e) {
+            console.error('Native save failed', e);
+            alert('Error saving PDF: ' + e.message);
+        }
+    };
+
+    const printBtn = document.getElementById('printBtn');
+    if (printBtn) {
+        printBtn.addEventListener('click', async () => {
+            const originalText = printBtn.innerHTML;
+            printBtn.innerHTML = "<span>⏳</span> Generating...";
+            printBtn.disabled = true;
+
+            try {
+                const result = await generatePDFBlob();
+
+                if (result.isNative) {
+                    await handleNativeSave(result.dataUri, `${result.title}.pdf`);
+                } else {
+                    // Browser Fallback
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(result.blob);
+                    link.download = `${result.title}.pdf`;
+                    link.click();
+                }
+            } catch (err) {
+                console.error(err);
+                alert("PDF Generation failed. Try standard print.");
+                window.print();
+            } finally {
+                printBtn.innerHTML = originalText;
+                printBtn.disabled = false;
+            }
+        });
+    }
+
+    const shareBtn = document.getElementById('shareBtn');
+    if (shareBtn) {
+        shareBtn.addEventListener('click', async () => {
+            const originalText = shareBtn.innerHTML;
+            shareBtn.innerHTML = "<span>⏳</span> Preparing...";
+            shareBtn.disabled = true;
+
+            try {
+                const result = await generatePDFBlob();
+
+                if (result.isNative) {
+                    await handleNativeSave(result.dataUri, `${result.title}.pdf`);
+                } else if (navigator.share) {
+                    const file = new File([result.blob], `${result.title}.pdf`, { type: 'application/pdf' });
+                    await navigator.share({
+                        files: [file],
+                        title: 'Pay Revision Report',
+                        text: 'Sharing my pay revision calculation report.'
+                    });
+                } else {
+                    alert("Sharing not supported on this browser.");
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Sharing failed.");
+            } finally {
+                shareBtn.innerHTML = originalText;
+                shareBtn.disabled = false;
+            }
+        });
+    }
 });

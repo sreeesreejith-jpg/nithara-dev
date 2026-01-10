@@ -271,3 +271,262 @@ header p {
     margin-top: 1.5rem;
     font-weight: 600;
 }
+
+/* Button & Share Styles */
+.button-group {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.print-button,
+.share-button {
+    padding: 12px;
+    border: none;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex: 1;
+    transition: transform 0.2s;
+}
+
+.print-button {
+    background: #ffffff;
+    color: #1e293b;
+}
+
+.share-button {
+    background: #10b981;
+    color: white;
+}
+
+.print-button:active,
+.share-button:active {
+    transform: scale(0.95);
+}
+
+.report-header {
+    display: none;
+}
+
+/* Media Query for Print and PDF Mode */
+@media print {
+    body {
+        background: white !important;
+        color: black !important;
+        display: block !important;
+    }
+
+    .container {
+        max-width: 100% !important;
+        box-shadow: none !important;
+        border: none !important;
+        background: white !important;
+        padding: 0 !important;
+    }
+
+    .background-blobs,
+    .home-icon,
+    .actions,
+    .button-group,
+    .disclaimer,
+    .footer,
+    .placeholder-message {
+        display: none !important;
+    }
+
+    .report-header {
+        display: block !important;
+        text-align: center;
+        margin-bottom: 2rem;
+        border-bottom: 2px solid black;
+        padding-bottom: 1rem;
+    }
+
+    .report-header h1 {
+        color: black !important;
+        -webkit-text-fill-color: initial !important;
+        background: none !important;
+    }
+
+    .input-wrapper {
+        border-bottom: 1px solid black !important;
+        background: transparent !important;
+        padding: 0.2rem 0 !important;
+    }
+
+    .input-wrapper input {
+        color: black !important;
+        font-size: 1.1rem !important;
+        text-align: right !important;
+    }
+
+    .summary-container {
+        opacity: 1 !important;
+        transform: none !important;
+        background: white !important;
+        color: black !important;
+        border: 2px solid black !important;
+    }
+
+    .donut-chart,
+    .donut-center {
+        background: white !important;
+        border: 1px solid black;
+    }
+
+    .donut-segment {
+        filter: grayscale(1) contrast(2);
+    }
+
+    strong,
+    span,
+    label,
+    div,
+    h1,
+    h2,
+    h3,
+    th,
+    td {
+        color: black !important;
+    }
+
+    table,
+    th,
+    td {
+        border: 1px solid black !important;
+        border-collapse: collapse !important;
+        background: white !important;
+    }
+
+    th {
+        background: #eee !important;
+    }
+
+    .view-toggle,
+    .back-link {
+        display: none !important;
+    }
+}
+
+/* Styles for pdf-mode (used by html2pdf) */
+body.pdf-mode {
+    background: white !important;
+    color: black !important;
+    display: block !important;
+    /* Force A4 width context */
+    padding: 20px 30px !important;
+    margin: 0 !important;
+    width: 760px !important;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 9999;
+}
+
+body.pdf-mode .container {
+    width: 100% !important;
+    max-width: none !important;
+    box-shadow: none !important;
+    border: none !important;
+    background: white !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+body.pdf-mode .background-blobs,
+body.pdf-mode .home-icon,
+body.pdf-mode .actions,
+body.pdf-mode .button-group,
+body.pdf-mode .disclaimer,
+body.pdf-mode .footer,
+body.pdf-mode .placeholder-message {
+    display: none !important;
+}
+
+body.pdf-mode .report-header {
+    display: block !important;
+    text-align: center;
+    margin-bottom: 2rem;
+    border-bottom: 2px solid black;
+    padding-bottom: 1rem;
+}
+
+body.pdf-mode .report-header h1 {
+    color: black !important;
+    -webkit-text-fill-color: initial !important;
+    background: none !important;
+    margin: 0;
+    font-size: 2rem;
+}
+
+body.pdf-mode .input-wrapper {
+    border-bottom: 1px solid black !important;
+    background: transparent !important;
+}
+
+body.pdf-mode .input-wrapper input {
+    color: black !important;
+    text-align: right !important;
+}
+
+body.pdf-mode .summary-container {
+    opacity: 1 !important;
+    transform: none !important;
+    background: white !important;
+    border: 1px solid black !important;
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 1.5rem !important;
+}
+
+/* Force Grid Layouts */
+body.pdf-mode .calculator-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 1.25rem !important;
+}
+
+body.pdf-mode .donut-chart,
+body.pdf-mode .donut-center {
+    background: white !important;
+    border: 1px solid black;
+}
+
+body.pdf-mode .donut-segment {
+    filter: grayscale(1) contrast(2);
+}
+
+body.pdf-mode strong,
+body.pdf-mode span,
+body.pdf-mode label,
+body.pdf-mode div,
+body.pdf-mode h1,
+body.pdf-mode h2,
+body.pdf-mode h3,
+body.pdf-mode th,
+body.pdf-mode td {
+    color: black !important;
+}
+
+body.pdf-mode table,
+body.pdf-mode th,
+body.pdf-mode td {
+    border: 1px solid black !important;
+    border-collapse: collapse !important;
+    background: white !important;
+}
+
+body.pdf-mode th {
+    background: #eee !important;
+}
+
+body.pdf-mode .view-toggle,
+body.pdf-mode .back-link {
+    display: none !important;
+}

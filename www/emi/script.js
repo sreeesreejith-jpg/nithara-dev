@@ -230,3 +230,147 @@ function calcRate(P, T, E) {
     }
     return (low + high) / 2 * 12 * 100;
 }
+
+// PDF & Sharing Logic
+const prepareForPDF = () => {
+    const printDate = document.getElementById('printDate');
+    if (printDate) {
+        printDate.textContent = "Generated on: " + new Date().toLocaleDateString('en-IN', {
+            day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
+        });
+    }
+    document.body.classList.add('pdf-mode');
+    return "EMI_Report_" + new Date().getTime();
+};
+
+const cleanupAfterPDF = () => {
+    document.body.classList.remove('pdf-mode');
+};
+
+const generatePDFResult = async () => {
+    // Reset scroll to top before capture
+    window.scrollTo(0, 0);
+
+    const reportTitle = prepareForPDF();
+    const element = document.querySelector('.container');
+
+    // Optimize for A4
+    const opt = {
+        margin: 10,
+        filename: `${reportTitle}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: {
+            scale: 2,
+            useCORS: true,
+            backgroundColor: '#ffffff',
+            logging: false,
+            scrollY: 0,
+            scrollX: 0
+        },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    try {
+        // Check if running in Capacitor Native Environment
+        const isCapacitor = window.Capacitor && window.Capacitor.isNativePlatform();
+
+        if (isCapacitor) {
+            // Generate Base64 for Capacitor
+            const pdfDataUri = await html2pdf().set(opt).from(element).outputPdf('datauristring');
+            cleanupAfterPDF();
+            return { dataUri: pdfDataUri, title: reportTitle, isNative: true };
+        } else {
+            // Generate Blob for Browser
+            const pdfBlob = await html2pdf().set(opt).from(element).output('blob');
+            cleanupAfterPDF();
+            return { blob: pdfBlob, title: reportTitle, isNative: false };
+        }
+    } catch (err) {
+        cleanupAfterPDF();
+        throw err;
+    }
+};
+
+const handleNativeSave = async (dataUri, filename) => {
+    try {
+        const { Filesystem } = window.Capacitor.Plugins;
+        const { Share } = window.Capacitor.Plugins;
+        const base64Data = dataUri.split(',')[1];
+
+        const fileResult = await Filesystem.writeFile({
+            path: filename,
+            data: base64Data,
+            directory: 'CACHE'
+        });
+
+        await Share.share({
+            title: 'EMI Report',
+            text: 'Here is your report',
+            url: fileResult.uri,
+            dialogTitle: 'Save or Share PDF'
+        });
+
+    } catch (e) {
+        console.error('Native save failed', e);
+        alert('Error saving PDF: ' + e.message);
+    }
+};
+
+const printBtn = document.getElementById('printBtn');
+if (printBtn) {
+    printBtn.addEventListener('click', async () => {
+        const originalText = printBtn.innerHTML;
+        printBtn.innerHTML = "<span>⏳</span> Generating...";
+        printBtn.disabled = true;
+
+        try {
+            const result = await generatePDFResult();
+            if (result.isNative) {
+                await handleNativeSave(result.dataUri, `${result.title}.pdf`);
+            } else {
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(result.blob);
+                link.download = `${result.title}.pdf`;
+                link.click();
+            }
+        } catch (err) {
+            console.error(err);
+            alert("PDF Generation failed. Try standard print.");
+            window.print();
+        } finally {
+            printBtn.innerHTML = originalText;
+            printBtn.disabled = false;
+        }
+    });
+}
+
+const shareBtn = document.getElementById('shareBtn');
+if (shareBtn) {
+    shareBtn.addEventListener('click', async () => {
+        const originalText = shareBtn.innerHTML;
+        shareBtn.innerHTML = "<span>⏳</span> Preparing...";
+        shareBtn.disabled = true;
+
+        try {
+            const result = await generatePDFResult();
+            if (result.isNative) {
+                await handleNativeSave(result.dataUri, `${result.title}.pdf`);
+            } else if (navigator.share) {
+                const file = new File([result.blob], `${result.title}.pdf`, { type: 'application/pdf' });
+                await navigator.share({
+                    files: [file],
+                    title: 'EMI Calculation Report',
+                    text: 'Sharing my EMI calculation report.'
+                });
+            } else {
+                alert("Sharing not supported on this browser.");
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Sharing failed.");
+        } finally {
+            shareBtn.innerHTML = originalText;
+            shareBtn.disabled = false;
+        }
+    });
+}
