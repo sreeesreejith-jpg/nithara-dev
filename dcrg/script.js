@@ -165,6 +165,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const calcDcrg = document.getElementById('calcDcrg');
     const dispCommFactor = document.getElementById('dispCommFactor');
 
+    // Step Elements
+    const stepDcrg = document.getElementById('stepDcrg');
+    const stepCommutation = document.getElementById('stepCommutation');
+    const stepPension = document.getElementById('stepPension');
+    const stepReduced = document.getElementById('stepReduced');
+
     const inputs = [basicPayInput, daPercentageInput, serviceYearsInput, retirementAgeInput, avgEmolumentsInput];
 
     /**
@@ -228,7 +234,6 @@ document.addEventListener('DOMContentLoaded', () => {
         let dcrgQS = (years > 33) ? 33 : years;
         let dcrg = lastPay * (dcrgQS / 2);
 
-        // Limit DCRG to 17 Lakhs (11th Pay Revision)
         if (dcrg > 1700000) dcrg = 1700000;
 
         // 7. Total Benefits
@@ -251,6 +256,26 @@ document.addEventListener('DOMContentLoaded', () => {
         if (calcReducedPension) calcReducedPension.textContent = formatAmount(balancePension);
         if (calcDcrg) calcDcrg.textContent = formatAmount(dcrg);
         if (dispCommFactor) dispCommFactor.textContent = commFactor.toFixed(2);
+
+        // Update Steps with Actual Values
+        if (stepDcrg) stepDcrg.textContent = `${formatAmount(lastPay)} × ${dcrgQS / 2}`;
+        if (stepCommutation) stepCommutation.textContent = `${formatAmount(commutablePension)} × ${commFactor} × 12`;
+        if (stepPension) stepPension.textContent = `(${formatAmount(avgEmoluments)} / 2) × ${pensionFactor.toFixed(2)}`;
+        if (stepReduced) stepReduced.textContent = `${formatAmount(pension)} × 60%`;
+
+        // Visibility Condition: Show sections only if Basic Pay and Service Years are valid
+        const detailsSection = document.getElementById('details-section');
+        const benefitsSection = document.getElementById('benefits-section');
+
+        if (detailsSection && benefitsSection) {
+            if (bp > 0 && years > 0) {
+                detailsSection.classList.remove('hidden');
+                benefitsSection.classList.remove('hidden');
+            } else {
+                detailsSection.classList.add('hidden');
+                benefitsSection.classList.add('hidden');
+            }
+        }
     };
 
     // Attach listeners
