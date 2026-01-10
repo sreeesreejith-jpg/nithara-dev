@@ -278,6 +278,41 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    // Print logic
+    const printBtn = document.getElementById('printBtn');
+    if (printBtn) {
+        printBtn.addEventListener('click', () => {
+            // Set Report Details
+            const nameInput = document.getElementById('reportName');
+            const printName = document.getElementById('printEmployeeName');
+            const printDate = document.getElementById('printDate');
+
+            if (printName) {
+                printName.textContent = nameInput && nameInput.value ? `Employee: ${nameInput.value}` : '';
+            }
+            if (printDate) {
+                printDate.textContent = new Date().toLocaleDateString('en-IN', {
+                    day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                });
+            }
+
+            // Apply Print Selections
+            const checkService = document.getElementById('checkService');
+            const checkDetails = document.getElementById('checkDetails');
+            const checkSummary = document.getElementById('checkSummary');
+
+            if (checkService && !checkService.checked) document.body.classList.add('hide-service');
+            if (checkDetails && !checkDetails.checked) document.body.classList.add('hide-details');
+            if (checkSummary && !checkSummary.checked) document.body.classList.add('hide-summary');
+
+            // Print
+            window.print();
+
+            // Cleanup
+            document.body.classList.remove('hide-service', 'hide-details', 'hide-summary');
+        });
+    }
+
     // Attach listeners
     inputs.forEach(input => {
         input.addEventListener('input', () => {

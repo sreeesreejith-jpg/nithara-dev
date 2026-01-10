@@ -35,6 +35,13 @@
         <!-- Home Link -->
         <a href="../index.html" class="home-button">🏠</a>
 
+        <!-- Report Header (Print only) -->
+        <div class="report-header">
+            <h1>Pension & DCRG Report</h1>
+            <p id="printEmployeeName"></p>
+            <p>Generated on: <span id="printDate"></span></p>
+        </div>
+
         <!-- Placeholder Message -->
         <p class="placeholder-message">Fill the fields with your own data.</p>
 
@@ -68,8 +75,8 @@
                         <label for="avgEmoluments">Avg 10 Months Basic Pay</label>
                         <div class="input-wrapper">
                             <input type="number" id="avgEmoluments">
-                            <small class="input-hint">Current basic pay is used by default; enter the 10-month average
-                                if different.</small>
+                            <small class="input-hint">10 month average basic pay is used for calculation; if unknown,
+                                Current Basic Pay is used.</small>
                         </div>
                     </div>
                     <div class="input-group full-width">
@@ -88,7 +95,7 @@
                     <!-- Basis Group -->
                     <div class="detail-group-header">Computation Basis</div>
                     <div class="detail-item">
-                        <span class="detail-label">Last Pay + DA</span>
+                        <span class="detail-label">Last Basic pay + DA</span>
                         <span class="detail-value" id="calcLastPay">0</span>
                         <small class="detail-desc">Used for DCRG</small>
                     </div>
@@ -149,6 +156,23 @@
                     <span class="label">Balance Pension Next Month Onwards</span>
                 </div>
             </div>
+
+            <div class="print-config">
+                <div class="print-field">
+                    <label for="reportName">Employee Name (Optional)</label>
+                    <input type="text" id="reportName" placeholder="Enter name for report">
+                </div>
+                <div class="print-options">
+                    <span class="options-label">Include in Report:</span>
+                    <label><input type="checkbox" id="checkService" checked> Service Details</label>
+                    <label><input type="checkbox" id="checkDetails" checked> Calculation Details</label>
+                    <label><input type="checkbox" id="checkSummary" checked> Summary</label>
+                </div>
+            </div>
+
+            <button id="printBtn" class="print-button">
+                <span>🖨️</span> Print Report
+            </button>
         </div>
 
         <p class="disclaimer">* Calculations are approximate</p>
