@@ -1,12 +1,5 @@
 {
   "appId": "com.sreejith.nithara",
   "appName": "Nithara Apps",
-  "webDir": "www",
-  "server": {
-    "url": "https://sreeesreejith-jpg.github.io/nithara/",
-    "allowNavigation": [
-      "sreeesreejith-jpg.github.io"
-    ],
-    "cleartext": true
-  }
+  "webDir": "www"
 }
