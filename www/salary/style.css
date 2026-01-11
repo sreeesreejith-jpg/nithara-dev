@@ -689,7 +689,7 @@ body.pdf-mode .section-header {
 body.pdf-mode input {
     background: transparent !important;
     border: none !important;
-    border-bottom: 1px dashed #666 !important;
+    border-bottom: none !important;
     text-align: right !important;
     padding: 2px !important;
     font-weight: bold !important;
@@ -746,6 +746,8 @@ body.pdf-mode span[id*="val"] {
 body.pdf-mode .detail-item, 
 body.pdf-mode .result-row, 
 body.pdf-mode .revision-row,
+body.pdf-mode .revised-bp-row { border-top: none !important; margin: 0 !important; }
+body.pdf-mode .revised-bp-row,
 body.pdf-mode .input-field,
 body.pdf-mode .calculated-row {
     display: flex !important;

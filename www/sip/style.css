@@ -446,7 +446,7 @@ body.pdf-mode .result-card {
 body.pdf-mode input {
     background: transparent !important;
     border: none !important;
-    border-bottom: 1px dashed #666 !important;
+    border-bottom: none !important;
     text-align: right !important;
     padding: 2px !important;
     font-weight: bold !important;
