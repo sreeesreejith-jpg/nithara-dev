@@ -356,8 +356,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const handleNativeSave = async (dataUri, filename) => {
         try {
-            const { Filesystem } = window.Capacitor.Plugins;
-            const { Share } = window.Capacitor.Plugins;
+            const Filesystem = window.Capacitor?.Plugins?.Filesystem;
+            const Share = window.Capacitor?.Plugins?.Share;
 
             // Strip prefix for Filesystem write if present
             const base64Data = dataUri.split(',')[1];

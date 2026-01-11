@@ -115,8 +115,8 @@ const generatePDFResult = async () => {
 
 const handleNativeSave = async (dataUri, filename) => {
     try {
-        const { Filesystem } = window.Capacitor.Plugins;
-        const { Share } = window.Capacitor.Plugins;
+        const Filesystem = window.Capacitor?.Plugins?.Filesystem;
+        const Share = window.Capacitor?.Plugins?.Share;
         const base64Data = dataUri.split(',')[1];
 
         const fileResult = await Filesystem.writeFile({

@@ -255,8 +255,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const handleNativeSave = async (dataUri, filename) => {
         try {
-            const { Filesystem } = window.Capacitor.Plugins;
-            const { Share } = window.Capacitor.Plugins;
+            const Filesystem = window.Capacitor?.Plugins?.Filesystem;
+            const Share = window.Capacitor?.Plugins?.Share;
+
+            if (!Filesystem || !Share) {
+                throw new Error("Native plugins (Filesystem/Share) not available. Ensure you are on a mobile device.");
+            }
 
             // Strip prefix for Filesystem write if present
             const base64Data = dataUri.split(',')[1];
@@ -265,7 +269,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const fileResult = await Filesystem.writeFile({
                 path: filename,
                 data: base64Data,
-                directory: 'CACHE' // 'CACHE' or 'DOCUMENTS'
+                directory: 'CACHE'
             });
 
             // Share the file
