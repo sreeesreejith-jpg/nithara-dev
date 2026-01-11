@@ -276,7 +276,7 @@ const generatePDFResult = async () => {
 
         if (isCapacitor) {
             // Generate Base64 for Capacitor
-            const pdfDataUri = await html2pdf().set(opt).from(element).outputPdf('datauristring');
+            const pdfDataUri = await html2pdf().set(opt).from(element).output('datauristring');
             cleanupAfterPDF();
             return { dataUri: pdfDataUri, title: reportTitle, isNative: true };
         } else {

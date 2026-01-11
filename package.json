@@ -4,7 +4,7 @@
   "description": "A collection of premium finance and utility web applications, optimized for mobile as Progressive Web Apps (PWA).",
   "main": "index.js",
   "scripts": {
-    "build": "mkdir -p www && cp -r calculator dcrg emi housing pay-revision salary sip index.html style.css manifest.json service-worker.js capacitor-handler.js *.png www/",
+    "build": "mkdir -p www && cp -r calculator dcrg emi housing pay-revision salary sip js index.html style.css manifest.json service-worker.js capacitor-handler.js *.png www/",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
