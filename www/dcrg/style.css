@@ -482,10 +482,20 @@ body {
 /* Specific styles for html2pdf which uses .pdf-mode class */
 body.pdf-mode {
     background: white !important;
-    background-image: none !important;
     color: black !important;
-    width: 800px !important;
-    padding: 20px !important;
+    width: 760px !important;
+    padding: 15px !important;
+}
+
+body.pdf-mode * {
+    color: black !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    -webkit-text-fill-color: black !important;
+    text-shadow: none !important;
+    box-shadow: none !important;
+    border-color: #000 !important;
+    animation: none !important;
 }
 
 body.pdf-mode .container {
@@ -495,15 +505,16 @@ body.pdf-mode .container {
     margin: 0 !important;
 }
 
-body.pdf-mode * {
+body.pdf-mode .text-success,
+body.pdf-mode .text-accent,
+body.pdf-mode .highlight-factor {
     color: black !important;
-    background-color: transparent !important;
-    background-image: none !important;
-    -webkit-text-fill-color: initial !important;
-    text-shadow: none !important;
-    box-shadow: none !important;
-    border-color: #ccc !important;
-    animation: none !important;
+}
+
+body.pdf-mode .detail-value {
+    color: black !important;
+    font-weight: bold !important;
+    font-size: 1.1rem !important;
 }
 
 body.pdf-mode .home-button,
@@ -522,18 +533,18 @@ body.pdf-mode .input-hint {
 body.pdf-mode .report-header {
     display: block !important;
     text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 25px;
     border-bottom: 2px solid black;
-    padding-bottom: 15px;
+    padding-bottom: 10px;
 }
 
 body.pdf-mode .card,
 body.pdf-mode .sticky-dashboard {
     background: white !important;
     border: 1px solid black !important;
-    border-radius: 8px !important;
-    margin-bottom: 15px !important;
-    padding: 15px !important;
+    border-radius: 4px !important;
+    margin-bottom: 10px !important;
+    padding: 12px !important;
     page-break-inside: avoid;
     max-width: none !important;
 }
@@ -541,7 +552,7 @@ body.pdf-mode .sticky-dashboard {
 body.pdf-mode .input-group input {
     background: transparent !important;
     border: none !important;
-    border-bottom: 1px dashed #666 !important;
+    border-bottom: 1px dashed black !important;
     text-align: right !important;
     padding: 2px !important;
     font-weight: bold !important;
