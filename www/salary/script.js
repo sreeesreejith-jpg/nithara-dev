@@ -229,10 +229,10 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         try {
-            const cap = window.Capacitor || window.capacitor;
-            const isCapNative = cap && cap.isNativePlatform && cap.isNativePlatform();
+            const cap = window.Capacitor;
+            const hasNativePlugins = !!(cap && cap.Plugins && (cap.Plugins.Filesystem || cap.Plugins.Share));
 
-            if (isCapNative && cap.Plugins) {
+            if (hasNativePlugins) {
                 const Filesystem = cap.Plugins.Filesystem;
                 const Share = cap.Plugins.Share;
 

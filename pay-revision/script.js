@@ -233,26 +233,22 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         try {
-            // Check for Capacitor in multiple places
-            const cap = window.Capacitor || window.capacitor;
-            const isCapNative = cap && cap.isNativePlatform && cap.isNativePlatform();
+            const cap = window.Capacitor;
+            // Use a more direct check for Plugins availability
+            const hasNativePlugins = !!(cap && cap.Plugins && (cap.Plugins.Filesystem || cap.Plugins.Share));
 
-            // Debug alert for testing
-            // alert("DEBUG: Is Native? " + isCapNative + " | Plugins: " + (cap?.Plugins ? "Found" : "Missing"));
-
-            if (isCapNative && cap.Plugins) {
+            if (hasNativePlugins) {
                 const Filesystem = cap.Plugins.Filesystem;
                 const Share = cap.Plugins.Share;
 
                 if (Filesystem && Share) {
-                    // Generate Base64 for Capacitor
                     const pdfDataUri = await html2pdf().set(opt).from(element).output('datauristring');
                     cleanupAfterPDF();
                     return { dataUri: pdfDataUri, title: reportTitle, isNative: true };
                 }
             }
 
-            // Generate Blob for Browser/Desktop fallback
+            // Fallback for Web/Desktop
             const pdfBlob = await html2pdf().set(opt).from(element).output('blob');
             cleanupAfterPDF();
             return { blob: pdfBlob, title: reportTitle, isNative: false };
