@@ -757,6 +757,8 @@ body.pdf-mode span[id*="val"] {
     color: #000000 !important;
     -webkit-text-fill-color: #000000 !important;
     visibility: visible !important;
+    display: inline-block !important; /* Ensure space */ 
+    font-weight: bold !important;
     opacity: 1 !important;
 }
 
@@ -767,6 +769,8 @@ body.pdf-mode span[id*="val"] {
         color: #000000 !important;
         -webkit-text-fill-color: #000000 !important;
         visibility: visible !important;
+    display: inline-block !important; /* Ensure space */ 
+    font-weight: bold !important;
         opacity: 1 !important;
     }
 }
