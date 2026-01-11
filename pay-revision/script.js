@@ -233,11 +233,16 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         try {
-            const isCapacitor = window.Capacitor && window.Capacitor.isNativePlatform();
+            // Check for Capacitor in multiple places
+            const cap = window.Capacitor || window.capacitor;
+            const isCapNative = cap && cap.isNativePlatform && cap.isNativePlatform();
 
-            if (isCapacitor) {
-                const Filesystem = window.Capacitor?.Plugins?.Filesystem;
-                const Share = window.Capacitor?.Plugins?.Share;
+            // Debug alert for testing
+            // alert("DEBUG: Is Native? " + isCapNative + " | Plugins: " + (cap?.Plugins ? "Found" : "Missing"));
+
+            if (isCapNative && cap.Plugins) {
+                const Filesystem = cap.Plugins.Filesystem;
+                const Share = cap.Plugins.Share;
 
                 if (Filesystem && Share) {
                     // Generate Base64 for Capacitor
@@ -247,7 +252,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
-            // Generate Blob for Browser/Desktop
+            // Generate Blob for Browser/Desktop fallback
             const pdfBlob = await html2pdf().set(opt).from(element).output('blob');
             cleanupAfterPDF();
             return { blob: pdfBlob, title: reportTitle, isNative: false };
@@ -260,20 +265,27 @@ document.addEventListener('DOMContentLoaded', () => {
     const handleNativeSave = async (dataUri, filename) => {
         try {
             const Plugins = window.Capacitor?.Plugins;
-            const Filesystem = Plugins?.Filesystem;
-            const Share = Plugins?.Share;
+
+            // Debug: Check if Plugins object exists
+            if (!Plugins) {
+                alert("DEBUG: window.Capacitor.Plugins is UNDEFINED. Bridge failed.");
+                throw new Error("Capacitor Bridge not found.");
+            }
+
+            const Filesystem = Plugins.Filesystem;
+            const Share = Plugins.Share;
 
             if (!Filesystem) {
-                console.error('Capacitor Filesystem plugin is missing');
-                throw new Error("Filesystem plugin not available. Please rebuild the app.");
+                alert("DEBUG: Filesystem plugin not found in Plugins object.");
+                throw new Error("Filesystem plugin missing.");
             }
             if (!Share) {
-                console.error('Capacitor Share plugin is missing');
-                throw new Error("Share plugin not available. Please rebuild the app.");
+                alert("DEBUG: Share plugin not found in Plugins object.");
+                throw new Error("Share plugin missing.");
             }
 
-            // Strip prefix for Filesystem write if present
-            const base64Data = dataUri.split(',')[1];
+            // Strip prefix for Filesystem write
+            const base64Data = dataUri.split(',')[1] || dataUri;
 
             // Write to Cache Directory
             const fileResult = await Filesystem.writeFile({
@@ -292,7 +304,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         } catch (e) {
             console.error('Native save failed', e);
-            alert('Error saving PDF: ' + e.message);
+            alert('APK Error: ' + e.message);
         }
     };
 

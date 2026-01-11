@@ -229,10 +229,12 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         try {
-            const isNative = window.Capacitor && window.Capacitor.isNativePlatform();
-            if (isNative) {
-                const Filesystem = window.Capacitor?.Plugins?.Filesystem;
-                const Share = window.Capacitor?.Plugins?.Share;
+            const cap = window.Capacitor || window.capacitor;
+            const isCapNative = cap && cap.isNativePlatform && cap.isNativePlatform();
+
+            if (isCapNative && cap.Plugins) {
+                const Filesystem = cap.Plugins.Filesystem;
+                const Share = cap.Plugins.Share;
 
                 if (Filesystem && Share) {
                     const pdfDataUri = await html2pdf().set(opt).from(element).output('datauristring');
@@ -252,14 +254,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const handleNativeSave = async (dataUri, filename) => {
         try {
-            const Plugins = window.Capacitor?.Plugins;
-            const Filesystem = Plugins?.Filesystem;
-            const Share = Plugins?.Share;
+            const cap = window.Capacitor || window.capacitor;
+            const Plugins = cap?.Plugins;
 
-            if (!Filesystem) throw new Error("Filesystem plugin missing. Please rebuild.");
-            if (!Share) throw new Error("Share plugin missing. Please rebuild.");
+            if (!Plugins) throw new Error("Capacitor Plugins not found.");
 
-            const base64Data = dataUri.split(',')[1];
+            const Filesystem = Plugins.Filesystem;
+            const Share = Plugins.Share;
+
+            if (!Filesystem) throw new Error("Filesystem plugin missing.");
+            if (!Share) throw new Error("Share plugin missing.");
+
+            const base64Data = dataUri.split(',')[1] || dataUri;
 
             const fileResult = await Filesystem.writeFile({
                 path: filename,
@@ -276,7 +282,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         } catch (e) {
             console.error('Native save failed', e);
-            alert('Error saving PDF: ' + e.message);
+            alert('APK Error: ' + e.message);
         }
     };
 

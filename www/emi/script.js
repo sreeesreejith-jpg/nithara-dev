@@ -208,10 +208,12 @@ const generatePDFResult = async () => {
     };
 
     try {
-        const isCapacitor = window.Capacitor && window.Capacitor.isNativePlatform();
-        if (isCapacitor) {
-            const Filesystem = window.Capacitor?.Plugins?.Filesystem;
-            const Share = window.Capacitor?.Plugins?.Share;
+        const cap = window.Capacitor || window.capacitor;
+        const isCapNative = cap && cap.isNativePlatform && cap.isNativePlatform();
+
+        if (isCapNative && cap.Plugins) {
+            const Filesystem = cap.Plugins.Filesystem;
+            const Share = cap.Plugins.Share;
             if (Filesystem && Share) {
                 const pdfDataUri = await html2pdf().set(opt).from(element).output('datauristring');
                 cleanupAfterPDF();
@@ -229,19 +231,23 @@ const generatePDFResult = async () => {
 
 const handleNativeSave = async (dataUri, filename) => {
     try {
-        const Plugins = window.Capacitor?.Plugins;
-        const Filesystem = Plugins?.Filesystem;
-        const Share = Plugins?.Share;
+        const cap = window.Capacitor || window.capacitor;
+        const Plugins = cap?.Plugins;
 
-        if (!Filesystem) throw new Error("Filesystem plugin missing. Please rebuild.");
-        if (!Share) throw new Error("Share plugin missing. Please rebuild.");
+        if (!Plugins) throw new Error("Capacitor Plugins not found.");
 
-        const base64Data = dataUri.split(',')[1];
+        const Filesystem = Plugins.Filesystem;
+        const Share = Plugins.Share;
+
+        if (!Filesystem) throw new Error("Filesystem plugin missing.");
+        if (!Share) throw new Error("Share plugin missing.");
+
+        const base64Data = dataUri.split(',')[1] || dataUri;
         const fileResult = await Filesystem.writeFile({ path: filename, data: base64Data, directory: 'CACHE' });
         await Share.share({ title: 'EMI Report', text: 'Here is your report', url: fileResult.uri, dialogTitle: 'Save or Share PDF' });
     } catch (e) {
         console.error('Native save failed', e);
-        alert('Error saving PDF: ' + e.message);
+        alert('APK Error: ' + e.message);
     }
 };
 
