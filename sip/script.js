@@ -70,48 +70,71 @@ const cleanupAfterPDF = () => {
 };
 
 const generatePDFResult = async () => {
-    // Reset scroll to top before capture
-    window.scrollTo(0, 0);
-
-    const reportTitle = prepareForPDF();
-    const element = document.querySelector('.container');
-
-    // Optimize for A4
-    const opt = {
-        margin: 10,
-        filename: `${reportTitle}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: {
-            scale: 2,
-            useCORS: true,
-            backgroundColor: '#ffffff',
-            logging: false,
-            scrollY: 0,
-            scrollX: 0
-        },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    };
-
     try {
-        const cap = window.Capacitor;
-        const hasNativePlugins = !!(cap && cap.Plugins && (cap.Plugins.Filesystem || cap.Plugins.Share));
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        const reportTitle = "SIP_Report_" + new Date().getTime();
 
-        if (hasNativePlugins) {
-            const Filesystem = cap.Plugins.Filesystem;
-            const Share = cap.Plugins.Share;
+        // 1. Header & Title 
+        doc.setFillColor(16, 185, 129); // Green theme
+        doc.rect(0, 0, 210, 40, 'F');
 
-            if (Filesystem && Share) {
-                const pdfDataUri = await html2pdf().set(opt).from(element).output('datauristring');
-                cleanupAfterPDF();
-                return { dataUri: pdfDataUri, title: reportTitle, isNative: true };
+        doc.setFontSize(22);
+        doc.setTextColor(255);
+        doc.setFont("helvetica", "bold");
+        doc.text("SIP Investment Report", 14, 25);
+
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "normal");
+        doc.text("Generated on: " + new Date().toLocaleString('en-IN'), 14, 33);
+
+        // 2. Data Extraction
+        const mon = fields.investment.value || "0";
+        const rat = fields.rate.value || "0";
+        const yrs = fields.years.value || "0";
+        const mat = display.total.textContent || "0";
+        const inv = display.invested.textContent || "0";
+        const ret = display.returns.textContent || "0";
+
+        // 3. Table generation
+        doc.autoTable({
+            startY: 50,
+            head: [['Investment Parameter', 'Detail']],
+            body: [
+                ['Monthly Investment', 'Rs. ' + mon],
+                ['Expected Return Rate', rat + ' %'],
+                ['Time Period', yrs + ' Years'],
+                ['Total Invested Amount', 'Rs. ' + inv],
+                ['Estimated Returns (Wealth Gain)', 'Rs. ' + ret],
+                ['Net Maturity Value', 'Rs. ' + mat]
+            ],
+            theme: 'striped',
+            headStyles: { fillColor: [16, 185, 129], fontSize: 13 },
+            styles: { fontSize: 12, cellPadding: 6 },
+            columnStyles: {
+                0: { fontStyle: 'bold' },
+                1: { halign: 'right' }
             }
-        }
+        });
 
-        const pdfBlob = await html2pdf().set(opt).from(element).output('blob');
-        cleanupAfterPDF();
-        return { blob: pdfBlob, title: reportTitle, isNative: false };
+        // 4. Footer
+        const finalY = doc.lastAutoTable.finalY + 20;
+        doc.setFontSize(10);
+        doc.setTextColor(100);
+        doc.text("Email: sreee.sreejith@gmail.com", 14, finalY);
+        doc.text("* Note: Mutual fund investments are subject to market risks.", 14, finalY + 7);
+
+        // 5. Output Check
+        const cap = window.Capacitor;
+        const isNative = !!(cap && cap.Plugins && (cap.Plugins.Filesystem || cap.Plugins.Share));
+
+        if (isNative) {
+            return { dataUri: doc.output('datauristring'), title: reportTitle, isNative: true };
+        } else {
+            return { blob: doc.output('blob'), title: reportTitle, isNative: false };
+        }
     } catch (err) {
-        cleanupAfterPDF();
+        console.error("SIP PDF Error:", err);
         throw err;
     }
 };
@@ -127,23 +150,25 @@ const handleNativeSave = async (dataUri, filename) => {
         }
 
         const base64Data = dataUri.split(',')[1] || dataUri;
+        // Sanitize filename for Android OS
+        const cleanFilename = filename.replace(/[^a-z0-9.]/gi, '_');
 
         const fileResult = await Filesystem.writeFile({
-            path: filename,
+            path: cleanFilename,
             data: base64Data,
             directory: 'CACHE'
         });
 
         await Share.share({
             title: 'SIP Report',
-            text: 'Sharing my report.',
+            text: 'Sharing my SIP calculation report.',
             url: fileResult.uri,
             dialogTitle: 'Share PDF'
         });
 
     } catch (e) {
         console.error('Native share failed', e);
-        alert('Error: ' + e.message);
+        alert('Share Failed: ' + e.message);
     }
 };
 

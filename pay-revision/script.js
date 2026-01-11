@@ -209,49 +209,96 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.classList.remove('pdf-mode');
     };
 
-    const generatePDFBlob = async () => {
-        // Reset scroll to top before capture
-        window.scrollTo(0, 0);
-
-        const reportTitle = prepareForPDF();
-        const element = document.querySelector('.container');
-
-        // Optimize for A4
-        const opt = {
-            margin: 10,
-            filename: `${reportTitle}.pdf`,
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: {
-                scale: 2,
-                useCORS: true,
-                backgroundColor: '#ffffff',
-                logging: false,
-                scrollY: 0,
-                scrollX: 0
-            },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        };
-
+    const generatePDFResult = async () => {
         try {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const reportTitle = "PayRevision_Report_" + new Date().getTime();
+
+            // 1. Header & Title
+            doc.setFillColor(59, 130, 246); // Blue theme
+            doc.rect(0, 0, 210, 40, 'F');
+
+            doc.setFontSize(22);
+            doc.setTextColor(255);
+            doc.setFont("helvetica", "bold");
+            doc.text("Pay Revision Report", 14, 25);
+
+            doc.setFontSize(10);
+            doc.setFont("helvetica", "normal");
+            doc.text("Generated on: " + new Date().toLocaleString('en-IN'), 14, 33);
+
+            // 2. Data Extraction
+            const bp = document.getElementById('basic-pay-in').value || "0";
+            const oldGross = document.getElementById('res-gross-old').textContent || "0";
+            const newGross = document.getElementById('res-gross-new').textContent || "0";
+            const growth = document.getElementById('growth-val').textContent || "0";
+            const revisedBp = document.getElementById('res-bp-fixed').textContent || "0";
+
+            // 3. Comparison Table
+            doc.setFontSize(14);
+            doc.setTextColor(40);
+            doc.text("Salary Comparison", 14, 50);
+
+            doc.autoTable({
+                startY: 55,
+                head: [['Component', 'Before Revision', 'After Revision']],
+                body: [
+                    ['Monthly Gross Salary', 'Rs. ' + oldGross, 'Rs. ' + newGross],
+                    ['Basic Pay', 'Rs. ' + bp, 'Rs. ' + revisedBp],
+                    ['Salary Growth', '-', growth]
+                ],
+                theme: 'striped',
+                headStyles: { fillColor: [59, 130, 246] },
+                columnStyles: { 1: { halign: 'right' }, 2: { halign: 'right' } }
+            });
+
+            // 4. Detailed Calculation Table
+            doc.text("Detailed Pay Fixation", 14, doc.lastAutoTable.finalY + 15);
+
+            const daMerged = document.getElementById('res-da-merged').textContent || "0";
+            const fitmentP = document.getElementById('fitment-perc').value || "0";
+            const fitmentV = document.getElementById('res-fitment').textContent || "0";
+            const actualTotal = document.getElementById('res-actual-total').textContent || "0";
+            const balDaP = document.getElementById('bal-da-perc').value || "0";
+            const balDaV = document.getElementById('res-bal-da').textContent || "0";
+            const hraP = document.getElementById('hra-perc').value || "0";
+            const hraV = document.getElementById('res-hra-new').textContent || "0";
+
+            doc.autoTable({
+                startY: doc.lastAutoTable.finalY + 20,
+                head: [['Fixation Step', 'Info', 'Amount']],
+                body: [
+                    ['Base Basic Pay', '-', 'Rs. ' + bp],
+                    ['DA Merged', '31 %', 'Rs. ' + daMerged],
+                    ['Fitment Benefit', fitmentP + ' %', 'Rs. ' + fitmentV],
+                    ['Total Calculation', 'Sum', 'Rs. ' + actualTotal],
+                    ['BP Fixed At', 'Round Next 100', 'Rs. ' + revisedBp],
+                    ['Balance DA', balDaP + ' %', 'Rs. ' + balDaV],
+                    ['HRA', hraP + ' %', 'Rs. ' + hraV]
+                ],
+                theme: 'grid',
+                headStyles: { fillColor: [75, 85, 99] },
+                columnStyles: { 2: { halign: 'right' } }
+            });
+
+            // 5. Footer
+            const finalY = doc.lastAutoTable.finalY + 20;
+            doc.setFontSize(10);
+            doc.setTextColor(150);
+            doc.text("Email: sreee.sreejith@gmail.com", 14, finalY);
+
+            // 6. Output Check
             const cap = window.Capacitor;
-            const hasNativePlugins = !!(cap && cap.Plugins && (cap.Plugins.Filesystem || cap.Plugins.Share));
+            const isNative = !!(cap && cap.Plugins && (cap.Plugins.Filesystem || cap.Plugins.Share));
 
-            if (hasNativePlugins) {
-                const Filesystem = cap.Plugins.Filesystem;
-                const Share = cap.Plugins.Share;
-
-                if (Filesystem && Share) {
-                    const pdfDataUri = await html2pdf().set(opt).from(element).output('datauristring');
-                    cleanupAfterPDF();
-                    return { dataUri: pdfDataUri, title: reportTitle, isNative: true };
-                }
+            if (isNative) {
+                return { dataUri: doc.output('datauristring'), title: reportTitle, isNative: true };
+            } else {
+                return { blob: doc.output('blob'), title: reportTitle, isNative: false };
             }
-
-            const pdfBlob = await html2pdf().set(opt).from(element).output('blob');
-            cleanupAfterPDF();
-            return { blob: pdfBlob, title: reportTitle, isNative: false };
         } catch (err) {
-            cleanupAfterPDF();
+            console.error("PayRevision PDF Error:", err);
             throw err;
         }
     };
@@ -263,30 +310,32 @@ document.addEventListener('DOMContentLoaded', () => {
             const Share = cap?.Plugins?.Share;
 
             if (!Filesystem || !Share) {
-                throw new Error("Android native bridge not ready. Please restart the app.");
+                throw new Error("Android native bridge not ready.");
             }
 
             // Clean the base64 data
             const base64Data = dataUri.split(',')[1] || dataUri;
+            // Sanitize filename for Android
+            const cleanFilename = filename.replace(/[^a-z0-9.]/gi, '_');
 
             // Write the file to internal cache
             const fileResult = await Filesystem.writeFile({
-                path: filename,
+                path: cleanFilename,
                 data: base64Data,
                 directory: 'CACHE'
             });
 
             // Immediately open the share sheet
             await Share.share({
-                title: 'Calculation Report',
-                text: 'Sharing my calculation report.',
+                title: 'Pay Revision Report',
+                text: 'Sharing my pay revision report.',
                 url: fileResult.uri,
                 dialogTitle: 'Share PDF'
             });
 
         } catch (e) {
             console.error('Native share failed', e);
-            alert('Error: ' + e.message);
+            alert('Share Failed: ' + e.message);
         }
     };
 
@@ -298,7 +347,7 @@ document.addEventListener('DOMContentLoaded', () => {
             shareBtn.disabled = true;
 
             try {
-                const result = await generatePDFBlob();
+                const result = await generatePDFResult();
 
                 if (result.isNative) {
                     // Native Share

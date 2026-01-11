@@ -196,35 +196,71 @@ const prepareForPDF = () => {
 const cleanupAfterPDF = () => { document.body.classList.remove('pdf-mode'); };
 
 const generatePDFResult = async () => {
-    window.scrollTo(0, 0);
-    const reportTitle = prepareForPDF();
-    const element = document.querySelector('.container');
-    const opt = {
-        margin: 10,
-        filename: `${reportTitle}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', logging: false, scrollY: 0, scrollX: 0 },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    };
-
     try {
-        const cap = window.Capacitor;
-        const hasNativePlugins = !!(cap && cap.Plugins && (cap.Plugins.Filesystem || cap.Plugins.Share));
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        const reportTitle = "EMI_Report_" + new Date().getTime();
 
-        if (hasNativePlugins) {
-            const Filesystem = cap.Plugins.Filesystem;
-            const Share = cap.Plugins.Share;
-            if (Filesystem && Share) {
-                const pdfDataUri = await html2pdf().set(opt).from(element).output('datauristring');
-                cleanupAfterPDF();
-                return { dataUri: pdfDataUri, title: reportTitle, isNative: true };
+        // 1. Header with styling
+        doc.setFillColor(63, 81, 181); // Indigo color
+        doc.rect(0, 0, 210, 40, 'F');
+
+        doc.setFontSize(24);
+        doc.setTextColor(255, 255, 255);
+        doc.setFont("helvetica", "bold");
+        doc.text("EMI Calculation Report", 14, 25);
+
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "normal");
+        doc.text("Generated on: " + new Date().toLocaleString('en-IN'), 14, 33);
+
+        // 2. Data extraction
+        const P = fields.principal.value || "0";
+        const R = fields.rate.value || "0";
+        const T = fields.tenure.value || "0";
+        const E = fields.emi.value || "0";
+        const totalI = totalInterestEl.textContent || "0";
+        const totalP = totalPaymentEl.textContent || "0";
+
+        // 3. Table generation
+        doc.autoTable({
+            startY: 50,
+            head: [['Description', 'Value']],
+            body: [
+                ['Principal Amount', 'Rs. ' + P],
+                ['Interest Rate', R + ' %'],
+                ['Tenure', T + ' Years'],
+                ['Monthly EMI', 'Rs. ' + E],
+                ['Total Interest', 'Rs. ' + totalI],
+                ['Total Payment', 'Rs. ' + totalP]
+            ],
+            theme: 'grid',
+            headStyles: { fillColor: [63, 81, 181], fontSize: 13 },
+            styles: { fontSize: 12, cellPadding: 6 },
+            columnStyles: {
+                0: { fontStyle: 'bold', fillColor: [245, 245, 245] },
+                1: { halign: 'right' }
             }
+        });
+
+        // 4. Footer
+        const finalY = doc.lastAutoTable.finalY + 20;
+        doc.setFontSize(10);
+        doc.setTextColor(100, 100, 100);
+        doc.text("Email: sreee.sreejith@gmail.com", 14, finalY);
+        doc.text("* This is a computer-generated report based on standard EMI formulas.", 14, finalY + 7);
+
+        // 5. Native Share Check
+        const cap = window.Capacitor;
+        const isNative = !!(cap && cap.Plugins && (cap.Plugins.Filesystem || cap.Plugins.Share));
+
+        if (isNative) {
+            return { dataUri: doc.output('datauristring'), title: reportTitle, isNative: true };
+        } else {
+            return { blob: doc.output('blob'), title: reportTitle, isNative: false };
         }
-        const pdfBlob = await html2pdf().set(opt).from(element).output('blob');
-        cleanupAfterPDF();
-        return { blob: pdfBlob, title: reportTitle, isNative: false };
     } catch (err) {
-        cleanupAfterPDF();
+        console.error("Professional PDF Error:", err);
         throw err;
     }
 };
@@ -240,11 +276,24 @@ const handleNativeSave = async (dataUri, filename) => {
         }
 
         const base64Data = dataUri.split(',')[1] || dataUri;
-        const fileResult = await Filesystem.writeFile({ path: filename, data: base64Data, directory: 'CACHE' });
-        await Share.share({ title: 'EMI Report', text: 'Sharing my report.', url: fileResult.uri, dialogTitle: 'Share PDF' });
+        // Clean filename for Android
+        const cleanFilename = filename.replace(/[^a-z0-9.]/gi, '_');
+
+        const fileResult = await Filesystem.writeFile({
+            path: cleanFilename,
+            data: base64Data,
+            directory: 'CACHE'
+        });
+
+        await Share.share({
+            title: 'EMI Report',
+            text: 'Sharing my EMI calculation report.',
+            url: fileResult.uri,
+            dialogTitle: 'Share PDF'
+        });
     } catch (e) {
         console.error('Native share failed', e);
-        alert('Error: ' + e.message);
+        alert('Share Failed: ' + e.message);
     }
 };
 

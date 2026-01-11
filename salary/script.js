@@ -208,46 +208,114 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const generatePDFResult = async () => {
-        window.scrollTo(0, 0);
-        const reportTitle = prepareForPDF();
-        const element = document.querySelector('.container');
-
-        // Optimize for A4
-        const opt = {
-            margin: 10,
-            filename: `${reportTitle}.pdf`,
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: {
-                scale: 2,
-                useCORS: true,
-                backgroundColor: '#ffffff',
-                logging: false,
-                scrollY: 0,
-                scrollX: 0
-            },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        };
-
         try {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const reportTitle = "Salary_Report_" + new Date().getTime();
+
+            // 1. Header with styling
+            doc.setFillColor(16, 185, 129); // Green color from theme
+            doc.rect(0, 0, 210, 40, 'F');
+
+            doc.setFontSize(22);
+            doc.setTextColor(255);
+            doc.setFont("helvetica", "bold");
+            doc.text("Salary Calculation Report", 14, 25);
+
+            doc.setFontSize(10);
+            doc.setFont("helvetica", "normal");
+            doc.text("Generated on: " + new Date().toLocaleString('en-IN'), 14, 33);
+
+            // 2. Data Extraction
+            const bp = document.getElementById('basic-pay').value || "0";
+            const daP = document.getElementById('da-perc').value || "0";
+            const daV = document.getElementById('da-val').innerText || "0";
+            const hraP = document.getElementById('hra-perc').value || "0";
+            const hraV = document.getElementById('hra-val').innerText || "0";
+            const daPendP = document.getElementById('da-pending-perc').value || "0";
+            const daPendV = document.getElementById('da-pending-val').innerText || "0";
+            const otherEarn = document.getElementById('other-earnings').value || "0";
+
+            const gross = document.getElementById('gross-salary-val').innerText || "0";
+            const deduct = document.getElementById('total-deduction-val').innerText || "0";
+            const net = document.getElementById('net-salary-val').innerText || "0";
+
+            // 3. Earnings Table
+            doc.setFontSize(14);
+            doc.setTextColor(40);
+            doc.text("Earnings Details", 14, 50);
+
+            doc.autoTable({
+                startY: 55,
+                head: [['Component', 'Percentage / Info', 'Amount']],
+                body: [
+                    ['Basic Pay', '-', 'Rs. ' + bp],
+                    ['DA', daP + ' %', 'Rs. ' + daV],
+                    ['HRA', hraP + ' %', 'Rs. ' + hraV],
+                    ['DA Pending', daPendP + ' %', 'Rs. ' + daPendV],
+                    ['Other Earnings', '-', 'Rs. ' + otherEarn]
+                ],
+                theme: 'striped',
+                headStyles: { fillColor: [16, 185, 129] },
+                columnStyles: { 2: { halign: 'right' } }
+            });
+
+            // 4. Deductions data extraction for table
+            const d1 = document.getElementById('gpf-sub').value || "0";
+            const d2 = document.getElementById('gis').value || "0";
+            const d3 = document.getElementById('sli').value || "0";
+            const d4 = document.getElementById('medisep').value || "0";
+            const d5 = document.getElementById('sli-loan').value || "0";
+            const d6 = document.getElementById('other-deductions').value || "0";
+
+            doc.text("Deductions Details", 14, doc.lastAutoTable.finalY + 15);
+            doc.autoTable({
+                startY: doc.lastAutoTable.finalY + 20,
+                head: [['Component', 'Amount']],
+                body: [
+                    ['GPF Subscription', 'Rs. ' + d1],
+                    ['GIS', 'Rs. ' + d2],
+                    ['SLI', 'Rs. ' + d3],
+                    ['Medisep', 'Rs. ' + d4],
+                    ['SLI Loan', 'Rs. ' + d5],
+                    ['Other Deductions', 'Rs. ' + d6]
+                ],
+                theme: 'striped',
+                headStyles: { fillColor: [239, 68, 68] }, // Red for deductions
+                columnStyles: { 1: { halign: 'right' } }
+            });
+
+            // 5. Final Summary Table
+            doc.text("Final Summary", 14, doc.lastAutoTable.finalY + 15);
+            doc.autoTable({
+                startY: doc.lastAutoTable.finalY + 20,
+                body: [
+                    ['Gross Salary', 'Rs. ' + gross],
+                    ['Total Deductions', 'Rs. ' + deduct],
+                    ['Net Salary', 'Rs. ' + net]
+                ],
+                theme: 'grid',
+                styles: { fontSize: 12, fontStyle: 'bold' },
+                columnStyles: { 1: { halign: 'right' } }
+            });
+
+            // 6. Footer
+            const finalY = doc.lastAutoTable.finalY + 20;
+            doc.setFontSize(10);
+            doc.setTextColor(150);
+            doc.text("Email: sreee.sreejith@gmail.com", 14, finalY);
+
+            // 7. Output Management
             const cap = window.Capacitor;
-            const hasNativePlugins = !!(cap && cap.Plugins && (cap.Plugins.Filesystem || cap.Plugins.Share));
+            const isNative = !!(cap && cap.Plugins && (cap.Plugins.Filesystem || cap.Plugins.Share));
 
-            if (hasNativePlugins) {
-                const Filesystem = cap.Plugins.Filesystem;
-                const Share = cap.Plugins.Share;
-
-                if (Filesystem && Share) {
-                    const pdfDataUri = await html2pdf().set(opt).from(element).output('datauristring');
-                    cleanupAfterPDF();
-                    return { dataUri: pdfDataUri, title: reportTitle, isNative: true };
-                }
+            if (isNative) {
+                return { dataUri: doc.output('datauristring'), title: reportTitle, isNative: true };
+            } else {
+                return { blob: doc.output('blob'), title: reportTitle, isNative: false };
             }
-
-            const pdfBlob = await html2pdf().set(opt).from(element).output('blob');
-            cleanupAfterPDF();
-            return { blob: pdfBlob, title: reportTitle, isNative: false };
         } catch (err) {
-            cleanupAfterPDF();
+            console.error("Salary PDF Error:", err);
             throw err;
         }
     };
@@ -263,23 +331,25 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const base64Data = dataUri.split(',')[1] || dataUri;
+            // Ensure filename is safe for Android OS
+            const cleanFilename = filename.replace(/[^a-z0-9.]/gi, '_');
 
             const fileResult = await Filesystem.writeFile({
-                path: filename,
+                path: cleanFilename,
                 data: base64Data,
                 directory: 'CACHE'
             });
 
             await Share.share({
                 title: 'Salary Report',
-                text: 'Sharing my report.',
+                text: 'Sharing my salary calculation report.',
                 url: fileResult.uri,
                 dialogTitle: 'Share PDF'
             });
 
         } catch (e) {
             console.error('Native share failed', e);
-            alert('Error: ' + e.message);
+            alert('Share Failed: ' + e.message);
         }
     };
 

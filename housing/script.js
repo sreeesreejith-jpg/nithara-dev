@@ -131,48 +131,92 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const generatePDFResult = async () => {
-        // Reset scroll to top before capture
-        window.scrollTo(0, 0);
-
-        const reportTitle = prepareForPDF();
-        const element = document.querySelector('.container');
-
-        // Optimize for A4
-        const opt = {
-            margin: 10,
-            filename: `${reportTitle}.pdf`,
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: {
-                scale: 2,
-                useCORS: true,
-                backgroundColor: '#ffffff',
-                logging: false,
-                scrollY: 0,
-                scrollX: 0
-            },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        };
-
         try {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const reportTitle = "Housing_Report_" + new Date().getTime();
+
+            // 1. Header & Title
+            doc.setFillColor(99, 102, 241); // Indigo theme
+            doc.rect(0, 0, 210, 40, 'F');
+
+            doc.setFontSize(22);
+            doc.setTextColor(255);
+            doc.setFont("helvetica", "bold");
+            doc.text("Housing Loan Report", 14, 25);
+
+            doc.setFontSize(10);
+            doc.setFont("helvetica", "normal");
+            doc.text("Generated on: " + new Date().toLocaleString('en-IN'), 14, 33);
+
+            // 2. Data Extraction
+            const cents = document.getElementById('land-area').value || "0";
+            const costCent = document.getElementById('cost-per-cent').value || "0";
+            const sqft = document.getElementById('built-up-area').value || "0";
+            const costSqft = document.getElementById('cost-per-sqft').value || "0";
+            const other = document.getElementById('other-expenses').value || "0";
+            const netSalary = document.getElementById('net-salary').value || "0";
+            const rent = document.getElementById('rent').value || "0";
+
+            const emi = document.getElementById('monthly-emi').textContent || "0";
+            const totalLoan = document.getElementById('total-principal-bottom').textContent || "0";
+            const balAfterEmi = document.getElementById('balance-salary').value || "0";
+            const balAfterRent = document.getElementById('balance-after-rent').value || "0";
+            const excess = document.getElementById('final-balance').value || "0";
+
+            // 3. Project Details Table
+            doc.setFontSize(14);
+            doc.setTextColor(40);
+            doc.text("Project & Loan Details", 14, 50);
+
+            doc.autoTable({
+                startY: 55,
+                head: [['Description', 'Detail', 'Amount']],
+                body: [
+                    ['Plot Purchase', cents + ' Cents @ ' + costCent + '/Cent', '-'],
+                    ['Construction', sqft + ' Sq.Ft @ ' + costSqft + '/Sq.Ft', '-'],
+                    ['Other Expenses', '-', 'Rs. ' + other],
+                    ['Total Estimated Loan', 'Plot + Build + Other', 'Rs. ' + totalLoan],
+                    ['Proposed EMI', '30 Years @ 7.5%', 'Rs. ' + emi]
+                ],
+                theme: 'striped',
+                headStyles: { fillColor: [99, 102, 241] },
+                columnStyles: { 2: { halign: 'right' } }
+            });
+
+            // 4. Financial Feasibility Table
+            doc.text("Financial Feasibility", 14, doc.lastAutoTable.finalY + 15);
+            doc.autoTable({
+                startY: doc.lastAutoTable.finalY + 20,
+                body: [
+                    ['Current Net Salary', 'Rs. ' + netSalary],
+                    ['Current Rent Payment', 'Rs. ' + rent],
+                    ['Balance After EMI', 'Rs. ' + balAfterEmi],
+                    ['Balance After Rent', 'Rs. ' + balAfterRent],
+                    ['Excess/Buffer for Loan', 'Rs. ' + excess]
+                ],
+                theme: 'grid',
+                styles: { fontSize: 11, fontStyle: 'bold' },
+                columnStyles: { 1: { halign: 'right' } }
+            });
+
+            // 5. Footer
+            const finalY = doc.lastAutoTable.finalY + 20;
+            doc.setFontSize(10);
+            doc.setTextColor(150);
+            doc.text("Email: sreee.sreejith@gmail.com", 14, finalY);
+
+            // 6. Output Management
             const cap = window.Capacitor;
-            const hasNativePlugins = !!(cap && cap.Plugins && (cap.Plugins.Filesystem || cap.Plugins.Share));
+            const isNative = !!(cap && cap.Plugins && (cap.Plugins.Filesystem || cap.Plugins.Share));
 
-            if (hasNativePlugins) {
-                const Filesystem = cap.Plugins.Filesystem;
-                const Share = cap.Plugins.Share;
-
-                if (Filesystem && Share) {
-                    const pdfDataUri = await html2pdf().set(opt).from(element).output('datauristring');
-                    cleanupAfterPDF();
-                    return { dataUri: pdfDataUri, title: reportTitle, isNative: true };
-                }
+            if (isNative) {
+                return { dataUri: doc.output('datauristring'), title: reportTitle, isNative: true };
+            } else {
+                return { blob: doc.output('blob'), title: reportTitle, isNative: false };
             }
-
-            const pdfBlob = await html2pdf().set(opt).from(element).output('blob');
-            cleanupAfterPDF();
-            return { blob: pdfBlob, title: reportTitle, isNative: false };
         } catch (err) {
-            cleanupAfterPDF();
+            console.error("Housing PDF Error:", err);
             throw err;
         }
     };
@@ -188,23 +232,25 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const base64Data = dataUri.split(',')[1] || dataUri;
+            // Sanitize filename for Android OS
+            const cleanFilename = filename.replace(/[^a-z0-9.]/gi, '_');
 
             const fileResult = await Filesystem.writeFile({
-                path: filename,
+                path: cleanFilename,
                 data: base64Data,
                 directory: 'CACHE'
             });
 
             await Share.share({
                 title: 'Housing Loan Report',
-                text: 'Sharing my report.',
+                text: 'Sharing my housing loan calculation report.',
                 url: fileResult.uri,
                 dialogTitle: 'Share PDF'
             });
 
         } catch (e) {
             console.error('Native share failed', e);
-            alert('Error: ' + e.message);
+            alert('Share Failed: ' + e.message);
         }
     };
 

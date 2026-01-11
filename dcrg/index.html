@@ -30,7 +30,8 @@
     <script src="../capacitor.js"></script>
     <script src="../capacitor-handler.js"></script>
     <!-- PDF Generation Library -->
-    <script src="../js/html2pdf.bundle.min.js"></script>
+    <script src="../js/jspdf.umd.min.js"></script>
+    <script src="../js/jspdf.plugin.autotable.min.js"></script>
 </head>
 
 <body>
@@ -122,10 +123,14 @@
                         <small class="detail-desc">(Avg Pay / 2) × Factor</small>
                     </div>
                     <div class="detail-item">
-                        <span class="detail-label">Reduced Pension</span>
+                        <span class="detail-label">Reduced Pension (60%)</span>
                         <span class="detail-value text-success" id="calcReducedPension">0</span>
                         <div class="detail-step" id="stepReduced"></div>
-                        <small class="detail-desc">60% of Full (Basic) Pension</small>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Commutable Pension (40%)</span>
+                        <span class="detail-value" id="calcCommutablePension">0</span>
+                        <small class="detail-desc">Portion for Lump Sum Calculation</small>
                     </div>
 
                     <!-- Lump Sum Group -->
@@ -134,7 +139,7 @@
                         <span class="detail-label">Pension Commutation</span>
                         <span class="detail-value" id="calcCommutation">0</span>
                         <div class="detail-step" id="stepCommutation"></div>
-                        <small class="detail-desc">40% Pension × Commutation Factor (<span id="dispCommFactor"
+                        <small class="detail-desc">Commutable Portion × Factor (<span id="dispCommFactor"
                                 class="highlight-factor">Factor</span>) × 12</small>
                     </div>
                     <div class="detail-item">
