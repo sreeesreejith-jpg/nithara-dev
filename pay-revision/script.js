@@ -292,50 +292,38 @@ document.addEventListener('DOMContentLoaded', () => {
             const cap = window.Capacitor;
             const isNative = !!(cap && cap.Plugins && (cap.Plugins.Filesystem || cap.Plugins.Share));
 
-            if (isNative) {
-                return { dataUri: doc.output('datauristring'), title: reportTitle, isNative: true };
-            } else {
-                return { blob: doc.output('blob'), title: reportTitle, isNative: false };
-            }
+            return { blob: doc.output('blob'), title: reportTitle };
         } catch (err) {
             console.error("PayRevision PDF Error:", err);
             throw err;
         }
     };
 
-    const handleNativeSave = async (dataUri, filename) => {
+    const handleNativeShare = async (blob, filename) => {
         try {
             const cap = window.Capacitor;
-            const Filesystem = cap?.Plugins?.Filesystem;
-            const Share = cap?.Plugins?.Share;
+            const safeFilename = filename.replace(/[^a-z0-9.]/gi, '_');
 
-            if (!Filesystem || !Share) {
-                throw new Error("Android native bridge not ready.");
-            }
+            const reader = new FileReader();
+            const base64Data = await new Promise((resolve, reject) => {
+                reader.onload = () => resolve(reader.result.split(',')[1]);
+                reader.onerror = reject;
+                reader.readAsDataURL(blob);
+            });
 
-            // Clean the base64 data
-            const base64Data = dataUri.split(',')[1] || dataUri;
-            // Sanitize filename for Android
-            const cleanFilename = filename.replace(/[^a-z0-9.]/gi, '_');
-
-            // Write the file to internal cache
-            const fileResult = await Filesystem.writeFile({
-                path: cleanFilename,
+            const fileResult = await cap.Plugins.Filesystem.writeFile({
+                path: safeFilename,
                 data: base64Data,
                 directory: 'CACHE'
             });
 
-            // Immediately open the share sheet
-            await Share.share({
+            await cap.Plugins.Share.share({
                 title: 'Pay Revision Report',
-                text: 'Sharing my pay revision report.',
-                url: fileResult.uri,
-                dialogTitle: 'Share PDF'
+                url: fileResult.uri
             });
-
         } catch (e) {
             console.error('Native share failed', e);
-            alert('Share Failed: ' + e.message);
+            throw e;
         }
     };
 
@@ -343,33 +331,36 @@ document.addEventListener('DOMContentLoaded', () => {
     if (shareBtn) {
         shareBtn.addEventListener('click', async () => {
             const originalText = shareBtn.innerHTML;
-            shareBtn.innerHTML = "<span>⏳</span> Preparing PDF...";
+            shareBtn.innerHTML = "<span>⏳</span> Generating...";
             shareBtn.disabled = true;
 
             try {
                 const result = await generatePDFResult();
+                const fileName = `${result.title}.pdf`;
+                const cap = window.Capacitor;
+                const isNative = !!(cap && cap.Plugins && cap.Plugins.Filesystem && cap.Plugins.Share);
 
-                if (result.isNative) {
-                    // Native Share
-                    await handleNativeSave(result.dataUri, `${result.title}.pdf`);
-                } else if (navigator.share) {
-                    // Browser Share (Web fall back)
-                    const file = new File([result.blob], `${result.title}.pdf`, { type: 'application/pdf' });
-                    await navigator.share({
-                        files: [file],
-                        title: 'Calculation Report',
-                        text: 'Sharing my calculation report.'
-                    });
+                if (isNative) {
+                    await handleNativeShare(result.blob, fileName);
                 } else {
-                    // Last resort: Standard download
-                    const link = document.createElement('a');
-                    link.href = URL.createObjectURL(result.blob);
-                    link.download = `${result.title}.pdf`;
-                    link.click();
+                    const file = new File([result.blob], fileName, { type: 'application/pdf' });
+                    if (navigator.canShare && navigator.share && navigator.canShare({ files: [file] })) {
+                        await navigator.share({
+                            files: [file],
+                            title: 'Pay Revision Report',
+                        });
+                    } else {
+                        const url = URL.createObjectURL(result.blob);
+                        const link = document.createElement('a');
+                        link.href = url;
+                        link.download = fileName;
+                        link.click();
+                        setTimeout(() => URL.revokeObjectURL(url), 100);
+                    }
                 }
             } catch (err) {
                 console.error(err);
-                alert("Sharing failed. Please try again.");
+                alert("Please try again.");
             } finally {
                 shareBtn.innerHTML = originalText;
                 shareBtn.disabled = false;

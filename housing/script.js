@@ -210,47 +210,38 @@ document.addEventListener('DOMContentLoaded', () => {
             const cap = window.Capacitor;
             const isNative = !!(cap && cap.Plugins && (cap.Plugins.Filesystem || cap.Plugins.Share));
 
-            if (isNative) {
-                return { dataUri: doc.output('datauristring'), title: reportTitle, isNative: true };
-            } else {
-                return { blob: doc.output('blob'), title: reportTitle, isNative: false };
-            }
+            return { blob: doc.output('blob'), title: reportTitle };
         } catch (err) {
             console.error("Housing PDF Error:", err);
             throw err;
         }
     };
 
-    const handleNativeSave = async (dataUri, filename) => {
+    const handleNativeShare = async (blob, filename) => {
         try {
             const cap = window.Capacitor;
-            const Filesystem = cap?.Plugins?.Filesystem;
-            const Share = cap?.Plugins?.Share;
+            const safeFilename = filename.replace(/[^a-z0-9.]/gi, '_');
 
-            if (!Filesystem || !Share) {
-                throw new Error("Android native bridge not ready.");
-            }
+            const reader = new FileReader();
+            const base64Data = await new Promise((resolve, reject) => {
+                reader.onload = () => resolve(reader.result.split(',')[1]);
+                reader.onerror = reject;
+                reader.readAsDataURL(blob);
+            });
 
-            const base64Data = dataUri.split(',')[1] || dataUri;
-            // Sanitize filename for Android OS
-            const cleanFilename = filename.replace(/[^a-z0-9.]/gi, '_');
-
-            const fileResult = await Filesystem.writeFile({
-                path: cleanFilename,
+            const fileResult = await cap.Plugins.Filesystem.writeFile({
+                path: safeFilename,
                 data: base64Data,
                 directory: 'CACHE'
             });
 
-            await Share.share({
+            await cap.Plugins.Share.share({
                 title: 'Housing Loan Report',
-                text: 'Sharing my housing loan calculation report.',
-                url: fileResult.uri,
-                dialogTitle: 'Share PDF'
+                url: fileResult.uri
             });
-
         } catch (e) {
             console.error('Native share failed', e);
-            alert('Share Failed: ' + e.message);
+            throw e;
         }
     };
 
@@ -258,29 +249,36 @@ document.addEventListener('DOMContentLoaded', () => {
     if (shareBtn) {
         shareBtn.addEventListener('click', async () => {
             const originalText = shareBtn.innerHTML;
-            shareBtn.innerHTML = "<span>⏳</span> Preparing PDF...";
+            shareBtn.innerHTML = "<span>⏳</span> Generating...";
             shareBtn.disabled = true;
 
             try {
                 const result = await generatePDFResult();
-                if (result.isNative) {
-                    await handleNativeSave(result.dataUri, `${result.title}.pdf`);
-                } else if (navigator.share) {
-                    const file = new File([result.blob], `${result.title}.pdf`, { type: 'application/pdf' });
-                    await navigator.share({
-                        files: [file],
-                        title: 'Housing Loan Report',
-                        text: 'Sharing my housing loan calculation report.'
-                    });
+                const fileName = `${result.title}.pdf`;
+                const cap = window.Capacitor;
+                const isNative = !!(cap && cap.Plugins && cap.Plugins.Filesystem && cap.Plugins.Share);
+
+                if (isNative) {
+                    await handleNativeShare(result.blob, fileName);
                 } else {
-                    const link = document.createElement('a');
-                    link.href = URL.createObjectURL(result.blob);
-                    link.download = `${result.title}.pdf`;
-                    link.click();
+                    const file = new File([result.blob], fileName, { type: 'application/pdf' });
+                    if (navigator.canShare && navigator.share && navigator.canShare({ files: [file] })) {
+                        await navigator.share({
+                            files: [file],
+                            title: 'Housing Loan Report',
+                        });
+                    } else {
+                        const url = URL.createObjectURL(result.blob);
+                        const link = document.createElement('a');
+                        link.href = url;
+                        link.download = fileName;
+                        link.click();
+                        setTimeout(() => URL.revokeObjectURL(url), 100);
+                    }
                 }
             } catch (err) {
                 console.error(err);
-                alert("Sharing failed. Try again.");
+                alert("Please try again.");
             } finally {
                 shareBtn.innerHTML = originalText;
                 shareBtn.disabled = false;
