@@ -452,7 +452,9 @@ body {
 
     .report-header {
         display: block !important;
-        border-bottom: 2px solid black; margin-bottom: 10px !important; padding-bottom: 5px !important; 
+        border-bottom: 2px solid black;
+        margin-bottom: 10px !important;
+        padding-bottom: 5px !important;
     }
 
     .card,
@@ -484,7 +486,7 @@ body.pdf-mode {
     background: white !important;
     color: black !important;
     width: 760px !important;
-    padding: 12px !important; 
+    padding: 12px !important;
 }
 
 body.pdf-mode * {
@@ -505,11 +507,6 @@ body.pdf-mode .container {
     margin: 0 !important;
 }
 
-body.pdf-mode .text-success,
-body.pdf-mode .text-accent,
-body.pdf-mode .highlight-factor {
-    color: black !important;
-}
 
 body.pdf-mode .detail-value {
     color: black !important;
@@ -534,7 +531,9 @@ body.pdf-mode .report-header {
     display: block !important;
     text-align: center;
     margin-bottom: 25px;
-    border-bottom: 2px solid black; margin-bottom: 10px !important; padding-bottom: 5px !important; 
+    border-bottom: 2px solid black;
+    margin-bottom: 10px !important;
+    padding-bottom: 5px !important;
     padding-bottom: 10px;
 }
 
@@ -780,4 +779,83 @@ body.pdf-mode .detail-item {
 
 .text-success {
     color: #34d399 !important;
+}
+
+/* Final PDF Color Overrides - High Specificity to beat !important rules */
+body.pdf-mode .text-success,
+body.pdf-mode .text-accent,
+body.pdf-mode .text-danger,
+body.pdf-mode .text-primary,
+body.pdf-mode .value,
+body.pdf-mode .detail-value,
+body.pdf-mode .calculated-value,
+body.pdf-mode .pulse,
+body.pdf-mode .highlight,
+body.pdf-mode span[class*="text-"],
+body.pdf-mode span[id*="val"] {
+    color: #000000 !important;
+    -webkit-text-fill-color: #000000 !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+@media print {
+
+    .text-success,
+    .text-accent,
+    .text-danger,
+    .text-primary,
+    .value,
+    .detail-value,
+    .calculated-value,
+    .pulse,
+    .highlight,
+    span[class*="text-"],
+    span[id*="val"] {
+        color: #000000 !important;
+        -webkit-text-fill-color: #000000 !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+}
+
+/* Layout Fix for PDF rows */
+body.pdf-mode .detail-item,
+body.pdf-mode .result-row,
+body.pdf-mode .revision-row {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    align-items: center !important;
+    border-bottom: 1px solid #eee !important;
+    padding: 10px 0 !important;
+}
+
+body.pdf-mode .detail-label,
+body.pdf-mode .result-row .label {
+    flex: 1 !important;
+    width: auto !important;
+    text-align: left !important;
+    color: black !important;
+}
+
+body.pdf-mode .detail-value,
+body.pdf-mode .result-row .value {
+    flex: 0 0 auto !important;
+    width: auto !important;
+    min-width: 120px !important;
+    text-align: right !important;
+    color: black !important;
+    font-weight: bold !important;
+}
+
+body.pdf-mode .detail-step,
+body.pdf-mode .detail-desc {
+    width: 100% !important;
+    text-align: right !important;
+    color: #666 !important;
+    font-size: 0.8rem !important;
+    margin-top: 4px !important;
 }

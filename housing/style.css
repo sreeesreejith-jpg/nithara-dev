@@ -559,3 +559,31 @@ body.pdf-mode input {
 body.pdf-mode .row {
     border-bottom: 1px solid #eee !important;
 }
+/* Final PDF Color Overrides - High Specificity to beat !important rules */
+body.pdf-mode .text-success, 
+body.pdf-mode .text-accent, 
+body.pdf-mode .text-danger, 
+body.pdf-mode .text-primary,
+body.pdf-mode .value, 
+body.pdf-mode .detail-value,
+body.pdf-mode .calculated-value,
+body.pdf-mode .pulse,
+body.pdf-mode .highlight,
+body.pdf-mode span[class*="text-"],
+body.pdf-mode span[id*="val"] {
+    color: #000000 !important;
+    -webkit-text-fill-color: #000000 !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+@media print {
+    .text-success, .text-accent, .text-danger, .text-primary,
+    .value, .detail-value, .calculated-value, .pulse, .highlight,
+    span[class*="text-"], span[id*="val"] {
+        color: #000000 !important;
+        -webkit-text-fill-color: #000000 !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+}
