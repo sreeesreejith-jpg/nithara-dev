@@ -396,7 +396,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: [
                     ['Full Basic Pension', 'Rs. ' + bPension, stepPen],
                     ['Reduced Pension (60%)', 'Rs. ' + rPension, stepRed],
-                    ['Commutable Pension (40%)', 'Rs. ' + cPension, bPension + ' × 40%']
+                    ['Commutable Pension (40%)', 'Rs. ' + cPension, 'Portion for Lump Sum']
                 ],
                 theme: 'grid',
                 headStyles: { fillColor: [16, 185, 129] },
@@ -416,7 +416,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 startY: doc.lastAutoTable.finalY + 17,
                 head: [['Description', 'Amount', 'Formula / Step']],
                 body: [
-                    ['Pension Commutation', 'Rs. ' + commute, stepCom],
+                    ['Pension Commutation', 'Rs. ' + commute, stepCom + ' (Commutable Portion × Factor × 12)'],
                     ['DCRG Amount', 'Rs. ' + dcrgAmt, stepDcrgVal],
                     ['TOTAL LUMP SUM', 'Rs. ' + totalLump, 'Commutation + DCRG']
                 ],
@@ -429,7 +429,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const finalY = doc.lastAutoTable.finalY + 15;
             doc.setFontSize(10);
             doc.setTextColor(100);
-            doc.text("Email: sreee.sreejith@gmail.com", 14, finalY);
+            doc.text("* Computed based on Kerala Government Pension Rules.", 14, finalY);
+            doc.text("Email: sreee.sreejith@gmail.com", 14, finalY + 7);
 
             cleanupAfterPDF(); // Cleanup UI changes if any
 
