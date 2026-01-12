@@ -262,7 +262,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     ['DA', daP + ' %', 'Rs. ' + daV],
                     ['HRA', hraP + ' %', 'Rs. ' + hraV],
                     ['DA Pending', daPendP + ' %', 'Rs. ' + daPendV],
-                    ['Other Earnings', '-', 'Rs. ' + otherEarn]
+                    ['Other Earnings', '-', 'Rs. ' + otherEarn],
+                    ['Gross Salary', '-', 'Rs. ' + gross]
                 ],
                 theme: 'striped',
                 headStyles: { fillColor: [16, 185, 129] },
@@ -287,7 +288,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     ['SLI', 'Rs. ' + d3],
                     ['Medisep', 'Rs. ' + d4],
                     ['SLI Loan', 'Rs. ' + d5],
-                    ['Other Deductions', 'Rs. ' + d6]
+                    ['Other Deductions', 'Rs. ' + d6],
+                    ['Total Deductions', 'Rs. ' + deduct]
                 ],
                 theme: 'striped',
                 headStyles: { fillColor: [239, 68, 68] }, // Red for deductions

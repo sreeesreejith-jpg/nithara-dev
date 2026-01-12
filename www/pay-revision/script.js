@@ -243,16 +243,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 startY: 55,
                 head: [['Component', 'Before Revision', 'After Revision']],
                 body: [
-                    ['Monthly Gross Salary', 'Rs. ' + oldGross, 'Rs. ' + newGross],
                     ['Basic Pay', 'Rs. ' + bp, 'Rs. ' + revisedBp],
+                    ['Monthly Gross Salary', 'Rs. ' + oldGross, 'Rs. ' + newGross],
                     ['Salary Growth', '-', growth]
                 ],
                 theme: 'striped',
-                headStyles: { fillColor: [59, 130, 246] },
-                columnStyles: { 1: { halign: 'right' }, 2: { halign: 'right' } }
+                headStyles: { fillColor: [59, 130, 246], halign: 'left' },
+                columnStyles: {
+                    0: { halign: 'left' },
+                    1: { halign: 'right' },
+                    2: { halign: 'right' }
+                },
+                didParseCell: function (data) {
+                    if (data.section === 'head' && data.column.index > 0) {
+                        data.cell.styles.halign = 'right';
+                    }
+                }
             });
 
-            // 4. Detailed Calculation Table
+            // 4. Detailed Pay Fixation
             doc.text("Detailed Pay Fixation", 14, doc.lastAutoTable.finalY + 15);
 
             const daMerged = document.getElementById('res-da-merged').textContent || "0";
@@ -274,10 +283,34 @@ document.addEventListener('DOMContentLoaded', () => {
                     ['Total Calculation', 'Sum', 'Rs. ' + actualTotal],
                     ['BP Fixed At', 'Round Next 100', 'Rs. ' + revisedBp],
                     ['Balance DA', balDaP + ' %', 'Rs. ' + balDaV],
-                    ['HRA', hraP + ' %', 'Rs. ' + hraV]
+                    ['HRA', hraP + ' %', 'Rs. ' + hraV],
+                    ['Gross Salary', '-', 'Rs. ' + newGross]
                 ],
                 theme: 'grid',
                 headStyles: { fillColor: [75, 85, 99] },
+                columnStyles: { 2: { halign: 'right' } }
+            });
+
+            // 5. Before Revision Details
+            doc.text("Before Revision Details", 14, doc.lastAutoTable.finalY + 15);
+            const daOld = document.getElementById('res-da-old').textContent || "0";
+            const daPendP = document.getElementById('da-pend-perc').value || "0";
+            const daPendV = document.getElementById('res-da-pend').textContent || "0";
+            const hraOldP = document.getElementById('hra-old-perc').value || "0";
+            const hraOldV = document.getElementById('res-hra-old').textContent || "0";
+
+            doc.autoTable({
+                startY: doc.lastAutoTable.finalY + 20,
+                head: [['Component', 'Info', 'Amount']],
+                body: [
+                    ['Basic Pay', '-', 'Rs. ' + bp],
+                    ['Dearness Allowance (DA)', '22%', 'Rs. ' + daOld],
+                    ['DA Pending', daPendP + '%', 'Rs. ' + daPendV],
+                    ['House Rent Allowance (HRA)', hraOldP + '%', 'Rs. ' + hraOldV],
+                    ['Gross Salary', '-', 'Rs. ' + oldGross]
+                ],
+                theme: 'grid',
+                headStyles: { fillColor: [100, 116, 139] },
                 columnStyles: { 2: { halign: 'right' } }
             });
 
