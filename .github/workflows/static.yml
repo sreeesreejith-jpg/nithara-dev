@@ -33,11 +33,23 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup Pages
         uses: actions/configure-pages@v5
+        
+      - name: Prepare Site Files
+        run: |
+          mkdir public_site
+          # Copy everything to public_site
+          cp -r * public_site/ || true
+          # Remove Android App files and Secrets from the Website version
+          rm -rf public_site/android
+          rm -f public_site/*.keystore
+          rm -f public_site/*.txt
+          rm -rf public_site/.git
+          rm -rf public_site/.github
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Upload entire repository
-          path: '.'
+          path: 'public_site'
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
