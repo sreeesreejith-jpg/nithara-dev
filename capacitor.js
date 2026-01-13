@@ -1,2 +1,1 @@
-// Capacitor placeholder for web build
-window.Capacitor = window.Capacitor || {};
+// Capacitor native bridge placeholder

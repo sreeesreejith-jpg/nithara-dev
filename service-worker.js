@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nithara-app-v10';
+const CACHE_NAME = 'nithara-app-v13';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
