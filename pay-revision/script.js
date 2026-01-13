@@ -5,7 +5,8 @@ document.addEventListener('DOMContentLoaded', () => {
         'hra-old-perc',
         'fitment-perc',
         'bal-da-perc',
-        'hra-perc'
+        'hra-perc',
+        'years-service'
     ];
 
     inputs.forEach(id => {
@@ -160,7 +161,15 @@ document.addEventListener('DOMContentLoaded', () => {
         // After Revision Calculations
         const daMergedVal = Math.round(bp * (daMergedPerc / 100));
         const fitmentVal = Math.round(bp * (fitmentPerc / 100));
-        const actualTotal = bp + daMergedVal + fitmentVal;
+
+        // Service Weightage: 0.5% per year of service, Max 15%
+        const yearsService = parseFloat(document.getElementById('years-service').value) || 0;
+        let weightagePerc = yearsService * 0.5;
+        if (weightagePerc > 15) weightagePerc = 15; // Cap at 15%
+
+        const weightageVal = Math.round(bp * (weightagePerc / 100));
+
+        const actualTotal = bp + daMergedVal + fitmentVal + weightageVal;
 
         // BP Fixed At: Rounded to next multiple of 100
         const bpFixed = Math.ceil(actualTotal / 100) * 100;
@@ -177,6 +186,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('res-bp-new').textContent = bp;
         document.getElementById('res-da-merged').textContent = daMergedVal;
         document.getElementById('res-fitment').textContent = fitmentVal;
+        document.getElementById('res-weightage').textContent = weightageVal;
         document.getElementById('res-actual-total').textContent = actualTotal;
         document.getElementById('res-bp-fixed').textContent = bpFixed;
         document.getElementById('res-bal-da').textContent = balDaVal;
@@ -267,6 +277,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const daMerged = document.getElementById('res-da-merged').textContent || "0";
             const fitmentP = document.getElementById('fitment-perc').value || "0";
             const fitmentV = document.getElementById('res-fitment').textContent || "0";
+            const yearsService = document.getElementById('years-service').value || "0";
+            const weightageV = document.getElementById('res-weightage').textContent || "0";
             const actualTotal = document.getElementById('res-actual-total').textContent || "0";
             const balDaP = document.getElementById('bal-da-perc').value || "0";
             const balDaV = document.getElementById('res-bal-da').textContent || "0";
@@ -280,6 +292,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     ['Base Basic Pay', '-', 'Rs. ' + bp],
                     ['DA Merged', '31 %', 'Rs. ' + daMerged],
                     ['Fitment Benefit', fitmentP + ' %', 'Rs. ' + fitmentV],
+                    ['Service Weightage', yearsService + ' Yrs', 'Rs. ' + weightageV],
                     ['Total Calculation', 'Sum', 'Rs. ' + actualTotal],
                     ['BP Fixed At', 'Round Next 100', 'Rs. ' + revisedBp],
                     ['Balance DA', balDaP + ' %', 'Rs. ' + balDaV],
