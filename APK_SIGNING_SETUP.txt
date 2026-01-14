@@ -1,0 +1,78 @@
+MANUAL GUIDE: SETTING UP SEAMLESS APK UPDATES (NO ANDROID STUDIO)
+===================================================================
+
+Follow these exact steps to set this up for any new project.
+
+STEP 1: GENERATE YOUR SECRET KEY (Do this in a Terminal)
+--------------------------------------------------------
+1.  Open your Terminal.
+2.  Run this command to create a new keystore file.
+    (You will be asked to create a 6-character password. REMEMBER IT!)
+
+    keytool -genkey -v -keystore release.keystore -alias my-key-alias -keyalg RSA -keysize 2048 -validity 10000
+
+3.  Run this command to convert that file into a text code for GitHub:
+
+    base64 -w 0 release.keystore > keystore_base64.txt
+
+4.  Open `keystore_base64.txt` and copy the long text string inside.
+
+STEP 2: ADD SECRETS TO GITHUB (Do this in your Browser)
+-------------------------------------------------------
+1.  Go to your GitHub Repository page.
+2.  Click **Settings** (top right tab).
+3.  On the left menu, click **Secrets and variables** > **Actions**.
+4.  Click the Green Button **New repository secret**.
+5.  Add these 4 secrets one by one:
+
+    NAME                 VALUE
+    ----------------     --------------------------------------------------
+    KEYSTORE_BASE64      (Paste the long text code you copied in Step 1)
+    KEYSTORE_PASSWORD    (The password you created in Step 1)
+    KEY_ALIAS            my-key-alias
+    KEY_PASSWORD         (The password you created in Step 1)
+
+STEP 3: EDIT YOUR APP FILES (Do this in your Code Editor)
+---------------------------------------------------------
+1.  Open `android/app/build.gradle`.
+2.  Find the `android { ... }` block and paste this inside:
+
+    signingConfigs {
+        release {
+            storeFile file("release.keystore")
+            storePassword System.getenv("KEYSTORE_PASSWORD")
+            keyAlias System.getenv("KEY_ALIAS")
+            keyPassword System.getenv("KEY_PASSWORD")
+        }
+    }
+    buildTypes {
+        release {
+            signingConfig signingConfigs.release
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+STEP 4: UPDATE GITHUB WORKFLOW (Do this in .github/workflows/android-build.yml)
+-------------------------------------------------------------------------------
+1.  Add this step BEFORE the build command to create the file from your secret:
+
+    - name: Decode Keystore
+      run: |
+        echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > android/app/release.keystore
+
+2.  Add these environment variables to your "Build APK" step:
+
+    - name: Build and Sign APK
+      env:
+        KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+        KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+        KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+      run: |
+        cd android
+        chmod +x gradlew
+        ./gradlew assembleRelease
+
+DONE!
+-----
+Now, every time GitHub builds your app, it will allow updates over old versions.

@@ -18,6 +18,21 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // Toggle Logic for Service Weightage
+    const weightageCheck = document.getElementById('weightage-check');
+    const weightageContainer = document.getElementById('weightage-container');
+
+    if (weightageCheck && weightageContainer) {
+        weightageCheck.addEventListener('change', () => {
+            if (weightageCheck.checked) {
+                weightageContainer.style.display = ''; // Reverts to CSS (grid)
+            } else {
+                weightageContainer.style.display = 'none';
+            }
+            calculate();
+        });
+    }
+
     // Global variable to store stages for navigation
     let payStagesList = [
         23000, 23700, 24400, 25100, 25800, 26500, 27200, 27900, 28700, 29500,
@@ -163,11 +178,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const fitmentVal = Math.round(bp * (fitmentPerc / 100));
 
         // Service Weightage: 0.5% per year of service, Max 15%
-        const yearsService = parseFloat(document.getElementById('years-service').value) || 0;
-        let weightagePerc = yearsService * 0.5;
-        if (weightagePerc > 15) weightagePerc = 15; // Cap at 15%
+        // Only if checked
+        const isWeightageEnabled = document.getElementById('weightage-check')?.checked;
+        let weightageVal = 0;
+        let weightagePerc = 0;
 
-        const weightageVal = Math.round(bp * (weightagePerc / 100));
+        if (isWeightageEnabled) {
+            const yearsService = parseFloat(document.getElementById('years-service').value) || 0;
+            weightagePerc = yearsService * 0.5;
+            if (weightagePerc > 15) weightagePerc = 15; // Cap at 15%
+            weightageVal = Math.round(bp * (weightagePerc / 100));
+        }
 
         const actualTotal = bp + daMergedVal + fitmentVal + weightageVal;
 
@@ -285,20 +306,31 @@ document.addEventListener('DOMContentLoaded', () => {
             const hraP = document.getElementById('hra-perc').value || "0";
             const hraV = document.getElementById('res-hra-new').textContent || "0";
 
+
+            const isWeightageChecked = document.getElementById('weightage-check')?.checked;
+
+            const fixationRows = [
+                ['Base Basic Pay', '-', 'Rs. ' + bp],
+                ['DA Merged', '31 %', 'Rs. ' + daMerged],
+                ['Fitment Benefit', fitmentP + ' %', 'Rs. ' + fitmentV]
+            ];
+
+            if (isWeightageChecked) {
+                fixationRows.push(['Service Weightage', yearsService + ' Yrs', 'Rs. ' + weightageV]);
+            }
+
+            fixationRows.push(
+                ['Total Calculation', 'Sum', 'Rs. ' + actualTotal],
+                ['BP Fixed At', 'Round Next 100', 'Rs. ' + revisedBp],
+                ['Balance DA', balDaP + ' %', 'Rs. ' + balDaV],
+                ['HRA', hraP + ' %', 'Rs. ' + hraV],
+                ['Gross Salary', '-', 'Rs. ' + newGross]
+            );
+
             doc.autoTable({
                 startY: doc.lastAutoTable.finalY + 20,
                 head: [['Fixation Step', 'Info', 'Amount']],
-                body: [
-                    ['Base Basic Pay', '-', 'Rs. ' + bp],
-                    ['DA Merged', '31 %', 'Rs. ' + daMerged],
-                    ['Fitment Benefit', fitmentP + ' %', 'Rs. ' + fitmentV],
-                    ['Service Weightage', yearsService + ' Yrs', 'Rs. ' + weightageV],
-                    ['Total Calculation', 'Sum', 'Rs. ' + actualTotal],
-                    ['BP Fixed At', 'Round Next 100', 'Rs. ' + revisedBp],
-                    ['Balance DA', balDaP + ' %', 'Rs. ' + balDaV],
-                    ['HRA', hraP + ' %', 'Rs. ' + hraV],
-                    ['Gross Salary', '-', 'Rs. ' + newGross]
-                ],
+                body: fixationRows,
                 theme: 'grid',
                 headStyles: { fillColor: [75, 85, 99] },
                 columnStyles: { 2: { halign: 'right' } }

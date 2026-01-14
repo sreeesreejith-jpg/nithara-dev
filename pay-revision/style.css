@@ -314,9 +314,10 @@ header {
 }
 
 .highlight {
-    color: var(--primary);
-    font-size: 1.1rem;
+    color: #f43f5e; /* Vibrant Rose Red */
+    font-size: 1.25rem;
     font-weight: 800;
+    text-shadow: 0 0 10px rgba(244, 63, 94, 0.3);
 }
 
 .section-footer {
