@@ -35,165 +35,224 @@
                 </div>
             </div>
         </header>
-        <p class="placeholder-message"
-            style="text-align:center; margin:1rem 0; font-weight:500; color:var(--text-muted);">Fill the fields with
-            your own data.</p>
+        <!-- Professional Configuration Dashboard -->
+        <div class="input-main-card" style="padding: 1.25rem;">
+            <div class="dashboard-header"
+                style="margin-bottom: 1.5rem; display: grid; grid-template-columns: 1fr 140px; gap: 1rem; align-items: stretch;">
+                <!-- 1. Primary Input -->
+                <div class="input-field primary-input" style="align-items: flex-start; gap: 0.5rem; margin-bottom: 0;">
+                    <label
+                        style="font-size: 0.9rem; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px;">Initial
+                        Basic Pay</label>
+                    <div class="input-wrapper" style="max-width: 100%;">
+                        <input type="number" id="basic-pay-in" value="" placeholder="Enter Amount" step="100"
+                            autocomplete="off"
+                            style="max-width: 100%; text-align: left; padding-left: 1.25rem; font-size: 1.6rem; height: 60px; border-width: 2px; border-color: rgba(59, 130, 246, 0.4);">
+                        <ul id="custom-dropdown" class="custom-dropdown"></ul>
+                    </div>
+                </div>
 
-        <!-- Summary Dashboard -->
-        <div class="summary-cards">
-            <div class="summary-card main-summary after-card">
-                <span class="label">After Pay Revision</span>
-                <span id="gross-new-val" class="value">0</span>
-            </div>
-            <div class="summary-details">
-                <div class="summary-card before-card">
-                    <span class="label">Before Rev.</span>
-                    <span id="gross-old-val" class="value">0</span>
-                </div>
-                <div class="summary-card growth-card">
-                    <span class="label">Salary Growth</span>
-                    <span id="growth-val" class="value pulse">0</span>
+                <!-- 2. Primary KPI (Result) -->
+                <div class="revised-bp-display"
+                    style="background: rgba(244, 63, 94, 0.08); border: 1px solid rgba(244, 63, 94, 0.3); border-radius: 1rem; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 0.75rem; text-align: center; box-shadow: 0 4px 15px rgba(244, 63, 94, 0.1);">
+                    <span class="label"
+                        style="font-size: 0.65rem; color: #f43f5e; font-weight: 800; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.5px;">Revised
+                        Bp</span>
+                    <span id="revised-bp-val" class="value highlight"
+                        style="font-size: 1.8rem; line-height: 1; color: #f43f5e;">0</span>
                 </div>
             </div>
-        </div>
 
-        <!-- Main Input -->
-        <div class="input-main-card">
-            <div class="input-field primary-input">
-                <label>Please Enter Basic Pay</label>
-                <div class="input-wrapper">
-                    <input type="number" id="basic-pay-in" value="" placeholder="Enter Basic Pay" step="100"
-                        autocomplete="off">
-                    <ul id="custom-dropdown" class="custom-dropdown">
-                        <!-- Items populated by JS -->
-                    </ul>
+            <!-- Configuration Parameters -->
+            <div class="secondary-configs-box"
+                style="background: rgba(255, 255, 255, 0.02); border-radius: 1rem; padding: 1.25rem; border: 1px solid rgba(255, 255, 255, 0.05); display: flex; flex-direction: column; gap: 1rem;">
+
+                <!-- Fitment Parameter -->
+                <div class="input-field row-input"
+                    style="grid-template-columns: 1.2fr 110px 0px; gap: 1rem; padding: 0;">
+                    <label style="color: var(--text-main); font-weight: 600; font-size: 0.95rem;">Fitment
+                        Percentage</label>
+                    <div class="input-with-val">
+                        <input type="number" id="fitment-perc" value="7" step="0.5"
+                            style="text-align: center; font-size: 1.1rem; border-color: var(--primary); height: 40px;">
+                        <span class="unit" style="font-weight: 700; color: var(--primary);">%</span>
+                    </div>
+                    <span></span>
                 </div>
-            </div>
-            <div class="revised-bp-row">
-                <span class="label">Revised Basic Pay</span>
-                <span id="revised-bp-val" class="value">0</span>
+
+                <!-- Service Weightage Toggle & Input -->
+                <div class="weightage-logic-group" style="display: flex; flex-direction: column; gap: 1rem;">
+                    <div class="input-field row-input"
+                        style="grid-template-columns: 1.2fr 110px 0px; gap: 1rem; padding: 0;">
+                        <label for="weightage-check"
+                            style="font-size: 0.9rem; color: var(--text-muted); font-weight: 500;">Consider Service
+                            Weightage?</label>
+                        <div style="display: flex; justify-content: center; align-items: center;">
+                            <input type="checkbox" id="weightage-check"
+                                style="width: 24px; height: 24px; cursor: pointer; accent-color: var(--primary);">
+                        </div>
+                        <span></span>
+                    </div>
+
+                    <div class="input-field row-input" id="weightage-container"
+                        style="display: none; padding-top: 1rem; border-top: 1px dashed rgba(255,255,255,0.08); grid-template-columns: 1.2fr 110px 0px; gap: 1rem;">
+                        <label style="font-size: 0.9rem; color: var(--text-main); font-weight: 600;">Qualifying
+                            Service</label>
+                        <div class="input-wrapper" style="max-width: 100%;">
+                            <div class="input-with-val">
+                                <input type="number" id="years-service" value="" placeholder="None" step="1"
+                                    style="text-align: center; height: 40px;" autocomplete="off">
+                                <span class="unit" style="font-weight: 700;">Yrs</span>
+                            </div>
+                            <ul id="years-dropdown" class="custom-dropdown" style="max-height: 180px;"></ul>
+                        </div>
+                        <span></span>
+                    </div>
+                </div>
             </div>
         </div>
 
         <main class="revision-grid">
             <!-- After Section -->
-            <section class="revision-section after">
+            <section class="revision-section after" style="display: flex; flex-direction: column;">
                 <div class="section-header after-header">
-                    <h2>Pay Revision Calculation</h2>
+                    <h2>After Pay Revision</h2>
                 </div>
-                <div class="input-group">
-                    <div class="fixation-card"
-                        style="background: rgba(255, 255, 255, 0.03); border-radius: 1rem; padding: 1rem; border: 1px solid rgba(255, 255, 255, 0.05); margin-bottom: 1rem;">
-                        <div class="result-row">
-                            <span class="label">Bp</span>
-                            <span id="res-bp-new" class="value">0</span>
-                        </div>
-                        <div class="result-row">
-                            <span class="label">DA Merged 31%</span>
-                            <span id="res-da-merged" class="value">0</span>
-                        </div>
-                        <div class="input-field row-input">
-                            <label>Fitment</label>
-                            <div class="input-with-val">
-                                <input type="number" id="fitment-perc" value="7" step="0.5">
-                                <span class="unit">%</span>
-                            </div>
-                            <span id="res-fitment" class="calc-val">0</span>
-                        </div>
+                <div class="input-group"
+                    style="padding: 1rem; display: flex; flex-direction: column; gap: 0.5rem; flex: 1;">
+                    <!-- Static Result Rows -->
+                    <div class="result-row"
+                        style="display: grid; grid-template-columns: 1.2fr 1fr; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.03); padding: 0.5rem 0;">
+                        <span class="label">Basic Pay</span>
+                        <span id="res-bp-new" class="value" style="text-align: right;">0</span>
+                    </div>
+                    <div class="result-row"
+                        style="display: grid; grid-template-columns: 1.2fr 1fr; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.03); padding: 0.5rem 0;">
+                        <span class="label">DA Merged (31%)</span>
+                        <span id="res-da-merged" class="value" style="text-align: right;">0</span>
+                    </div>
+                    <div class="result-row"
+                        style="display: grid; grid-template-columns: 1.2fr 1fr; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.03); padding: 0.5rem 0;">
+                        <span class="label">Fitment Amount</span>
+                        <span id="res-fitment" class="value" style="text-align: right;">0</span>
+                    </div>
+                    <div class="result-row" id="res-weightage-row"
+                        style="display: none; grid-template-columns: 1.2fr 1fr; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.03); padding: 0.5rem 0;">
+                        <span class="label">Service Weightage</span>
+                        <span id="res-weightage" class="value" style="text-align: right;">0</span>
+                    </div>
 
-                        <div class="weightage-section">
-                            <div class="input-field row-input">
-                                <label for="weightage-check"
-                                    style="font-size: 0.85rem; color: var(--text-muted);">Consider Service
-                                    Weightage?</label>
-                                <div style="display: flex; justify-content: center;">
-                                    <input type="checkbox" id="weightage-check"
-                                        style="width: 20px; height: 20px; margin: 0;">
-                                </div>
-                                <span></span> <!-- Empty 3rd column to maintain grid alignment -->
-                            </div>
+                    <div class="result-row highlight-row"
+                        style="display: grid; grid-template-columns: 1.2fr 1fr; align-items: center; padding: 0.75rem 0; margin: 0.25rem 0;">
+                        <span class="label" style="font-weight: 700;">Actual Total</span>
+                        <span id="res-actual-total" class="value" style="text-align: right; font-weight: 800;">0</span>
+                    </div>
+                    <div class="result-row"
+                        style="display: grid; grid-template-columns: 1.2fr 1fr; align-items: center; background: rgba(59, 130, 246, 0.05); padding: 0.75rem 0.5rem; border-radius: 0.5rem;">
+                        <span class="label" style="font-size: 0.75rem; color: var(--primary);">Fixation (Next
+                            100)</span>
+                        <span id="res-bp-fixed" class="value highlight"
+                            style="text-align: right; font-size: 1.15rem;">0</span>
+                    </div>
 
-                            <div class="input-field row-input" id="weightage-container"
-                                style="display: none; padding-top: 0.5rem;">
-                                <label style="font-size: 0.85rem;">Qualifying Service (Years)</label>
-                                <div class="input-with-val">
-                                    <input type="number" id="years-service" value="0" placeholder="Years" step="1">
-                                    <span class="unit">Yrs</span>
-                                </div>
-                                <span id="res-weightage" class="calc-val">0</span>
-                            </div>
+                    <!-- Input Rows -->
+                    <div class="input-field row-input"
+                        style="display: grid; grid-template-columns: 1.2fr 100px 1fr; gap: 0.75rem; align-items: center; margin-top: 0.5rem;">
+                        <label style="font-size: 0.85rem;">Balance DA</label>
+                        <div class="input-with-val" style="margin: 0;">
+                            <input type="number" id="bal-da-perc" value="4" step="0.1"
+                                style="text-align: center; height: 32px; font-size: 0.9rem;">
+                            <span class="unit" style="font-size: 0.8rem;">%</span>
                         </div>
+                        <span id="res-bal-da" class="calc-val" style="text-align: right; font-weight: 600;">0</span>
                     </div>
-                    <div class="result-row highlight-row">
-                        <span class="label">Actual Total</span>
-                        <span id="res-actual-total" class="value">0</span>
-                    </div>
-                    <div class="result-row">
-                        <span class="label">BP Fixed At (Round to next 100)</span>
-                        <span id="res-bp-fixed" class="value highlight">0</span>
-                    </div>
-                    <div class="input-field row-input">
-                        <label>Balance DA</label>
-                        <div class="input-with-val">
-                            <input type="number" id="bal-da-perc" value="4" step="0.1">
-                            <span class="unit">%</span>
+                    <div class="input-field row-input"
+                        style="display: grid; grid-template-columns: 1.2fr 100px 1fr; gap: 0.75rem; align-items: center;">
+                        <label style="font-size: 0.85rem;">HRA</label>
+                        <div class="input-with-val" style="margin: 0;">
+                            <input type="number" id="hra-perc" value="5" step="0.5"
+                                style="text-align: center; height: 32px; font-size: 0.9rem;">
+                            <span class="unit" style="font-size: 0.8rem;">%</span>
                         </div>
-                        <span id="res-bal-da" class="calc-val">0</span>
-                    </div>
-                    <div class="input-field row-input">
-                        <label>HRA</label>
-                        <div class="input-with-val">
-                            <input type="number" id="hra-perc" value="5" step="0.5">
-                            <span class="unit">%</span>
-                        </div>
-                        <span id="res-hra-new" class="calc-val">0</span>
+                        <span id="res-hra-new" class="calc-val" style="text-align: right; font-weight: 600;">0</span>
                     </div>
                 </div>
-                <div class="section-footer">
-                    <span class="label">New Gross</span>
-                    <span id="res-gross-new" class="total-val">0</span>
+                <!-- Box-style footer as per image -->
+                <div class="section-footer"
+                    style="padding: 1.25rem; background: rgba(59, 130, 246, 0.08); border-top: 1px solid rgba(59, 130, 246, 0.2); text-align: center; border-radius: 0 0 1rem 1rem;">
+                    <span
+                        style="font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; display: block; margin-bottom: 2px;">After
+                        Pay Revision</span>
+                    <span id="res-gross-new" class="total-val"
+                        style="font-size: 1.8rem; font-weight: 800; color: var(--primary);">0</span>
+                    <!-- Hidden IDs for script continuity -->
+                    <span id="gross-new-val" style="display: none;">0</span>
                 </div>
             </section>
 
             <!-- Before Section -->
-            <section class="revision-section before">
+            <section class="revision-section before" style="display: flex; flex-direction: column;">
                 <div class="section-header before-header">
                     <h2>Before Pay Revision</h2>
                 </div>
-                <div class="input-group">
-                    <div class="result-row">
+                <div class="input-group"
+                    style="padding: 1rem; display: flex; flex-direction: column; gap: 0.5rem; flex: 1;">
+                    <div class="result-row"
+                        style="display: grid; grid-template-columns: 1.2fr 1fr; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.03); padding: 0.5rem 0;">
                         <span class="label">Basic Pay</span>
-                        <span id="res-bp-old" class="value">0</span>
+                        <span id="res-bp-old" class="value" style="text-align: right;">0</span>
                     </div>
-                    <div class="result-row">
+                    <div class="result-row"
+                        style="display: grid; grid-template-columns: 1.2fr 1fr; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.03); padding: 0.5rem 0;">
                         <span class="label">DA 22%</span>
-                        <span id="res-da-old" class="value">0</span>
+                        <span id="res-da-old" class="value" style="text-align: right;">0</span>
                     </div>
-                    <div class="input-field row-input">
-                        <label>DA Pending</label>
-                        <div class="input-with-val">
-                            <input type="number" id="da-pend-perc" value="15" step="1">
-                            <span class="unit">%</span>
+                    <div class="input-field row-input"
+                        style="display: grid; grid-template-columns: 1.2fr 100px 1fr; gap: 0.75rem; align-items: center; margin-top: 0.5rem;">
+                        <label style="font-size: 0.85rem;">DA Pending</label>
+                        <div class="input-with-val" style="margin: 0;">
+                            <input type="number" id="da-pend-perc" value="15" step="1"
+                                style="text-align: center; height: 32px; font-size: 0.9rem;">
+                            <span class="unit" style="font-size: 0.8rem;">%</span>
                         </div>
-                        <span id="res-da-pend" class="calc-val">0</span>
+                        <span id="res-da-pend" class="calc-val" style="text-align: right; font-weight: 600;">0</span>
                     </div>
-                    <div class="input-field row-input">
-                        <label>HRA</label>
-                        <div class="input-with-val">
-                            <input type="number" id="hra-old-perc" value="4" step="0.5">
-                            <span class="unit">%</span>
+                    <div class="input-field row-input"
+                        style="display: grid; grid-template-columns: 1.2fr 100px 1fr; gap: 0.75rem; align-items: center;">
+                        <label style="font-size: 0.85rem;">HRA</label>
+                        <div class="input-with-val" style="margin: 0;">
+                            <input type="number" id="hra-old-perc" value="4" step="0.5"
+                                style="text-align: center; height: 32px; font-size: 0.9rem;">
+                            <span class="unit" style="font-size: 0.8rem;">%</span>
                         </div>
-                        <span id="res-hra-old" class="calc-val">0</span>
+                        <span id="res-hra-old" class="calc-val" style="text-align: right; font-weight: 600;">0</span>
                     </div>
                 </div>
-                <div class="section-footer">
-                    <span class="label">Old Gross</span>
-                    <span id="res-gross-old" class="total-val">0</span>
+                <!-- Box-style footer as per image -->
+                <div class="section-footer"
+                    style="padding: 1.25rem; background: rgba(255, 255, 255, 0.03); border-top: 1px solid rgba(255, 255, 255, 0.05); text-align: center; border-radius: 0 0 1rem 1rem;">
+                    <span
+                        style="font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; display: block; margin-bottom: 2px;">Before
+                        Revision</span>
+                    <span id="res-gross-old" class="total-val"
+                        style="font-size: 1.8rem; font-weight: 800; color: #fff;">0</span>
+                    <!-- Hidden IDs for script continuity -->
+                    <span id="gross-old-val" style="display: none;">0</span>
                 </div>
             </section>
         </main>
 
-        <p class="disclaimer">* Calculations are approximate</p>
+        <!-- Subtle Net Salary Growth Highlight -->
+        <div class="growth-display-subtle"
+            style="margin: 1rem 0; padding: 0.75rem 1rem; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 0.75rem; display: flex; justify-content: space-between; align-items: center;">
+            <span
+                style="color: var(--text-muted); font-weight: 600; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">Net
+                Salary Growth</span>
+            <span id="growth-val" style="color: var(--primary); font-weight: 800; font-size: 1.2rem;">0</span>
+        </div>
+
+        <p class="disclaimer" style="margin-top: 1rem;">* Calculations are approximate</p>
+
 
         <!-- Section: Report Settings -->
         <section class="revision-section report-card" id="report-settings-section" style="margin-top: 2rem;">

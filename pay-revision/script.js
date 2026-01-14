@@ -18,16 +18,18 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Toggle Logic for Service Weightage
     const weightageCheck = document.getElementById('weightage-check');
     const weightageContainer = document.getElementById('weightage-container');
+    const weightageResultRow = document.getElementById('res-weightage-row');
 
     if (weightageCheck && weightageContainer) {
         weightageCheck.addEventListener('change', () => {
             if (weightageCheck.checked) {
                 weightageContainer.style.display = ''; // Reverts to CSS (grid)
+                if (weightageResultRow) weightageResultRow.style.display = '';
             } else {
                 weightageContainer.style.display = 'none';
+                if (weightageResultRow) weightageResultRow.style.display = 'none';
             }
             calculate();
         });
@@ -50,13 +52,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const basicPayInput = document.getElementById('basic-pay-in');
     const dropdown = document.getElementById('custom-dropdown');
 
-    // Store current value to dataset for reference
+    const yearsInput = document.getElementById('years-service');
+    const yearsDropdown = document.getElementById('years-dropdown');
+    const yearsList = Array.from({ length: 31 }, (_, i) => i); // 0 to 30
+
+    // Store current value for reference
     basicPayInput.dataset.lastValid = basicPayInput.value;
+    yearsInput.dataset.lastValid = yearsInput.value;
 
     function renderDropdown(filterText = "") {
         dropdown.innerHTML = "";
-
-        // Filter logic: If empty, show all. If text, show matches.
         const filtered = filterText
             ? payStagesList.filter(stage => stage.toString().startsWith(filterText))
             : payStagesList;
@@ -70,7 +75,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const li = document.createElement('li');
             li.textContent = stage;
             li.addEventListener('mousedown', (e) => {
-                // Use mousedown to prevent blur from firing before click
                 e.preventDefault();
                 selectValue(stage);
             });
@@ -78,21 +82,62 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    function renderYearsDropdown(filterText = "") {
+        yearsDropdown.innerHTML = "";
+        const filtered = filterText
+            ? yearsList.filter(year => year.toString().startsWith(filterText))
+            : yearsList;
+
+        if (filtered.length === 0) {
+            yearsDropdown.classList.remove('show');
+            return;
+        }
+
+        filtered.forEach(year => {
+            const li = document.createElement('li');
+            li.textContent = year;
+            li.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                selectYearValue(year);
+            });
+            yearsDropdown.appendChild(li);
+        });
+    }
+
     function selectValue(val) {
         basicPayInput.value = val;
-        basicPayInput.dataset.lastValid = val; // Update ghost ref
+        basicPayInput.dataset.lastValid = val;
         dropdown.classList.remove('show');
-        calculate(); // Trigger calc
+        calculate();
+    }
+
+    function selectYearValue(val) {
+        yearsInput.value = val;
+        yearsInput.dataset.lastValid = val;
+        yearsDropdown.classList.remove('show');
+        calculate();
     }
 
     function showDropdown() {
-        renderDropdown(""); // Show all initially or filter based on current val? 
+        renderDropdown("");
         dropdown.classList.add('show');
-
-        // Auto-scroll to current value if exists
         const currentVal = parseInt(basicPayInput.value);
         if (currentVal) {
             const items = Array.from(dropdown.querySelectorAll('li'));
+            const match = items.find(li => li.textContent == currentVal);
+            if (match) {
+                match.scrollIntoView({ block: 'center' });
+                match.classList.add('active');
+            }
+        }
+    }
+
+    function showYearsDropdown() {
+        renderYearsDropdown("");
+        yearsDropdown.classList.add('show');
+        const currentVal = yearsInput.value;
+        if (currentVal !== "") {
+            const items = Array.from(yearsDropdown.querySelectorAll('li'));
             const match = items.find(li => li.textContent == currentVal);
             if (match) {
                 match.scrollIntoView({ block: 'center' });
@@ -107,31 +152,55 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 150);
     }
 
-    // Input Listeners
+    function hideYearsDropdown() {
+        setTimeout(() => {
+            yearsDropdown.classList.remove('show');
+        }, 150);
+    }
+
+    // Input Listeners for Basic Pay
     basicPayInput.addEventListener('focus', function () {
         this.select();
         showDropdown();
     });
-
     basicPayInput.addEventListener('click', function () {
         this.select();
         showDropdown();
     });
-
     basicPayInput.addEventListener('input', function () {
-        // If typing manual value
         calculate();
-        // Filter the list live
         renderDropdown(this.value);
         dropdown.classList.add('show');
     });
-
     basicPayInput.addEventListener('blur', function () {
         if (this.value.trim() === "") {
             this.value = this.dataset.lastValid || "";
             calculate();
         }
         hideDropdown();
+    });
+
+    // Input Listeners for Years
+    yearsInput.addEventListener('focus', function () {
+        this.select();
+        showYearsDropdown();
+    });
+    yearsInput.addEventListener('click', function () {
+        this.select();
+        showYearsDropdown();
+    });
+    yearsInput.addEventListener('input', function () {
+        calculate();
+        renderYearsDropdown(this.value);
+        yearsDropdown.classList.add('show');
+    });
+    yearsInput.addEventListener('blur', function () {
+        if (this.value.trim() === "") {
+            // If empty, we can leave it empty or set to 0. User said "prefilled with non".
+            // Let's keep it empty if they cleared it.
+            calculate();
+        }
+        hideYearsDropdown();
     });
 
     // Fetch external data if available
@@ -214,7 +283,10 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('res-hra-new').textContent = hraNewVal;
         document.getElementById('res-gross-new').textContent = grossNew;
 
-        // Summary Cards
+        // Update Before UI (already done earlier but ensuring consistency)
+        document.getElementById('res-gross-old').textContent = grossOld;
+
+        // Summary Card
         document.getElementById('gross-new-val').textContent = grossNew;
         document.getElementById('gross-old-val').textContent = grossOld;
         document.getElementById('growth-val').textContent = `${growth} (${growthPerc}%)`;
@@ -260,8 +332,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // 2. Data Extraction
             const bp = document.getElementById('basic-pay-in').value || "0";
-            const oldGross = document.getElementById('res-gross-old').textContent || "0";
-            const newGross = document.getElementById('res-gross-new').textContent || "0";
+            const oldGross = document.getElementById('gross-old-val').textContent || "0";
+            const newGross = document.getElementById('gross-new-val').textContent || "0";
             const growth = document.getElementById('growth-val').textContent || "0";
             const revisedBp = document.getElementById('res-bp-fixed').textContent || "0";
 
