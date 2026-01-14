@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const yearsInput = document.getElementById('years-service');
     const yearsDropdown = document.getElementById('years-dropdown');
-    const yearsList = Array.from({ length: 31 }, (_, i) => i); // 0 to 30
+    const yearsList = Array.from({ length: 41 }, (_, i) => i); // 0 to 40
 
     // Store current value for reference
     basicPayInput.dataset.lastValid = basicPayInput.value;
@@ -78,6 +78,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 e.preventDefault();
                 selectValue(stage);
             });
+            // Dynamic update on hover
+            li.addEventListener('mouseenter', () => {
+                basicPayInput.value = stage;
+                calculate();
+            });
             dropdown.appendChild(li);
         });
     }
@@ -99,6 +104,11 @@ document.addEventListener('DOMContentLoaded', () => {
             li.addEventListener('mousedown', (e) => {
                 e.preventDefault();
                 selectYearValue(year);
+            });
+            // Dynamic update on hover
+            li.addEventListener('mouseenter', () => {
+                yearsInput.value = year;
+                calculate();
             });
             yearsDropdown.appendChild(li);
         });
@@ -253,7 +263,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let weightagePerc = 0;
 
         if (isWeightageEnabled) {
-            const yearsService = parseFloat(document.getElementById('years-service').value) || 0;
+            const yearsService = Math.floor(parseFloat(document.getElementById('years-service').value) || 0);
             weightagePerc = yearsService * 0.5;
             if (weightagePerc > 15) weightagePerc = 15; // Cap at 15%
             weightageVal = Math.round(bp * (weightagePerc / 100));
