@@ -345,8 +345,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Summary Card
         document.getElementById('gross-new-val').textContent = grossNew;
         document.getElementById('gross-old-val').textContent = grossOld;
-        document.getElementById('growth-val').textContent = `${growth} (${growthPerc}%)`;
-        document.getElementById('revised-bp-val').textContent = bpFixed;
+        document.getElementById('growth-val').textContent = bp > 0 ? `${growth} (${growthPerc}%)` : '-';
+        document.getElementById('revised-bp-val').textContent = bp > 0 ? bpFixed : '';
     }
 
     // Initial calculation
