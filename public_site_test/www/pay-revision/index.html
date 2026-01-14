@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apps | Pay Revision</title>
+    <meta name="description"
+        content="Calculate pay revision benefits including fitment, DA merger, and HRA adjustments.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=1.0">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="../icon-192.png">
+    <meta name="theme-color" content="#3b82f6">
+    <script src="../capacitor.js"></script>
+    <script src="../capacitor-handler.js"></script>
+    <script src="../js/jspdf.umd.min.js"></script>
+    <script src="../js/jspdf.plugin.autotable.min.js"></script>
+    <script src="../js/pdf-helper.js"></script>
+</head>
+
+<body>
+    <div class="report-header">
+        <h1>Pay Revision Report</h1>
+        <p id="printDate"></p>
+    </div>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <a href="../index.html" class="home-icon" title="Go Home">🏠</a>
+                <div class="header-text">
+                    <h1>Pay Revision</h1>
+                </div>
+            </div>
+        </header>
+        <p class="placeholder-message"
+            style="text-align:center; margin:1rem 0; font-weight:500; color:var(--text-muted);">Fill the fields with
+            your own data.</p>
+
+        <!-- Summary Dashboard -->
+        <div class="summary-cards">
+            <div class="summary-card main-summary after-card">
+                <span class="label">After Pay Revision</span>
+                <span id="gross-new-val" class="value">0</span>
+            </div>
+            <div class="summary-details">
+                <div class="summary-card before-card">
+                    <span class="label">Before Rev.</span>
+                    <span id="gross-old-val" class="value">0</span>
+                </div>
+                <div class="summary-card growth-card">
+                    <span class="label">Salary Growth</span>
+                    <span id="growth-val" class="value pulse">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Input -->
+        <div class="input-main-card">
+            <div class="input-field primary-input">
+                <label>Please Enter Basic Pay</label>
+                <div class="input-wrapper">
+                    <input type="number" id="basic-pay-in" value="" placeholder="Enter Basic Pay" step="100"
+                        autocomplete="off">
+                    <ul id="custom-dropdown" class="custom-dropdown">
+                        <!-- Items populated by JS -->
+                    </ul>
+                </div>
+            </div>
+            <div class="revised-bp-row">
+                <span class="label">Revised Basic Pay</span>
+                <span id="revised-bp-val" class="value">0</span>
+            </div>
+        </div>
+
+        <main class="revision-grid">
+            <!-- After Section -->
+            <section class="revision-section after">
+                <div class="section-header after-header">
+                    <h2>Pay Revision Calculation</h2>
+                </div>
+                <div class="input-group">
+                    <div class="result-row">
+                        <span class="label">Bp</span>
+                        <span id="res-bp-new" class="value">0</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="label">DA Merged 31%</span>
+                        <span id="res-da-merged" class="value">0</span>
+                    </div>
+                    <div class="input-field row-input">
+                        <label>Fitment</label>
+                        <div class="input-with-val">
+                            <input type="number" id="fitment-perc" value="7" step="0.5">
+                            <span class="unit">%</span>
+                        </div>
+                        <span id="res-fitment" class="calc-val">0</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="label">Actual Total</span>
+                        <span id="res-actual-total" class="value">0</span>
+                    </div>
+                    <div class="result-row highlight-row">
+                        <span class="label">BP Fixed At (Round to next 100)</span>
+                        <span id="res-bp-fixed" class="value highlight">0</span>
+                    </div>
+                    <div class="input-field row-input">
+                        <label>Balance DA</label>
+                        <div class="input-with-val">
+                            <input type="number" id="bal-da-perc" value="4" step="0.1">
+                            <span class="unit">%</span>
+                        </div>
+                        <span id="res-bal-da" class="calc-val">0</span>
+                    </div>
+                    <div class="input-field row-input">
+                        <label>HRA</label>
+                        <div class="input-with-val">
+                            <input type="number" id="hra-perc" value="5" step="0.5">
+                            <span class="unit">%</span>
+                        </div>
+                        <span id="res-hra-new" class="calc-val">0</span>
+                    </div>
+                </div>
+                <div class="section-footer">
+                    <span class="label">New Gross</span>
+                    <span id="res-gross-new" class="total-val">0</span>
+                </div>
+            </section>
+
+            <!-- Before Section -->
+            <section class="revision-section before">
+                <div class="section-header before-header">
+                    <h2>Before Pay Revision</h2>
+                </div>
+                <div class="input-group">
+                    <div class="result-row">
+                        <span class="label">Basic Pay</span>
+                        <span id="res-bp-old" class="value">0</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="label">DA 22%</span>
+                        <span id="res-da-old" class="value">0</span>
+                    </div>
+                    <div class="input-field row-input">
+                        <label>DA Pending</label>
+                        <div class="input-with-val">
+                            <input type="number" id="da-pend-perc" value="15" step="1">
+                            <span class="unit">%</span>
+                        </div>
+                        <span id="res-da-pend" class="calc-val">0</span>
+                    </div>
+                    <div class="input-field row-input">
+                        <label>HRA</label>
+                        <div class="input-with-val">
+                            <input type="number" id="hra-old-perc" value="4" step="0.5">
+                            <span class="unit">%</span>
+                        </div>
+                        <span id="res-hra-old" class="calc-val">0</span>
+                    </div>
+                </div>
+                <div class="section-footer">
+                    <span class="label">Old Gross</span>
+                    <span id="res-gross-old" class="total-val">0</span>
+                </div>
+            </section>
+        </main>
+
+        <p class="disclaimer">* Calculations are approximate</p>
+
+        <!-- Section: Report Settings -->
+        <section class="revision-section report-card" id="report-settings-section" style="margin-top: 2rem;">
+            <div class="section-header reports-header">
+                <h2>Report Settings</h2>
+            </div>
+            <div class="input-group">
+                <div class="input-field report-field">
+                    <label>Employee Name</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="reportName" placeholder="Optional">
+                    </div>
+                </div>
+                <div class="input-field report-field">
+                    <label>PEN Number</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="penNumber" placeholder="Optional">
+                    </div>
+                </div>
+                <div class="input-field report-field full-width">
+                    <label>School / Office Name</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="schoolName" placeholder="Optional">
+                    </div>
+                </div>
+            </div>
+
+            <div class="button-group report-buttons">
+                <button id="downloadBtn" class="download-button">
+                    <span>📥</span> Download PDF
+                </button>
+                <button id="shareBtn" class="share-button">
+                    <span>📤</span> Share Report
+                </button>
+            </div>
+        </section>
+
+
+        <footer>email: sreee.sreejith@gmail.com
+
+        </footer>
+    </div>
+
+    <script src="script.js?v=1.1"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').catch(err => console.log('SW fail', err));
+            });
+        }
+    </script>
+</body>
+
+</html>

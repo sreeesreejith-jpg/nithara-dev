@@ -5,8 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
         'hra-old-perc',
         'fitment-perc',
         'bal-da-perc',
-        'hra-perc',
-        'years-service'
+        'hra-perc'
     ];
 
     inputs.forEach(id => {
@@ -17,23 +16,6 @@ document.addEventListener('DOMContentLoaded', () => {
             this.select();
         });
     });
-
-    const weightageCheck = document.getElementById('weightage-check');
-    const weightageContainer = document.getElementById('weightage-container');
-    const weightageResultRow = document.getElementById('res-weightage-row');
-
-    if (weightageCheck && weightageContainer) {
-        weightageCheck.addEventListener('change', () => {
-            if (weightageCheck.checked) {
-                weightageContainer.style.display = ''; // Reverts to CSS (grid)
-                if (weightageResultRow) weightageResultRow.style.display = '';
-            } else {
-                weightageContainer.style.display = 'none';
-                if (weightageResultRow) weightageResultRow.style.display = 'none';
-            }
-            calculate();
-        });
-    }
 
     // Global variable to store stages for navigation
     let payStagesList = [
@@ -52,16 +34,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const basicPayInput = document.getElementById('basic-pay-in');
     const dropdown = document.getElementById('custom-dropdown');
 
-    const yearsInput = document.getElementById('years-service');
-    const yearsDropdown = document.getElementById('years-dropdown');
-    const yearsList = Array.from({ length: 31 }, (_, i) => i); // 0 to 30
-
-    // Store current value for reference
+    // Store current value to dataset for reference
     basicPayInput.dataset.lastValid = basicPayInput.value;
-    yearsInput.dataset.lastValid = yearsInput.value;
 
     function renderDropdown(filterText = "") {
         dropdown.innerHTML = "";
+
+        // Filter logic: If empty, show all. If text, show matches.
         const filtered = filterText
             ? payStagesList.filter(stage => stage.toString().startsWith(filterText))
             : payStagesList;
@@ -75,6 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const li = document.createElement('li');
             li.textContent = stage;
             li.addEventListener('mousedown', (e) => {
+                // Use mousedown to prevent blur from firing before click
                 e.preventDefault();
                 selectValue(stage);
             });
@@ -82,62 +62,21 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function renderYearsDropdown(filterText = "") {
-        yearsDropdown.innerHTML = "";
-        const filtered = filterText
-            ? yearsList.filter(year => year.toString().startsWith(filterText))
-            : yearsList;
-
-        if (filtered.length === 0) {
-            yearsDropdown.classList.remove('show');
-            return;
-        }
-
-        filtered.forEach(year => {
-            const li = document.createElement('li');
-            li.textContent = year;
-            li.addEventListener('mousedown', (e) => {
-                e.preventDefault();
-                selectYearValue(year);
-            });
-            yearsDropdown.appendChild(li);
-        });
-    }
-
     function selectValue(val) {
         basicPayInput.value = val;
-        basicPayInput.dataset.lastValid = val;
+        basicPayInput.dataset.lastValid = val; // Update ghost ref
         dropdown.classList.remove('show');
-        calculate();
-    }
-
-    function selectYearValue(val) {
-        yearsInput.value = val;
-        yearsInput.dataset.lastValid = val;
-        yearsDropdown.classList.remove('show');
-        calculate();
+        calculate(); // Trigger calc
     }
 
     function showDropdown() {
-        renderDropdown("");
+        renderDropdown(""); // Show all initially or filter based on current val? 
         dropdown.classList.add('show');
+
+        // Auto-scroll to current value if exists
         const currentVal = parseInt(basicPayInput.value);
         if (currentVal) {
             const items = Array.from(dropdown.querySelectorAll('li'));
-            const match = items.find(li => li.textContent == currentVal);
-            if (match) {
-                match.scrollIntoView({ block: 'center' });
-                match.classList.add('active');
-            }
-        }
-    }
-
-    function showYearsDropdown() {
-        renderYearsDropdown("");
-        yearsDropdown.classList.add('show');
-        const currentVal = yearsInput.value;
-        if (currentVal !== "") {
-            const items = Array.from(yearsDropdown.querySelectorAll('li'));
             const match = items.find(li => li.textContent == currentVal);
             if (match) {
                 match.scrollIntoView({ block: 'center' });
@@ -152,55 +91,31 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 150);
     }
 
-    function hideYearsDropdown() {
-        setTimeout(() => {
-            yearsDropdown.classList.remove('show');
-        }, 150);
-    }
-
-    // Input Listeners for Basic Pay
+    // Input Listeners
     basicPayInput.addEventListener('focus', function () {
         this.select();
         showDropdown();
     });
+
     basicPayInput.addEventListener('click', function () {
         this.select();
         showDropdown();
     });
+
     basicPayInput.addEventListener('input', function () {
+        // If typing manual value
         calculate();
+        // Filter the list live
         renderDropdown(this.value);
         dropdown.classList.add('show');
     });
+
     basicPayInput.addEventListener('blur', function () {
         if (this.value.trim() === "") {
             this.value = this.dataset.lastValid || "";
             calculate();
         }
         hideDropdown();
-    });
-
-    // Input Listeners for Years
-    yearsInput.addEventListener('focus', function () {
-        this.select();
-        showYearsDropdown();
-    });
-    yearsInput.addEventListener('click', function () {
-        this.select();
-        showYearsDropdown();
-    });
-    yearsInput.addEventListener('input', function () {
-        calculate();
-        renderYearsDropdown(this.value);
-        yearsDropdown.classList.add('show');
-    });
-    yearsInput.addEventListener('blur', function () {
-        if (this.value.trim() === "") {
-            // If empty, we can leave it empty or set to 0. User said "prefilled with non".
-            // Let's keep it empty if they cleared it.
-            calculate();
-        }
-        hideYearsDropdown();
     });
 
     // Fetch external data if available
@@ -245,21 +160,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // After Revision Calculations
         const daMergedVal = Math.round(bp * (daMergedPerc / 100));
         const fitmentVal = Math.round(bp * (fitmentPerc / 100));
-
-        // Service Weightage: 0.5% per year of service, Max 15%
-        // Only if checked
-        const isWeightageEnabled = document.getElementById('weightage-check')?.checked;
-        let weightageVal = 0;
-        let weightagePerc = 0;
-
-        if (isWeightageEnabled) {
-            const yearsService = parseFloat(document.getElementById('years-service').value) || 0;
-            weightagePerc = yearsService * 0.5;
-            if (weightagePerc > 15) weightagePerc = 15; // Cap at 15%
-            weightageVal = Math.round(bp * (weightagePerc / 100));
-        }
-
-        const actualTotal = bp + daMergedVal + fitmentVal + weightageVal;
+        const actualTotal = bp + daMergedVal + fitmentVal;
 
         // BP Fixed At: Rounded to next multiple of 100
         const bpFixed = Math.ceil(actualTotal / 100) * 100;
@@ -276,20 +177,13 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('res-bp-new').textContent = bp;
         document.getElementById('res-da-merged').textContent = daMergedVal;
         document.getElementById('res-fitment').textContent = fitmentVal;
-        if (isWeightageEnabled) {
-            document.querySelector('#res-weightage-row .label').textContent = `Service Weightage (${weightagePerc.toFixed(1)}%)`;
-        }
-        document.getElementById('res-weightage').textContent = weightageVal;
         document.getElementById('res-actual-total').textContent = actualTotal;
         document.getElementById('res-bp-fixed').textContent = bpFixed;
         document.getElementById('res-bal-da').textContent = balDaVal;
         document.getElementById('res-hra-new').textContent = hraNewVal;
         document.getElementById('res-gross-new').textContent = grossNew;
 
-        // Update Before UI (already done earlier but ensuring consistency)
-        document.getElementById('res-gross-old').textContent = grossOld;
-
-        // Summary Card
+        // Summary Cards
         document.getElementById('gross-new-val').textContent = grossNew;
         document.getElementById('gross-old-val').textContent = grossOld;
         document.getElementById('growth-val').textContent = `${growth} (${growthPerc}%)`;
@@ -335,8 +229,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // 2. Data Extraction
             const bp = document.getElementById('basic-pay-in').value || "0";
-            const oldGross = document.getElementById('gross-old-val').textContent || "0";
-            const newGross = document.getElementById('gross-new-val').textContent || "0";
+            const oldGross = document.getElementById('res-gross-old').textContent || "0";
+            const newGross = document.getElementById('res-gross-new').textContent || "0";
             const growth = document.getElementById('growth-val').textContent || "0";
             const revisedBp = document.getElementById('res-bp-fixed').textContent || "0";
 
@@ -373,39 +267,25 @@ document.addEventListener('DOMContentLoaded', () => {
             const daMerged = document.getElementById('res-da-merged').textContent || "0";
             const fitmentP = document.getElementById('fitment-perc').value || "0";
             const fitmentV = document.getElementById('res-fitment').textContent || "0";
-            const yearsService = document.getElementById('years-service').value || "0";
-            const weightageV = document.getElementById('res-weightage').textContent || "0";
             const actualTotal = document.getElementById('res-actual-total').textContent || "0";
             const balDaP = document.getElementById('bal-da-perc').value || "0";
             const balDaV = document.getElementById('res-bal-da').textContent || "0";
             const hraP = document.getElementById('hra-perc').value || "0";
             const hraV = document.getElementById('res-hra-new').textContent || "0";
 
-
-            const isWeightageChecked = document.getElementById('weightage-check')?.checked;
-
-            const fixationRows = [
-                ['Base Basic Pay', '-', 'Rs. ' + bp],
-                ['DA Merged', '31 %', 'Rs. ' + daMerged],
-                ['Fitment Benefit', fitmentP + ' %', 'Rs. ' + fitmentV]
-            ];
-
-            if (isWeightageChecked) {
-                fixationRows.push(['Service Weightage', yearsService + ' Yrs', 'Rs. ' + weightageV]);
-            }
-
-            fixationRows.push(
-                ['Total Calculation', 'Sum', 'Rs. ' + actualTotal],
-                ['BP Fixed At', 'Round Next 100', 'Rs. ' + revisedBp],
-                ['Balance DA', balDaP + ' %', 'Rs. ' + balDaV],
-                ['HRA', hraP + ' %', 'Rs. ' + hraV],
-                ['Gross Salary', '-', 'Rs. ' + newGross]
-            );
-
             doc.autoTable({
                 startY: doc.lastAutoTable.finalY + 20,
                 head: [['Fixation Step', 'Info', 'Amount']],
-                body: fixationRows,
+                body: [
+                    ['Base Basic Pay', '-', 'Rs. ' + bp],
+                    ['DA Merged', '31 %', 'Rs. ' + daMerged],
+                    ['Fitment Benefit', fitmentP + ' %', 'Rs. ' + fitmentV],
+                    ['Total Calculation', 'Sum', 'Rs. ' + actualTotal],
+                    ['BP Fixed At', 'Round Next 100', 'Rs. ' + revisedBp],
+                    ['Balance DA', balDaP + ' %', 'Rs. ' + balDaV],
+                    ['HRA', hraP + ' %', 'Rs. ' + hraV],
+                    ['Gross Salary', '-', 'Rs. ' + newGross]
+                ],
                 theme: 'grid',
                 headStyles: { fillColor: [75, 85, 99] },
                 columnStyles: { 2: { halign: 'right' } }

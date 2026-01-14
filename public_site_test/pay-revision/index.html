@@ -35,98 +35,80 @@
                 </div>
             </div>
         </header>
-        <!-- Step 1: Data Entry -->
-        <div class="step-header" style="margin: 0.5rem 0 0.85rem 0; display: flex; align-items: center; gap: 0.75rem;">
-            <div
-                style="background: var(--primary); color: white; width: 26px; height: 26px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 0.85rem; flex-shrink: 0; box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);">
-                1</div>
-            <div style="display: flex; flex-direction: column;">
-                <span
-                    style="font-size: 0.8rem; font-weight: 800; color: var(--text-main); text-transform: uppercase; letter-spacing: 0.5px; line-height: 1;">Employee
-                    Details</span>
-                <span style="font-size: 0.6rem; color: var(--text-muted); font-weight: 500;">Enter Initial Basic Pay &
-                    Parameters</span>
-            </div>
-        </div>
-
         <!-- Professional Configuration Dashboard -->
-        <div class="input-main-card"
-            style="padding: 1rem; background: linear-gradient(145deg, rgba(30, 41, 59, 1), rgba(15, 23, 42, 1)); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 1rem; box-shadow: 0 10px 25px rgba(0,0,0,0.3);">
+        <div class="input-main-card" style="padding: 1.25rem;">
             <div class="dashboard-header"
-                style="margin-bottom: 1rem; display: grid; grid-template-columns: 1fr 100px; gap: 0.75rem;">
+                style="margin-bottom: 1.5rem; display: grid; grid-template-columns: 1fr 140px; gap: 1rem; align-items: stretch;">
                 <!-- 1. Primary Input -->
-                <div class="input-field primary-input" style="gap: 0.3rem; padding: 0;">
+                <div class="input-field primary-input" style="align-items: flex-start; gap: 0.5rem; margin-bottom: 0;">
                     <label
-                        style="font-size: 0.65rem; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 1px;">Initial
+                        style="font-size: 0.9rem; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px;">Initial
                         Basic Pay</label>
-                    <div class="input-wrapper" style="width: 100%;">
-                        <input type="number" id="basic-pay-in" placeholder="Amount" autocomplete="off"
-                            style="width: 100%; font-size: 1.15rem; height: 48px; border-radius: 0.6rem; border: 2px solid var(--primary); background: #000; color: #fff; font-weight: 800; padding: 0 0.75rem; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);">
+                    <div class="input-wrapper" style="max-width: 100%;">
+                        <input type="number" id="basic-pay-in" value="" placeholder="Enter Amount" step="100"
+                            autocomplete="off"
+                            style="max-width: 100%; text-align: left; padding-left: 1.25rem; font-size: 1.6rem; height: 60px; border-width: 2px; border-color: rgba(59, 130, 246, 0.4);">
                         <ul id="custom-dropdown" class="custom-dropdown"></ul>
                     </div>
                 </div>
 
                 <!-- 2. Primary KPI (Result) -->
                 <div class="revised-bp-display"
-                    style="background: rgba(244, 63, 94, 0.1); border: 1.5px solid rgba(244, 63, 94, 0.3); border-radius: 0.85rem; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 0.25rem; text-align: center;">
-                    <span
-                        style="font-size: 0.5rem; color: #f43f5e; font-weight: 800; text-transform: uppercase;">Revised
-                        BP</span>
-                    <span id="revised-bp-val"
-                        style="font-size: 1.25rem; color: #f43f5e; font-weight: 900; line-height: 1;">0</span>
+                    style="background: rgba(244, 63, 94, 0.08); border: 1px solid rgba(244, 63, 94, 0.3); border-radius: 1rem; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 0.75rem; text-align: center; box-shadow: 0 4px 15px rgba(244, 63, 94, 0.1);">
+                    <span class="label"
+                        style="font-size: 0.65rem; color: #f43f5e; font-weight: 800; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.5px;">Revised
+                        Bp</span>
+                    <span id="revised-bp-val" class="value highlight"
+                        style="font-size: 1.8rem; line-height: 1; color: #f43f5e;">0</span>
                 </div>
             </div>
 
             <!-- Configuration Parameters -->
             <div class="secondary-configs-box"
-                style="background: rgba(255, 255, 255, 0.03); border-radius: 0.75rem; padding: 0.75rem; border: 1px solid rgba(255, 255, 255, 0.05); display: flex; flex-direction: column; gap: 0.75rem;">
+                style="background: rgba(255, 255, 255, 0.02); border-radius: 1rem; padding: 1.25rem; border: 1px solid rgba(255, 255, 255, 0.05); display: flex; flex-direction: column; gap: 1rem;">
+
+                <!-- Fitment Parameter -->
                 <div class="input-field row-input"
-                    style="display: grid; grid-template-columns: 1.2fr 85px 0px; gap: 0.5rem; align-items: center; padding: 0;">
-                    <label style="color: var(--text-main); font-weight: 700; font-size: 0.8rem;">Fitment %</label>
-                    <div class="input-with-val" style="margin: 0;">
+                    style="grid-template-columns: 1.2fr 110px 0px; gap: 1rem; padding: 0;">
+                    <label style="color: var(--text-main); font-weight: 600; font-size: 0.95rem;">Fitment
+                        Percentage</label>
+                    <div class="input-with-val">
                         <input type="number" id="fitment-perc" value="7" step="0.5"
-                            style="text-align: center; height: 32px; font-size: 0.95rem;">
-                        <span class="unit" style="font-weight: 800; color: var(--primary);">%</span>
+                            style="text-align: center; font-size: 1.1rem; border-color: var(--primary); height: 40px;">
+                        <span class="unit" style="font-weight: 700; color: var(--primary);">%</span>
                     </div>
+                    <span></span>
                 </div>
 
-                <div class="weightage-logic-group" style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <!-- Service Weightage Toggle & Input -->
+                <div class="weightage-logic-group" style="display: flex; flex-direction: column; gap: 1rem;">
                     <div class="input-field row-input"
-                        style="display: grid; grid-template-columns: 1.2fr 85px 0px; gap: 0.5rem; align-items: center; padding: 0;">
+                        style="grid-template-columns: 1.2fr 110px 0px; gap: 1rem; padding: 0;">
                         <label for="weightage-check"
-                            style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Service
+                            style="font-size: 0.9rem; color: var(--text-muted); font-weight: 500;">Consider Service
                             Weightage?</label>
-                        <div style="display: flex; justify-content: center;"><input type="checkbox" id="weightage-check"
-                                style="width: 18px; height: 18px; accent-color: var(--primary);"></div>
-                    </div>
-                    <div class="input-field row-input" id="weightage-container"
-                        style="display: none; padding-top: 0.75rem; border-top: 1px dashed rgba(255,255,255,0.1); grid-template-columns: 1.2fr 85px 0px; gap: 0.5rem; align-items: center;">
-                        <label style="font-size: 0.8rem; color: var(--text-main); font-weight: 700;">Years
-                            Category</label>
-                        <div class="input-wrapper" style="width: 100%;">
-                            <div class="input-with-val" style="margin: 0;">
-                                <input type="number" id="years-service" placeholder="Years"
-                                    style="text-align: center; height: 32px; font-size: 0.95rem;"><span class="unit"
-                                    style="font-weight: 800;">Yrs</span>
-                            </div>
-                            <ul id="years-dropdown" class="custom-dropdown"></ul>
+                        <div style="display: flex; justify-content: center; align-items: center;">
+                            <input type="checkbox" id="weightage-check"
+                                style="width: 24px; height: 24px; cursor: pointer; accent-color: var(--primary);">
                         </div>
+                        <span></span>
+                    </div>
+
+                    <div class="input-field row-input" id="weightage-container"
+                        style="display: none; padding-top: 1rem; border-top: 1px dashed rgba(255,255,255,0.08); grid-template-columns: 1.2fr 110px 0px; gap: 1rem;">
+                        <label style="font-size: 0.9rem; color: var(--text-main); font-weight: 600;">Qualifying
+                            Service</label>
+                        <div class="input-wrapper" style="max-width: 100%;">
+                            <div class="input-with-val">
+                                <input type="number" id="years-service" value="" placeholder="None" step="1"
+                                    style="text-align: center; height: 40px;" autocomplete="off">
+                                <span class="unit" style="font-weight: 700;">Yrs</span>
+                            </div>
+                            <ul id="years-dropdown" class="custom-dropdown" style="max-height: 180px;"></ul>
+                        </div>
+                        <span></span>
                     </div>
                 </div>
-            </div>
-        </div>
-
-        <!-- Step 2: Visualization -->
-        <div class="step-header" style="margin: 1.25rem 0 0.75rem 0; display: flex; align-items: center; gap: 0.75rem;">
-            <div
-                style="background: var(--growth-color); color: white; width: 26px; height: 26px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 0.85rem; flex-shrink: 0; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);">
-                2</div>
-            <div style="display: flex; flex-direction: column;">
-                <span
-                    style="font-size: 0.8rem; font-weight: 800; color: var(--text-main); text-transform: uppercase; letter-spacing: 0.5px; line-height: 1;">Calculation
-                    Results</span>
-                <span style="font-size: 0.6rem; color: var(--text-muted); font-weight: 500;">Review Detailed
-                    Breakdown</span>
             </div>
         </div>
 
@@ -155,10 +137,9 @@
                         <span id="res-fitment" class="value" style="text-align: right;">0</span>
                     </div>
                     <div class="result-row" id="res-weightage-row"
-                        style="display: none; grid-template-columns: 1.2fr 1fr; align-items: center; border-bottom: 2px solid rgba(59, 130, 246, 0.3); background: rgba(59, 130, 246, 0.1); padding: 0.6rem 0.5rem; border-radius: 0.4rem; margin: 0.2rem 0;">
-                        <span class="label" style="color: var(--primary); font-weight: 700;">Service Weightage</span>
-                        <span id="res-weightage" class="value"
-                            style="text-align: right; color: var(--primary); font-weight: 800;">0</span>
+                        style="display: none; grid-template-columns: 1.2fr 1fr; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.03); padding: 0.5rem 0;">
+                        <span class="label">Service Weightage</span>
+                        <span id="res-weightage" class="value" style="text-align: right;">0</span>
                     </div>
 
                     <div class="result-row highlight-row"

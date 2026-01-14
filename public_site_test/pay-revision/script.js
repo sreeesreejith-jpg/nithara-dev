@@ -276,9 +276,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('res-bp-new').textContent = bp;
         document.getElementById('res-da-merged').textContent = daMergedVal;
         document.getElementById('res-fitment').textContent = fitmentVal;
-        if (isWeightageEnabled) {
-            document.querySelector('#res-weightage-row .label').textContent = `Service Weightage (${weightagePerc.toFixed(1)}%)`;
-        }
         document.getElementById('res-weightage').textContent = weightageVal;
         document.getElementById('res-actual-total').textContent = actualTotal;
         document.getElementById('res-bp-fixed').textContent = bpFixed;
