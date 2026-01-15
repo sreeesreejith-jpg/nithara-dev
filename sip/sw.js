@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sip-calc-v2';
+const CACHE_NAME = 'sip-calc-v3';
 const ASSETS = [
     './',
     './index.html',
@@ -8,7 +8,12 @@ const ASSETS = [
     './icon-512.png',
     './icon-192.png',
     './manifest.json',
-    './screenshot.png'
+    './screenshot.png',
+    '../js/pdf-helper.js',
+    '../js/jspdf.umd.min.js',
+    '../js/jspdf.plugin.autotable.min.js',
+    '../capacitor.js',
+    '../capacitor-handler.js'
 ];
 
 self.addEventListener('install', (e) => {

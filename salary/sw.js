@@ -1,11 +1,16 @@
-const CACHE_NAME = 'salary-v3';
+const CACHE_NAME = 'salary-v4';
 const ASSETS = [
     './',
     './index.html',
     './style.css?v=1.0',
     './script.js?v=1.0',
     './manifest.json',
-    '../icon-192.png'
+    '../icon-192.png',
+    '../js/pdf-helper.js',
+    '../js/jspdf.umd.min.js',
+    '../js/jspdf.plugin.autotable.min.js',
+    '../capacitor.js',
+    '../capacitor-handler.js'
 ];
 
 self.addEventListener('install', (event) => {

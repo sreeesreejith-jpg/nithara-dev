@@ -1,10 +1,15 @@
-const CACHE_NAME = 'pay-rev-v8';
+const CACHE_NAME = 'pay-rev-v9';
 const ASSETS = [
     'index.html',
     'style.css',
     'script.js',
     'manifest.json',
-    '../icon-192.png'
+    '../icon-192.png',
+    '../js/pdf-helper.js',
+    '../js/jspdf.umd.min.js',
+    '../js/jspdf.plugin.autotable.min.js',
+    '../capacitor.js',
+    '../capacitor-handler.js'
 ];
 
 self.addEventListener('install', (event) => {

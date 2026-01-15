@@ -1,3 +1,4 @@
+// Pay Revision Script v1.6
 document.addEventListener('DOMContentLoaded', () => {
     const inputs = [
         'basic-pay-in',
@@ -685,7 +686,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await generatePDFResult();
             await window.PDFHelper.download(result.blob, `${result.title}.pdf`);
         } catch (err) {
-            alert("Error generating PDF for download.");
+            console.error("PayRevision PDF Generation Error:", err);
+            alert("Error generating PDF: " + (err.message || "Please check your inputs."));
         } finally {
             if (btn) {
                 btn.innerHTML = originalText;
@@ -706,9 +708,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await generatePDFResult();
             await window.PDFHelper.share(result.blob, `${result.title}.pdf`, 'Pay Revision Report');
         } catch (err) {
-            console.error("Share error:", err);
-            if (err.name !== 'AbortError' && !err.toString().includes('AbortError')) {
-                alert("Sharing failed. Try 'Download PDF' instead.");
+            console.error("PayRevision Share Error:", err);
+            const errMsg = err.message || err.toString();
+            if (err.name !== 'AbortError' && !errMsg.includes('AbortError')) {
+                alert("Sharing failed: " + errMsg + "\n\nPlease try 'Download PDF' instead.");
             }
         } finally {
             if (btn) {

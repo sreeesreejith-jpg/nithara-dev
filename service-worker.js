@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nithara-app-v13';
+const CACHE_NAME = 'nithara-app-v14';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
@@ -29,7 +29,13 @@ const ASSETS_TO_CACHE = [
     './housing/script.js',
     './sip/index.html',
     './sip/style.css',
-    './sip/script.js'
+    './sip/script.js',
+    // Library and Helper scripts
+    './js/pdf-helper.js',
+    './js/jspdf.umd.min.js',
+    './js/jspdf.plugin.autotable.min.js',
+    './capacitor.js',
+    './capacitor-handler.js'
 ];
 
 // Install Event

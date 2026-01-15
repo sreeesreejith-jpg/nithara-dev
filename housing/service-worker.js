@@ -1,4 +1,4 @@
-const CACHE_NAME = 'housing-emi-v2';
+const CACHE_NAME = 'housing-emi-v3';
 const urlsToCache = [
     './',
     './index.html',
@@ -8,7 +8,12 @@ const urlsToCache = [
     './icon-1024.jpg',
     './icon-512.png',
     './icon-192.png',
-    './screenshot.png'
+    './screenshot.png',
+    '../js/pdf-helper.js',
+    '../js/jspdf.umd.min.js',
+    '../js/jspdf.plugin.autotable.min.js',
+    '../capacitor.js',
+    '../capacitor-handler.js'
 ];
 
 // Install event - cache resources

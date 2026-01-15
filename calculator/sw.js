@@ -1,4 +1,4 @@
-const CACHE_NAME = 'calc-v4';
+const CACHE_NAME = 'calc-v5';
 const ASSETS = [
     './',
     './index.html',
@@ -6,7 +6,12 @@ const ASSETS = [
     './script.js',
     './manifest.json',
     './icon-192.png',
-    './icon-512.png'
+    './icon-512.png',
+    '../js/pdf-helper.js',
+    '../js/jspdf.umd.min.js',
+    '../js/jspdf.plugin.autotable.min.js',
+    '../capacitor.js',
+    '../capacitor-handler.js'
 ];
 
 self.addEventListener('install', (e) => {
