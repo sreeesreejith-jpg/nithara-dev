@@ -123,20 +123,29 @@ window.PDFHelper = {
 
             } else {
                 console.log('Browser download initiated');
+                const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
                 const url = URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = safeFileName;
-                link.style.display = 'none';
-                document.body.appendChild(link);
-                link.click();
 
-                setTimeout(() => {
-                    document.body.removeChild(link);
-                    URL.revokeObjectURL(url);
-                }, 1000);
+                if (isMobile) {
+                    // On mobile, direct redirection is often more reliable than a link click
+                    window.location.href = url;
+                    console.log('Mobile browser: Redirected to PDF blob URL');
+                    return { success: true, method: 'browser-mobile-open' };
+                } else {
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = safeFileName;
+                    link.style.display = 'none';
+                    document.body.appendChild(link);
+                    link.click();
 
-                return { success: true, method: 'browser-download' };
+                    setTimeout(() => {
+                        document.body.removeChild(link);
+                        URL.revokeObjectURL(url);
+                    }, 5000); // Increased timeout for stability
+
+                    return { success: true, method: 'browser-download' };
+                }
             }
         } catch (err) {
             console.error("PDFHelper Download Error:", err);
