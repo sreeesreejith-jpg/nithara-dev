@@ -49,30 +49,14 @@ window.PDFHelper = {
 
                 return { success: true, method: 'native-share' };
 
-            } else if (navigator.share) {
-                console.log('Web Share API detected');
-                const file = new File([blob], safeFileName, { type: 'application/pdf' });
-
-                // Check if canShare is supported and returns true
-                if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                    await navigator.share({
-                        files: [file],
-                        title: title || 'Report',
-                        text: 'PDF Report'
-                    });
-                    return { success: true, method: 'web-share' };
-                } else {
-                    console.warn('navigator.share available but file sharing NOT supported. Falling back.');
-                    return await this.download(blob, safeFileName);
-                }
             } else {
-                console.log('No sharing API available, falling back to download');
+                // WEB FALLBACK: Do not use navigator.share for files on mobile (flaky support)
+                // Direct download is safer and more consistent.
+                console.log('Web environment: using download fallback');
                 return await this.download(blob, safeFileName);
             }
         } catch (err) {
             console.error("PDFHelper Share Error:", err);
-            // If share fails (e.g. user cancelled or empty message error), fallback to download
-            // UNLESS it was a user abort
             if (err.name !== 'AbortError') {
                 alert("Share failed (" + err.message + "). Attempting to save file instead...");
                 return await this.download(blob, safeFileName);
@@ -109,39 +93,28 @@ window.PDFHelper = {
                 });
 
                 console.log('Native save success:', fileResult.uri);
-                // Important: Show where it is saved
                 alert("✅ Saved to Documents!\n\nFile: " + safeFileName);
-
-                // Try to open it immediately if possible (optional, but good UX)
-                try {
-                    if (cap.Plugins.FileOpener) {
-                        // If FileOpener plugin existed, we'd use it. Without it, just Alert is safest.
-                    }
-                } catch (e) { }
 
                 return { success: true, method: 'native-save', uri: fileResult.uri };
 
             } else {
                 console.log('Browser download initiated');
 
-                // Method 1: Anchor Tag (Standard)
-                const url = URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = safeFileName;
-                document.body.appendChild(link);
-                link.click();
+                // DATA URL METHOD (More compatible with mobile Chrome than Blob URL)
+                const reader = new FileReader();
+                reader.onloadend = function () {
+                    const dataUrl = reader.result;
+                    const link = document.createElement('a');
+                    link.href = dataUrl;
+                    link.download = safeFileName;
+                    document.body.appendChild(link);
+                    link.click();
 
-                // Validation: Some mobile browsers ignore the click
-                // We set a backup timeout to open in new tab if download doesn't trigger? 
-                // Hard to detect. Instead, we can provide a manual link if needed.
-                // For now, let's keep the standard anchor click but cleanup cleaner.
-
-                setTimeout(() => {
-                    document.body.removeChild(link);
-                    // Do NOT revoke immediately on mobile, sometimes it breaks the download stream
-                    setTimeout(() => URL.revokeObjectURL(url), 10000);
-                }, 100);
+                    setTimeout(() => {
+                        document.body.removeChild(link);
+                    }, 1000);
+                };
+                reader.readAsDataURL(blob);
 
                 return { success: true, method: 'browser-download' };
             }
