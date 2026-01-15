@@ -122,18 +122,21 @@ window.PDFHelper = {
                 return { success: true, method: 'native-save', uri: fileResult.uri };
 
             } else {
-                console.log('Browser download initiated');
+                console.log('Browser download initiated (Data URL method)');
                 const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-                const url = URL.createObjectURL(blob);
+
+                // Convert to Data URL (Base64) - much more compatible for mobile PWA handovers
+                const base64Data = await this._blobToBase64(blob);
+                const dataUrl = `data:application/pdf;base64,${base64Data}`;
 
                 if (isMobile) {
-                    // On mobile, direct redirection is often more reliable than a link click
-                    window.location.href = url;
-                    console.log('Mobile browser: Redirected to PDF blob URL');
-                    return { success: true, method: 'browser-mobile-open' };
+                    // Create a clickable element as a backup, but usually location.href works for Data URLs
+                    console.log('Mobile browser: Opening via Base64 Data URL');
+                    window.location.href = dataUrl;
+                    return { success: true, method: 'browser-mobile-dataurl-open' };
                 } else {
                     const link = document.createElement('a');
-                    link.href = url;
+                    link.href = dataUrl;
                     link.download = safeFileName;
                     link.style.display = 'none';
                     document.body.appendChild(link);
@@ -141,10 +144,9 @@ window.PDFHelper = {
 
                     setTimeout(() => {
                         document.body.removeChild(link);
-                        URL.revokeObjectURL(url);
-                    }, 5000); // Increased timeout for stability
+                    }, 5000);
 
-                    return { success: true, method: 'browser-download' };
+                    return { success: true, method: 'browser-download-dataurl' };
                 }
             }
         } catch (err) {
