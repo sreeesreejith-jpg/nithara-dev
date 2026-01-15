@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nithara-sip-calc-v4';
+const CACHE_NAME = 'nithara-reset-final';
 const CACHE_PREFIX = 'nithara-sip-calc-';
 const ASSETS = [
     './',

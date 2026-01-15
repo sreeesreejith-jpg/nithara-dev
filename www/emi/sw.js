@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nithara-emi-calc-v4';
+const CACHE_NAME = 'nithara-reset-final';
 const CACHE_PREFIX = 'nithara-emi-calc-';
 const ASSETS = [
     './',

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nithara-pension-calc-v7';
+const CACHE_NAME = 'nithara-reset-final';
 const CACHE_PREFIX = 'nithara-pension-calc-';
 const ASSETS = [
     './',
@@ -10,9 +10,9 @@ const ASSETS = [
     './icon-192.png',
     './icon-1024.jpg',
     './screenshot.png',
-    '../js/pdf-helper.js',
-    '../js/jspdf.umd.min.js',
-    '../js/jspdf.plugin.autotable.min.js'
+    '../pdf-helper.js',
+    '../jspdf.umd.min.js',
+    '../jspdf.plugin.autotable.min.js'
 ];
 
 

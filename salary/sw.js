@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nithara-salary-v5';
+const CACHE_NAME = 'nithara-reset-final';
 const CACHE_PREFIX = 'nithara-salary-';
 const ASSETS = [
     './',
