@@ -98,25 +98,27 @@ window.PDFHelper = {
                 return { success: true, method: 'native-save', uri: fileResult.uri };
 
             } else {
-                console.log('Browser download initiated');
+                console.log('Browser download initiated (Opening in new tab)');
 
-                // DATA URL METHOD (More compatible with mobile Chrome than Blob URL)
-                const reader = new FileReader();
-                reader.onloadend = function () {
-                    const dataUrl = reader.result;
+                const url = URL.createObjectURL(blob);
+
+                // Attempt 1: Open directly (Best for Mobile Chrome)
+                const newWindow = window.open(url, '_blank');
+
+                if (!newWindow || newWindow.closed || typeof newWindow.closed == 'undefined') {
+                    // Popup blocked? Fallback to Anchor click
+                    console.warn('Popup blocked, falling back to anchor click');
                     const link = document.createElement('a');
-                    link.href = dataUrl;
+                    link.href = url;
                     link.download = safeFileName;
                     document.body.appendChild(link);
                     link.click();
+                    setTimeout(() => document.body.removeChild(link), 100);
+                } else {
+                    // Success - user sees PDF
+                }
 
-                    setTimeout(() => {
-                        document.body.removeChild(link);
-                    }, 1000);
-                };
-                reader.readAsDataURL(blob);
-
-                return { success: true, method: 'browser-download' };
+                return { success: true, method: 'browser-open' };
             }
         } catch (err) {
             console.error("PDFHelper Download Error:", err);
