@@ -6,8 +6,13 @@ window.PDFHelper = {
         console.log('PDFHelper.share initiation', { fileName, size: blob.size });
 
         const cap = window.Capacitor;
-        // Robust Native Check
         const isNative = !!(cap && (cap.isNative || (cap.getPlatform && cap.getPlatform() !== 'web')) && cap.Plugins && cap.Plugins.Filesystem && cap.Plugins.Share);
+
+        // Debug help:
+        if (!cap && /android/i.test(navigator.userAgent)) {
+            console.warn("Capacitor bridge not detected in Android environment");
+            // alert("DEBUG: Capacitor Bridge Missing! PDF functions may fail.");
+        }
 
         if (!fileName.toLowerCase().endsWith('.pdf')) {
             fileName += '.pdf';
@@ -87,6 +92,11 @@ window.PDFHelper = {
 
         const cap = window.Capacitor;
         const isNative = !!(cap && (cap.isNative || (cap.getPlatform && cap.getPlatform() !== 'web')) && cap.Plugins && cap.Plugins.Filesystem);
+
+        // Debug help:
+        if (!cap && /android/i.test(navigator.userAgent)) {
+            console.warn("Capacitor bridge not detected in Android environment");
+        }
 
         if (!fileName.toLowerCase().endsWith('.pdf')) {
             fileName += '.pdf';

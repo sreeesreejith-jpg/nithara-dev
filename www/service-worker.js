@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nithara-main-v16';
+const CACHE_NAME = 'nithara-main-v17';
 const CACHE_PREFIX = 'nithara-main-';
 const ASSETS_TO_CACHE = [
     './',
