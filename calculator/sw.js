@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nithara-calc-v5';
+const CACHE_NAME = 'nithara-calc-v6';
 const CACHE_PREFIX = 'nithara-calc-';
 const ASSETS = [
     './',
@@ -10,10 +10,9 @@ const ASSETS = [
     './icon-512.png',
     '../js/pdf-helper.js',
     '../js/jspdf.umd.min.js',
-    '../js/jspdf.plugin.autotable.min.js',
-    '../capacitor.js',
-    '../capacitor-handler.js'
+    '../js/jspdf.plugin.autotable.min.js'
 ];
+
 
 self.addEventListener('install', (e) => {
     e.waitUntil(

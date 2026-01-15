@@ -1,14 +1,17 @@
-const CACHE_NAME = 'nithara-main-v15';
+const CACHE_NAME = 'nithara-main-v16';
 const CACHE_PREFIX = 'nithara-main-';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
     './style.css',
     './manifest.json',
-    './capacitor-handler.js',
     './icon-192.png',
     './icon-512.png',
     './icon-maskable.png',
+    // Core JS Libraries
+    './js/pdf-helper.js',
+    './js/jspdf.umd.min.js',
+    './js/jspdf.plugin.autotable.min.js',
     // Cache entry points for sub-apps
     './calculator/index.html',
     './calculator/style.css',
@@ -32,10 +35,6 @@ const ASSETS_TO_CACHE = [
     './sip/style.css',
     './sip/script.js',
     // Library and Helper scripts
-    './js/pdf-helper.js',
-    './js/jspdf.umd.min.js',
-    './js/jspdf.plugin.autotable.min.js',
-    './capacitor.js',
     './capacitor-handler.js'
 ];
 

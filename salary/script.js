@@ -209,8 +209,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const generatePDFResult = async () => {
         try {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
+            const jsPDFLib = window.jsPDF || (window.jspdf ? window.jspdf.jsPDF : null);
+            if (!jsPDFLib) throw new Error("PDF Library not loaded");
+            const doc = new jsPDFLib();
             const reportTitle = "Salary_Report_" + new Date().getTime();
 
             // 1. Header with styling

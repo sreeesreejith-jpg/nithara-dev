@@ -3,9 +3,11 @@ window.PDFHelper = {
      * Share a PDF blob using Capacitor or Web Share API
      */
     share: async function (blob, fileName, title) {
-        console.log('PDFHelper.share initiation', { fileName });
+        console.log('PDFHelper.share initiation', { fileName, size: blob.size });
+
         const cap = window.Capacitor;
-        const isNative = !!(cap && (cap.isNative || (cap.Plugins && cap.Plugins.Filesystem)));
+        // Robust Native Check
+        const isNative = !!(cap && (cap.isNative || (cap.getPlatform && cap.getPlatform() !== 'web')) && cap.Plugins && cap.Plugins.Filesystem && cap.Plugins.Share);
 
         if (!fileName.toLowerCase().endsWith('.pdf')) {
             fileName += '.pdf';
@@ -13,40 +15,41 @@ window.PDFHelper = {
         const safeFileName = fileName.replace(/[^a-z0-9.]/gi, '_');
 
         try {
-            if (isNative && cap.Plugins && cap.Plugins.Filesystem && cap.Plugins.Share) {
+            if (isNative) {
                 console.log('Native sharing detected');
 
-                // 1. Request/Check Permissions
+                // 1. Permission Check
                 try {
-                    const status = await cap.Plugins.Filesystem.checkPermissions();
-                    if (status.publicStorage !== 'granted') {
-                        await cap.Plugins.Filesystem.requestPermissions();
+                    if (cap.Plugins.Filesystem.checkPermissions) {
+                        const status = await cap.Plugins.Filesystem.checkPermissions();
+                        if (status.publicStorage !== 'granted' && status.storage !== 'granted') {
+                            await cap.Plugins.Filesystem.requestPermissions();
+                        }
                     }
                 } catch (pErr) {
-                    console.warn('Permission check failed, continuing anyway', pErr);
+                    console.warn('Permission check failed', pErr);
                 }
 
-                // 2. Convert Blob to Base64
+                // 2. Write to Cache (Required for Sharing)
                 const base64Data = await this._blobToBase64(blob);
-
-                // 3. Save to Temporary Directory
                 const fileResult = await cap.Plugins.Filesystem.writeFile({
                     path: safeFileName,
                     data: base64Data,
                     directory: 'CACHE'
                 });
 
-                console.log('Native file saved for sharing:', fileResult.uri);
+                console.log('Native file saved for share:', fileResult.uri);
 
-                // 4. Share
+                // 3. Share the File URI
                 await cap.Plugins.Share.share({
                     title: title || 'Report',
-                    text: 'View my calculation report from Nithara Apps',
-                    url: fileResult.uri,
-                    files: [fileResult.uri]
+                    text: 'View my calculation report',
+                    files: [fileResult.uri],
+                    dialogTitle: 'Share PDF'
                 });
 
                 return { success: true, method: 'native-share' };
+
             } else if (navigator.share) {
                 console.log('Web Share API detected');
                 const file = new File([blob], safeFileName, { type: 'application/pdf' });
@@ -54,24 +57,22 @@ window.PDFHelper = {
                 if (navigator.canShare && navigator.canShare({ files: [file] })) {
                     await navigator.share({
                         files: [file],
-                        title: title || 'Report'
+                        title: title || 'Report',
+                        text: 'PDF Report'
                     });
                     return { success: true, method: 'web-share' };
                 } else {
-                    console.log('Web Share API - no file support, fallback to download');
+                    console.warn('navigator.share available but file sharing NOT supported. Falling back.');
                     return await this.download(blob, safeFileName);
                 }
             } else {
-                console.log('No sharing API available, using download');
+                console.log('No sharing API available, falling back to download');
                 return await this.download(blob, safeFileName);
             }
         } catch (err) {
-            console.error("PDFHelper Share Error details:", err);
-            // Alert user if native share fails
-            if (isNative && err.name !== 'AbortError') {
-                alert("Share failed: " + (err.message || err.toString()) + "\n\nPlease try 'Download PDF' instead.");
-            }
-            if (err.name !== 'AbortError') {
+            console.error("PDFHelper Share Error:", err);
+            if (err.name !== 'AbortError' && !err.toString().includes('AbortError')) {
+                alert("Share failed (" + (err.message || 'Error') + "). Attempting download instead...");
                 return await this.download(blob, safeFileName);
             }
             throw err;
@@ -79,12 +80,13 @@ window.PDFHelper = {
     },
 
     /**
-     * Download/Save a PDF blob - enhanced for native support
+     * Download/Save a PDF blob
      */
     download: async function (blob, fileName) {
         console.log('PDFHelper.download initiation', { fileName });
+
         const cap = window.Capacitor;
-        const isNative = !!(cap && (cap.isNative || (cap.Plugins && cap.Plugins.Filesystem)));
+        const isNative = !!(cap && (cap.isNative || (cap.getPlatform && cap.getPlatform() !== 'web')) && cap.Plugins && cap.Plugins.Filesystem);
 
         if (!fileName.toLowerCase().endsWith('.pdf')) {
             fileName += '.pdf';
@@ -92,22 +94,10 @@ window.PDFHelper = {
         const safeFileName = fileName.replace(/[^a-z0-9.]/gi, '_');
 
         try {
-            if (isNative && cap.Plugins && cap.Plugins.Filesystem) {
+            if (isNative) {
                 console.log('Native save initiated');
-
-                // Check Permissions
-                try {
-                    const status = await cap.Plugins.Filesystem.checkPermissions();
-                    if (status.publicStorage !== 'granted') {
-                        await cap.Plugins.Filesystem.requestPermissions();
-                    }
-                } catch (pErr) {
-                    console.log('Permission error', pErr);
-                }
-
                 const base64Data = await this._blobToBase64(blob);
 
-                // Save to Documents (better for download)
                 const fileResult = await cap.Plugins.Filesystem.writeFile({
                     path: safeFileName,
                     data: base64Data,
@@ -116,11 +106,12 @@ window.PDFHelper = {
                 });
 
                 console.log('Native save success:', fileResult.uri);
-                alert("✅ Report saved successfully!\n\nFile: " + safeFileName + "\nLocation: Your Downloads/Documents folder.");
+                alert("✅ Saved to Documents!\n\nFile: " + safeFileName);
 
                 return { success: true, method: 'native-save', uri: fileResult.uri };
+
             } else {
-                console.log('Standard browser download initiated');
+                console.log('Browser download initiated');
                 const url = URL.createObjectURL(blob);
                 const link = document.createElement('a');
                 link.href = url;
@@ -137,13 +128,10 @@ window.PDFHelper = {
                 return { success: true, method: 'browser-download' };
             }
         } catch (err) {
-            console.error("PDFHelper Download Error details:", err);
-            if (isNative) {
-                alert("Download failed: " + (err.message || err.toString()));
-                // Ultimate fallback for native
-                const url = URL.createObjectURL(blob);
-                window.open(url, '_blank');
-            }
+            console.error("PDFHelper Download Error:", err);
+            const url = URL.createObjectURL(blob);
+            window.open(url, '_blank');
+            alert("Auto-download failed. Opening PDF in new tab if possible...");
             throw err;
         }
     },
@@ -156,7 +144,10 @@ window.PDFHelper = {
             const reader = new FileReader();
             reader.onload = () => {
                 const result = reader.result;
-                const base64 = typeof result === 'string' ? result.split(',')[1] : '';
+                if (!result || typeof result !== 'string') {
+                    return reject(new Error("FileReader result is empty"));
+                }
+                const base64 = result.includes(',') ? result.split(',')[1] : result;
                 resolve(base64);
             };
             reader.onerror = (err) => reject(err);
@@ -164,3 +155,4 @@ window.PDFHelper = {
         });
     }
 };
+

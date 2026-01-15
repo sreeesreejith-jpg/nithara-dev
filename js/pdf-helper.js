@@ -4,11 +4,10 @@ window.PDFHelper = {
      */
     share: async function (blob, fileName, title) {
         console.log('PDFHelper.share initiation', { fileName, size: blob.size });
-        // REMOVED DEBUG ALERT to reduce noise, assuming logic fix works.
 
         const cap = window.Capacitor;
-        // Strict Native Check: Must have Filesystem AND Share plugins
-        const isNative = !!(cap && cap.isNative && cap.Plugins && cap.Plugins.Filesystem && cap.Plugins.Share);
+        // Robust Native Check
+        const isNative = !!(cap && (cap.isNative || (cap.getPlatform && cap.getPlatform() !== 'web')) && cap.Plugins && cap.Plugins.Filesystem && cap.Plugins.Share);
 
         if (!fileName.toLowerCase().endsWith('.pdf')) {
             fileName += '.pdf';
@@ -19,14 +18,16 @@ window.PDFHelper = {
             if (isNative) {
                 console.log('Native sharing detected');
 
-                // 1. Permission Check (Best Effort)
+                // 1. Permission Check
                 try {
-                    const status = await cap.Plugins.Filesystem.checkPermissions();
-                    if (status.publicStorage !== 'granted') {
-                        await cap.Plugins.Filesystem.requestPermissions();
+                    if (cap.Plugins.Filesystem.checkPermissions) {
+                        const status = await cap.Plugins.Filesystem.checkPermissions();
+                        if (status.publicStorage !== 'granted' && status.storage !== 'granted') {
+                            await cap.Plugins.Filesystem.requestPermissions();
+                        }
                     }
                 } catch (pErr) {
-                    console.warn('Permission check failed, continuing', pErr);
+                    console.warn('Permission check failed', pErr);
                 }
 
                 // 2. Write to Cache (Required for Sharing)
@@ -34,7 +35,7 @@ window.PDFHelper = {
                 const fileResult = await cap.Plugins.Filesystem.writeFile({
                     path: safeFileName,
                     data: base64Data,
-                    directory: 'CACHE' // Sharing usually requires CACHE or EXTERNAL_CACHE
+                    directory: 'CACHE'
                 });
 
                 console.log('Native file saved for share:', fileResult.uri);
@@ -43,7 +44,7 @@ window.PDFHelper = {
                 await cap.Plugins.Share.share({
                     title: title || 'Report',
                     text: 'View my calculation report',
-                    url: fileResult.uri,
+                    files: [fileResult.uri], // Capacitor 5+ prefers files array
                     dialogTitle: 'Share PDF'
                 });
 
@@ -53,7 +54,6 @@ window.PDFHelper = {
                 console.log('Web Share API detected');
                 const file = new File([blob], safeFileName, { type: 'application/pdf' });
 
-                // Check if canShare is supported and returns true
                 if (navigator.canShare && navigator.canShare({ files: [file] })) {
                     await navigator.share({
                         files: [file],
@@ -71,8 +71,8 @@ window.PDFHelper = {
             }
         } catch (err) {
             console.error("PDFHelper Share Error:", err);
-            if (err.name !== 'AbortError') {
-                alert("Share failed (" + err.message + "). Attempting to save file instead...");
+            if (err.name !== 'AbortError' && !err.toString().includes('AbortError')) {
+                alert("Share failed (" + (err.message || 'Error') + "). Attempting download instead...");
                 return await this.download(blob, safeFileName);
             }
             throw err;
@@ -80,13 +80,13 @@ window.PDFHelper = {
     },
 
     /**
-     * Download/Save a PDF blob - enhanced for native support
+     * Download/Save a PDF blob
      */
     download: async function (blob, fileName) {
         console.log('PDFHelper.download initiation', { fileName });
 
         const cap = window.Capacitor;
-        const isNative = !!(cap && cap.isNative && cap.Plugins && cap.Plugins.Filesystem);
+        const isNative = !!(cap && (cap.isNative || (cap.getPlatform && cap.getPlatform() !== 'web')) && cap.Plugins && cap.Plugins.Filesystem);
 
         if (!fileName.toLowerCase().endsWith('.pdf')) {
             fileName += '.pdf';
@@ -98,7 +98,7 @@ window.PDFHelper = {
                 console.log('Native save initiated');
                 const base64Data = await this._blobToBase64(blob);
 
-                // Save to DOCUMENTS for permanent access
+                // Attempt to save to DOCUMENTS
                 const fileResult = await cap.Plugins.Filesystem.writeFile({
                     path: safeFileName,
                     data: base64Data,
@@ -112,7 +112,7 @@ window.PDFHelper = {
                 return { success: true, method: 'native-save', uri: fileResult.uri };
 
             } else {
-                console.log('Browser download initiated (Classic Anchor Method)');
+                console.log('Browser download initiated');
                 const url = URL.createObjectURL(blob);
                 const link = document.createElement('a');
                 link.href = url;
@@ -130,12 +130,9 @@ window.PDFHelper = {
             }
         } catch (err) {
             console.error("PDFHelper Download Error:", err);
-
-            // Ultimate Fallback: Open in New Tab
             const url = URL.createObjectURL(blob);
             window.open(url, '_blank');
-            alert("Auto-download failed. Opening PDF in new tab...");
-
+            alert("Auto-download failed. Opening PDF in new tab if possible...");
             throw err;
         }
     },
@@ -159,3 +156,4 @@ window.PDFHelper = {
         });
     }
 };
+

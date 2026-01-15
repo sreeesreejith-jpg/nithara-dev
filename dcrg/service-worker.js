@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nithara-pension-calc-v6';
+const CACHE_NAME = 'nithara-pension-calc-v7';
 const CACHE_PREFIX = 'nithara-pension-calc-';
 const ASSETS = [
     './',
@@ -12,10 +12,9 @@ const ASSETS = [
     './screenshot.png',
     '../js/pdf-helper.js',
     '../js/jspdf.umd.min.js',
-    '../js/jspdf.plugin.autotable.min.js',
-    '../capacitor.js',
-    '../capacitor-handler.js'
+    '../js/jspdf.plugin.autotable.min.js'
 ];
+
 
 self.addEventListener('install', (event) => {
     self.skipWaiting();

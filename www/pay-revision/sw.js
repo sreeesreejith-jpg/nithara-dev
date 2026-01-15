@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nithara-pay-rev-v24';
+const CACHE_NAME = 'nithara-pay-rev-v25';
 const CACHE_PREFIX = 'nithara-pay-rev-';
 const ASSETS = [
     'index.html',
@@ -8,10 +8,9 @@ const ASSETS = [
     '../icon-192.png',
     '../js/pdf-helper.js',
     '../js/jspdf.umd.min.js',
-    '../js/jspdf.plugin.autotable.min.js',
-    '../capacitor.js',
-    '../capacitor-handler.js'
+    '../js/jspdf.plugin.autotable.min.js'
 ];
+
 
 self.addEventListener('install', (event) => {
     event.waitUntil(

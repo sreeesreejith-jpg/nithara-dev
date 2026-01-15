@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nithara-housing-emi-v3';
+const CACHE_NAME = 'nithara-housing-emi-v4';
 const CACHE_PREFIX = 'nithara-housing-emi-';
 const urlsToCache = [
     './',
@@ -12,10 +12,9 @@ const urlsToCache = [
     './screenshot.png',
     '../js/pdf-helper.js',
     '../js/jspdf.umd.min.js',
-    '../js/jspdf.plugin.autotable.min.js',
-    '../capacitor.js',
-    '../capacitor-handler.js'
+    '../js/jspdf.plugin.autotable.min.js'
 ];
+
 
 // Install event - cache resources
 self.addEventListener('install', event => {
