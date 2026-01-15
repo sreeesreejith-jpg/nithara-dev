@@ -30,19 +30,20 @@ window.PDFHelper = {
                 const base64Data = await this._blobToBase64(blob);
 
                 // 3. Save to Temporary Directory
+                console.log('Writing file to CACHE:', safeFileName);
                 const fileResult = await cap.Plugins.Filesystem.writeFile({
                     path: safeFileName,
                     data: base64Data,
                     directory: 'CACHE'
                 });
 
-                console.log('Native file saved for sharing:', fileResult.uri);
+                console.log('Native file saved, URI:', fileResult.uri);
 
                 // 4. Share
+                // Some Android versions prefer NO url if files are provided
                 await cap.Plugins.Share.share({
                     title: title || 'Report',
                     text: 'View my calculation report from Nithara Apps',
-                    url: fileResult.uri,
                     files: [fileResult.uri]
                 });
 
@@ -156,7 +157,13 @@ window.PDFHelper = {
             const reader = new FileReader();
             reader.onload = () => {
                 const result = reader.result;
-                const base64 = typeof result === 'string' ? result.split(',')[1] : '';
+                if (!result || typeof result !== 'string') {
+                    return reject(new Error("FileReader result is empty"));
+                }
+                const base64 = result.includes(',') ? result.split(',')[1] : result;
+                if (!base64 || base64.length < 10) {
+                    return reject(new Error("Generated base64 is invalid or too short"));
+                }
                 resolve(base64);
             };
             reader.onerror = (err) => reject(err);

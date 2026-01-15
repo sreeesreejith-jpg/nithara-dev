@@ -514,9 +514,9 @@ document.addEventListener('DOMContentLoaded', () => {
             doc.setFontSize(10);
             doc.setFont("helvetica", "normal");
 
-            const name = document.getElementById('reportName')?.value || "";
-            const pen = document.getElementById('penNumber')?.value || "";
-            const school = document.getElementById('schoolName')?.value || "";
+            const name = document.getElementById('reportName')?.value?.trim() || "";
+            const pen = document.getElementById('penNumber')?.value?.trim() || "";
+            const school = document.getElementById('schoolName')?.value?.trim() || "";
 
             let headerY = 28;
             if (name) { doc.text(`Employee: ${name}`, 14, headerY); headerY += 5; }
@@ -662,15 +662,20 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             // 7. Footer
-            const finalY = doc.lastAutoTable.finalY + 20;
-            doc.setFontSize(10);
-            doc.setTextColor(150);
-            doc.text("Email: sreee.sreejith@gmail.com", 14, finalY < 280 ? finalY : 280);
+            if (doc.lastAutoTable) {
+                const finalY = doc.lastAutoTable.finalY + 20;
+                doc.setFontSize(10);
+                doc.setTextColor(150);
+                doc.text("Email: sreee.sreejith@gmail.com", 14, finalY < 280 ? finalY : 280);
+            }
 
-            return { blob: doc.output('blob'), title: reportTitle };
+            // More robust blob creation for mobile
+            const pdfOutput = doc.output('arraybuffer');
+            const blob = new Blob([pdfOutput], { type: 'application/pdf' });
+            return { blob: blob, title: reportTitle };
         } catch (err) {
-            console.error("PayRevision PDF Error:", err);
-            throw err;
+            console.error("PayRevision PDF Generation Breakdown:", err);
+            throw new Error("PDF layout failed: " + err.message);
         }
     };
 
