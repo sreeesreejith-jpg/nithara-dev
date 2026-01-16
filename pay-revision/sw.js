@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nithara-reset-final';
+const CACHE_NAME = 'nithara-pay-rev-v1.7';
 const CACHE_PREFIX = 'nithara-pay-rev-';
 const ASSETS = [
     'index.html',
@@ -6,9 +6,9 @@ const ASSETS = [
     'script.js',
     'manifest.json',
     '../icon-192.png',
-    '../js/pdf-helper.js',
-    '../js/jspdf.umd.min.js',
-    '../js/jspdf.plugin.autotable.min.js'
+    '../pdf-helper.js',
+    '../jspdf.umd.min.js',
+    '../jspdf.plugin.autotable.min.js'
 ];
 
 

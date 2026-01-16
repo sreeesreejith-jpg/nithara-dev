@@ -88,19 +88,26 @@ window.PDFHelper = {
             } else {
                 console.log('Standard browser download initiated');
                 const url = URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = safeFileName;
-                link.style.display = 'none';
-                document.body.appendChild(link);
-                link.click();
 
-                setTimeout(() => {
-                    document.body.removeChild(link);
-                    URL.revokeObjectURL(url);
-                }, 2000);
+                // For mobile browsers, window.open can sometimes be more reliable than anchor.click()
+                const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
-                return { success: true, method: 'browser-download' };
+                if (isMobile) {
+                    window.open(url, '_blank');
+                } else {
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = safeFileName;
+                    link.style.display = 'none';
+                    document.body.appendChild(link);
+                    link.click();
+                    setTimeout(() => {
+                        document.body.removeChild(link);
+                        URL.revokeObjectURL(url);
+                    }, 2000);
+                }
+
+                return { success: true, method: isMobile ? 'mobile-open' : 'browser-download' };
             }
         } catch (err) {
             console.error("PDFHelper Download Error:", err);
