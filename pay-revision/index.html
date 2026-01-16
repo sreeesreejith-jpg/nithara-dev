@@ -67,9 +67,9 @@
                     </div>
                 </div>
 
-                <!-- 2. Revised BP Preview -->
-                <div
-                    style="display: flex; flex-direction: column; align-items: center; gap: 0.6rem; text-align: center;">
+                <!-- 2. Revised BP Preview (Conditional) -->
+                <div id="revised-bp-container"
+                    style="display: none; flex-direction: column; align-items: center; gap: 0.6rem; text-align: center;">
                     <label
                         style="font-size: 0.7rem; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 1px;">Revised
                         BP on 01.07.2024</label>
@@ -80,9 +80,9 @@
                     </div>
                 </div>
 
-                <!-- 3. Present Basic Pay (New) -->
-                <div
-                    style="display: flex; flex-direction: column; align-items: center; gap: 0.6rem; text-align: center;">
+                <!-- 3. Present Basic Pay (New) (Conditional) -->
+                <div id="present-bp-container"
+                    style="display: none; flex-direction: column; align-items: center; gap: 0.6rem; text-align: center;">
                     <label
                         style="font-size: 0.7rem; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 1px;">Present
                         Basic Pay</label>
@@ -108,7 +108,7 @@
                     <div class="input-field row-input"
                         style="display: grid; grid-template-columns: 1fr 140px; gap: 1rem; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.03); padding-bottom: 0.75rem;">
                         <label style="font-size: 0.9rem; color: var(--text-main); font-weight: 700;">Increment
-                            Month</label>
+                            Month <span style="color: #ef4444; font-weight: 900;">*</span></label>
                         <select id="increment-month"
                             style="text-align: center; height: 36px; font-size: 0.9rem; border-radius: 0.5rem; background: rgba(0,0,0,0.2); color: white; border: 1px solid rgba(59, 130, 246, 0.3); font-weight: 700;">
                             <option value="">Select Month</option>
@@ -296,8 +296,9 @@
                 </div>
             </section>
 
-            <!-- Right Side: Present Salary Details -->
-            <section class="revision-section after" style="display: flex; flex-direction: column;">
+            <!-- Right Side: Present Salary Details (Conditional) -->
+            <section id="present-salary-container" class="revision-section after"
+                style="display: none; flex-direction: column;">
                 <div class="section-header after-header">
                     <h2>Present Salary Details</h2>
                 </div>

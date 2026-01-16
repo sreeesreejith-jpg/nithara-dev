@@ -56,6 +56,36 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Increment Month Conditional Display Logic
+    const incrementMonth = document.getElementById('increment-month');
+    const revisedBpContainer = document.getElementById('revised-bp-container');
+    const presentBpContainer = document.getElementById('present-bp-container');
+    const presentSalaryContainer = document.getElementById('present-salary-container');
+
+    function toggleConditionalSections() {
+        const isIncrementSelected = incrementMonth && incrementMonth.value !== "";
+
+        if (revisedBpContainer) {
+            revisedBpContainer.style.display = isIncrementSelected ? 'flex' : 'none';
+        }
+        if (presentBpContainer) {
+            presentBpContainer.style.display = isIncrementSelected ? 'flex' : 'none';
+        }
+        if (presentSalaryContainer) {
+            presentSalaryContainer.style.display = isIncrementSelected ? 'flex' : 'none';
+        }
+    }
+
+    if (incrementMonth) {
+        incrementMonth.addEventListener('change', () => {
+            toggleConditionalSections();
+            calculate();
+        });
+    }
+
+    // Initialize conditional sections on page load
+    toggleConditionalSections();
+
     // Global variable to store stages for navigation
     let payStagesList = [
         23000, 23700, 24400, 25100, 25800, 26500, 27200, 27900, 28700, 29500,
@@ -540,7 +570,7 @@ document.addEventListener('DOMContentLoaded', () => {
             bpCurrent = revisedScale[currentIndex];
         }
 
-        if (timelineHTML && bp > 0) {
+        if (timelineHTML && bp > 0 && incMonth !== null) {
             timelineDiv.innerHTML = timelineHTML;
             timelineContainer.style.display = 'flex';
         } else {
