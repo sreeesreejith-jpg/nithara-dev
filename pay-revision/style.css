@@ -249,37 +249,36 @@ header {
 }
 
 .result-row {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: 1fr 110px;
+    gap: 0.75rem;
     align-items: center;
-    padding: 0.5rem 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    padding: 0.65rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .row-input {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: 1fr 100px 110px;
+    gap: 0.75rem;
     align-items: center;
-    padding: 0.25rem 0;
+    padding: 0.4rem 0;
 }
 
 .label {
     font-size: 0.85rem;
     color: var(--text-muted);
     font-weight: 500;
-    white-space: nowrap;
+    white-space: normal;
+    line-height: 1.25;
 }
 
 .value {
-    font-weight: 600;
-    font-family: monospace;
-}
-
-.row-input {
-    display: grid;
-    grid-template-columns: 1fr 100px 90px;
-    gap: 0.5rem;
-    align-items: center;
+    font-weight: 700;
+    font-family: 'Outfit', monospace;
+    /* Using Outfit but keeping it consistent */
+    text-align: right;
+    letter-spacing: 0.5px;
 }
 
 .input-with-val {
@@ -448,21 +447,28 @@ footer {
         gap: 0.3rem;
     }
 
+    .result-row {
+        grid-template-columns: 1fr 90px;
+        gap: 0.5rem;
+        padding: 0.5rem 0;
+    }
+
     .row-input {
-        grid-template-columns: 1fr 70px 80px;
+        grid-template-columns: 1fr 75px 90px;
         gap: 0.4rem;
     }
 
-    .result-row {
-        gap: 0.5rem;
+    .label {
+        font-size: 0.75rem;
     }
 
-    .label {
-        font-size: 0.72rem;
+    .value,
+    .calc-val {
+        font-size: 0.85rem;
     }
 
     .calc-val {
-        font-size: 0.78rem;
+        font-size: 0.85rem;
     }
 }
 
@@ -939,7 +945,7 @@ body.pdf-mode .input-hint {
 /* Timeline Styles */
 .timeline-item {
     display: grid;
-    grid-template-columns: 1fr 120px;
+    grid-template-columns: 1fr 110px;
     align-items: center;
     padding: 0.6rem 0.75rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
