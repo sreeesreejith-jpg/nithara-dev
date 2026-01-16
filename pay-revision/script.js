@@ -86,6 +86,27 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize conditional sections on page load
     toggleConditionalSections();
 
+    // Initialize dynamic date labels
+    function initializeDateLabels() {
+        const now = new Date();
+        const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        const currentMonthYear = `${months[now.getMonth()]} ${now.getFullYear()}`;
+
+        // Update "Present BP" label to show "Revised BP on Jan 2026" format
+        const presentBpLabel = document.getElementById('present-bp-label');
+        if (presentBpLabel) {
+            presentBpLabel.textContent = `Revised BP on ${currentMonthYear}`;
+        }
+
+        // Update Gross Salary label
+        const grossLabel = document.getElementById('label-gross-new');
+        if (grossLabel) {
+            grossLabel.textContent = `Gross Salary (${currentMonthYear})`;
+        }
+    }
+
+    initializeDateLabels();
+
     // Global variable to store stages for navigation
     let payStagesList = [
         23000, 23700, 24400, 25100, 25800, 26500, 27200, 27900, 28700, 29500,
