@@ -97,53 +97,7 @@
             <!-- Configuration Parameters -->
             <!-- Grouped Configuration Parameters -->
             <div style="display: flex; flex-direction: column; gap: 1rem;">
-                <!-- Group A: Fixation Parameters -->
-                <div class="config-group-card"
-                    style="background: rgba(59, 130, 246, 0.05); border-radius: 1rem; padding: 1.25rem; border: 1px solid rgba(59, 130, 246, 0.2); display: flex; flex-direction: column; gap: 1rem;">
-                    <h3
-                        style="font-size: 0.75rem; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.25rem; font-weight: 800;">
-                        Fixation Parameters</h3>
-
-                    <div class="input-field row-input"
-                        style="display: grid; grid-template-columns: 1fr 100px; gap: 1rem; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.03); padding-bottom: 0.75rem;">
-                        <label style="color: var(--text-main); font-weight: 700; font-size: 0.9rem;">Fitment
-                            Percentage</label>
-                        <div class="input-with-val">
-                            <input type="number" id="fitment-perc" value="7" step="0.5"
-                                style="text-align: center; height: 36px; font-size: 1rem; background: rgba(0,0,0,0.2); border-color: rgba(59, 130, 246, 0.3);">
-                            <span class="unit" style="font-weight: 800; color: var(--primary);">%</span>
-                        </div>
-                    </div>
-
-                    <div class="weightage-logic-group" style="display: flex; flex-direction: column; gap: 0.75rem;">
-                        <div class="input-field row-input"
-                            style="display: grid; grid-template-columns: 1fr 100px; gap: 1rem; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.03); padding-bottom: 0.75rem;">
-                            <label for="weightage-check"
-                                style="font-size: 0.9rem; color: var(--text-muted); font-weight: 600;">If Service
-                                Weightage allowed?</label>
-                            <div style="display: flex; justify-content: center;">
-                                <input type="checkbox" id="weightage-check"
-                                    style="width: 20px; height: 20px; accent-color: var(--primary);">
-                            </div>
-                        </div>
-                        <div class="input-field row-input" id="weightage-container"
-                            style="display: none; grid-template-columns: 1fr 100px; gap: 1rem; align-items: center; padding-bottom: 0.75rem;">
-                            <label style="font-size: 0.9rem; color: var(--text-main); font-weight: 700;">Completed Years
-                                of Service</label>
-                            <div class="input-wrapper" style="width: 100%;">
-                                <div class="input-with-val" style="margin: 0;">
-                                    <input type="number" id="years-service" placeholder="Years" step="1" min="0"
-                                        autocomplete="off"
-                                        style="text-align: center; height: 36px; font-size: 1rem; border-color: var(--primary); background: rgba(0,0,0,0.2);">
-                                    <span class="unit" style="font-weight: 800;">Yrs</span>
-                                </div>
-                                <ul id="years-dropdown" class="custom-dropdown"></ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Group B: Pay Progression -->
+                <!-- Group B: Pay Progression (Moved Up) -->
                 <div class="config-group-card"
                     style="background: rgba(139, 92, 246, 0.05); border-radius: 1rem; padding: 1.25rem; border: 1px solid rgba(139, 92, 246, 0.2); display: flex; flex-direction: column; gap: 1rem;">
                     <h3
@@ -154,9 +108,7 @@
                     <div class="input-field row-input"
                         style="display: grid; grid-template-columns: 1fr 140px; gap: 1rem; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.03); padding-bottom: 0.75rem;">
                         <label style="font-size: 0.9rem; color: var(--text-main); font-weight: 700;">Increment
-                            Month<br><small
-                                style="font-size: 0.65rem; color: var(--text-muted); font-weight: 500;">(Required for
-                                progression)</small></label>
+                            Month</label>
                         <select id="increment-month"
                             style="text-align: center; height: 36px; font-size: 0.9rem; border-radius: 0.5rem; background: rgba(0,0,0,0.2); color: white; border: 1px solid rgba(59, 130, 246, 0.3); font-weight: 700;">
                             <option value="">Select Month</option>
@@ -222,6 +174,52 @@
                                 <option value="10">November</option>
                                 <option value="11">December</option>
                             </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Group A: Fixation Parameters (Moved Down) -->
+                <div class="config-group-card"
+                    style="background: rgba(59, 130, 246, 0.05); border-radius: 1rem; padding: 1.25rem; border: 1px solid rgba(59, 130, 246, 0.2); display: flex; flex-direction: column; gap: 1rem;">
+                    <h3
+                        style="font-size: 0.75rem; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.25rem; font-weight: 800;">
+                        Fixation Parameters</h3>
+
+                    <div class="input-field row-input"
+                        style="display: grid; grid-template-columns: 1fr 100px; gap: 1rem; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.03); padding-bottom: 0.75rem;">
+                        <label style="color: var(--text-main); font-weight: 700; font-size: 0.9rem;">Fitment
+                            Percentage</label>
+                        <div class="input-with-val">
+                            <input type="number" id="fitment-perc" value="7" step="0.5"
+                                style="text-align: center; height: 36px; font-size: 1rem; background: rgba(0,0,0,0.2); border-color: rgba(59, 130, 246, 0.3);">
+                            <span class="unit" style="font-weight: 800; color: var(--primary);">%</span>
+                        </div>
+                    </div>
+
+                    <div class="weightage-logic-group" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                        <div class="input-field row-input"
+                            style="display: grid; grid-template-columns: 1fr 100px; gap: 1rem; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.03); padding-bottom: 0.75rem;">
+                            <label for="weightage-check"
+                                style="font-size: 0.9rem; color: var(--text-muted); font-weight: 600;">If Service
+                                Weightage allowed?</label>
+                            <div style="display: flex; justify-content: center;">
+                                <input type="checkbox" id="weightage-check"
+                                    style="width: 20px; height: 20px; accent-color: var(--primary);">
+                            </div>
+                        </div>
+                        <div class="input-field row-input" id="weightage-container"
+                            style="display: none; grid-template-columns: 1fr 100px; gap: 1rem; align-items: center; padding-bottom: 0.75rem;">
+                            <label style="font-size: 0.9rem; color: var(--text-main); font-weight: 700;">Completed Years
+                                of Service</label>
+                            <div class="input-wrapper" style="width: 100%;">
+                                <div class="input-with-val" style="margin: 0;">
+                                    <input type="number" id="years-service" placeholder="Years" step="1" min="0"
+                                        autocomplete="off"
+                                        style="text-align: center; height: 36px; font-size: 1rem; border-color: var(--primary); background: rgba(0,0,0,0.2);">
+                                    <span class="unit" style="font-weight: 800;">Yrs</span>
+                                </div>
+                                <ul id="years-dropdown" class="custom-dropdown"></ul>
+                            </div>
                         </div>
                     </div>
                 </div>
