@@ -22,7 +22,9 @@ document.addEventListener('DOMContentLoaded', () => {
             el.addEventListener('change', calculate);
             // Auto-select text on click/focus to easily see datalist
             el.addEventListener('click', function () {
-                this.select();
+                if (typeof this.select === 'function') {
+                    this.select();
+                }
             });
         }
     });
@@ -34,8 +36,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (weightageCheck && weightageContainer) {
         weightageCheck.addEventListener('change', () => {
             if (weightageCheck.checked) {
-                weightageContainer.style.display = ''; // Reverts to CSS (grid)
-                if (weightageResultRow) weightageResultRow.style.display = '';
+                weightageContainer.style.display = 'flex'; // Proper layout for input container (column)
+                if (weightageResultRow) weightageResultRow.style.display = 'grid'; // Strict Grid for result row
             } else {
                 weightageContainer.style.display = 'none';
                 if (weightageResultRow) weightageResultRow.style.display = 'none';
@@ -54,6 +56,128 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Increment Month Conditional Display Logic
+    const incrementMonthInput = document.getElementById('increment-month');
+    const incrementMonthDisplay = document.getElementById('increment-month-display');
+    const incrementMonthDropdown = document.getElementById('increment-month-dropdown');
+
+    // Grade Month Logic
+    const gradeMonthInput = document.getElementById('grade-month');
+    const gradeMonthDisplay = document.getElementById('grade-month-display');
+    const gradeMonthDropdown = document.getElementById('grade-month-dropdown');
+
+    const revisedBpContainer = document.getElementById('revised-bp-container');
+    const presentBpContainer = document.getElementById('present-bp-container');
+    const presentSalaryContainer = document.getElementById('present-salary-container');
+
+    function toggleConditionalSections() {
+        const isIncrementSelected = incrementMonthInput && incrementMonthInput.value !== "";
+
+        if (revisedBpContainer) {
+            revisedBpContainer.style.display = isIncrementSelected ? 'flex' : 'none';
+        }
+        if (presentBpContainer) {
+            presentBpContainer.style.display = isIncrementSelected ? 'flex' : 'none';
+        }
+        if (presentSalaryContainer) {
+            presentSalaryContainer.style.display = isIncrementSelected ? 'flex' : 'none';
+        }
+    }
+
+    // Generic Month Dropdown Logic
+    function setupMonthDropdown(inputEl, displayEl, dropdownEl) {
+        function renderMonths() {
+            dropdownEl.innerHTML = "";
+            monthNames.forEach((month, index) => {
+                const li = document.createElement('li');
+                li.textContent = month;
+                li.dataset.value = index; // Store 0-11 index
+
+                li.addEventListener('mousedown', (e) => {
+                    e.preventDefault();
+                    selectMonth(index, month);
+                });
+
+                // Optional: Preview on hover (might be annoying for months, maybe skip)
+                // li.addEventListener('mouseenter', () => ... );
+
+                dropdownEl.appendChild(li);
+            });
+        }
+
+        function selectMonth(index, name) {
+            inputEl.value = index;
+            displayEl.value = name;
+            dropdownEl.classList.remove('show');
+            toggleConditionalSections(); // Update visibility if needed
+            calculate();
+        }
+
+        function showDropdown() {
+            renderMonths();
+            dropdownEl.classList.add('show');
+            const currentVal = inputEl.value;
+            if (currentVal !== "") {
+                const items = Array.from(dropdownEl.querySelectorAll('li'));
+                const match = items.find(li => li.dataset.value == currentVal);
+                if (match) {
+                    match.scrollIntoView({ block: 'center' });
+                    items.forEach(li => li.classList.remove('active'));
+                    match.classList.add('active');
+                }
+            }
+        }
+
+        displayEl.addEventListener('click', showDropdown);
+        displayEl.addEventListener('focus', showDropdown);
+        displayEl.addEventListener('blur', () => {
+            setTimeout(() => dropdownEl.classList.remove('show'), 150);
+        });
+
+        dropdownEl.addEventListener('scroll', () => {
+            if (dropdownEl.classList.contains('show')) {
+                // Reuse the generic sync function if possible, or adapt it
+                syncSelectionOnScroll(dropdownEl, displayEl, inputEl, true);
+            }
+        });
+    }
+
+    if (incrementMonthInput && incrementMonthDisplay && incrementMonthDropdown) {
+        setupMonthDropdown(incrementMonthInput, incrementMonthDisplay, incrementMonthDropdown);
+    }
+
+    if (gradeMonthInput && gradeMonthDisplay && gradeMonthDropdown) {
+        setupMonthDropdown(gradeMonthInput, gradeMonthDisplay, gradeMonthDropdown);
+    }
+
+    // Overload syncSelectionOnScroll to handle Month dropdowns (value vs text)
+    // We'll modify the existing one below or create a new one. Let's modify the existing one to be more flexible.
+
+
+    // Initialize conditional sections on page load
+    toggleConditionalSections();
+
+    // Initialize dynamic date labels
+    function initializeDateLabels() {
+        const now = new Date();
+        const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        const currentMonthYear = `${months[now.getMonth()]} ${now.getFullYear()}`;
+
+        // Update "Present BP" label to show "Revised BP on Jan 2026" format
+        const presentBpLabel = document.getElementById('present-bp-label');
+        if (presentBpLabel) {
+            presentBpLabel.textContent = `Revised BP on ${currentMonthYear}`;
+        }
+
+        // Update Gross Salary label
+        const grossLabel = document.getElementById('label-gross-new');
+        if (grossLabel) {
+            grossLabel.textContent = `Gross Salary (${currentMonthYear})`;
+        }
+    }
+
+    initializeDateLabels();
+
     // Global variable to store stages for navigation
     let payStagesList = [
         23000, 23700, 24400, 25100, 25800, 26500, 27200, 27900, 28700, 29500,
@@ -66,6 +190,105 @@ document.addEventListener('DOMContentLoaded', () => {
         126500, 129300, 132100, 134900, 137700, 140500, 143600, 146700, 149800,
         153200, 156600, 160000, 163400, 166800
     ];
+
+    // --- Fitment Dropdown logic ---
+    const fitmentInput = document.getElementById('fitment-perc');
+    const fitmentDropdown = document.getElementById('fitment-dropdown');
+    const fitmentList = [7, 8, 9, 10];
+
+    function renderFitmentDropdown() {
+        fitmentDropdown.innerHTML = "";
+        fitmentList.forEach(val => {
+            const li = document.createElement('li');
+            li.textContent = val;
+            li.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                fitmentInput.value = val;
+                fitmentDropdown.classList.remove('show');
+                calculate();
+            });
+            li.addEventListener('mouseenter', () => {
+                fitmentInput.value = val;
+                calculate();
+            });
+            fitmentDropdown.appendChild(li);
+        });
+    }
+
+    function showFitmentDropdown() {
+        renderFitmentDropdown();
+        fitmentDropdown.classList.add('show');
+        const currentVal = fitmentInput.value;
+        const items = Array.from(fitmentDropdown.querySelectorAll('li'));
+        const match = items.find(li => li.textContent == currentVal);
+        if (match) {
+            match.scrollIntoView({ block: 'center' });
+            items.forEach(li => li.classList.remove('active'));
+            match.classList.add('active');
+        }
+    }
+
+    fitmentInput.addEventListener('focus', showFitmentDropdown);
+    fitmentInput.addEventListener('click', showFitmentDropdown);
+    fitmentInput.addEventListener('blur', () => {
+        setTimeout(() => fitmentDropdown.classList.remove('show'), 150);
+    });
+    fitmentDropdown.addEventListener('scroll', () => {
+        if (fitmentDropdown.classList.contains('show')) {
+            syncSelectionOnScroll(fitmentDropdown, fitmentInput);
+        }
+    });
+
+    // --- HRA Dropdown logic ---
+    const hraInput = document.getElementById('hra-perc');
+    const hraDropdown = document.getElementById('hra-dropdown');
+    const hraList = [4, 6, 8, 10];
+
+    function renderHRADropdown() {
+        hraDropdown.innerHTML = "";
+        hraList.forEach(val => {
+            const li = document.createElement('li');
+            li.textContent = val;
+            li.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                hraInput.value = val;
+                hraDropdown.classList.remove('show');
+                calculate();
+            });
+            li.addEventListener('mouseenter', () => {
+                hraInput.value = val;
+                calculate();
+            });
+            hraDropdown.appendChild(li);
+        });
+    }
+
+    function showHRADropdown() {
+        renderHRADropdown();
+        hraDropdown.classList.add('show');
+        const currentVal = hraInput.value;
+        const items = Array.from(hraDropdown.querySelectorAll('li'));
+        const match = items.find(li => li.textContent == currentVal);
+        if (match) {
+            match.scrollIntoView({ block: 'center' });
+            items.forEach(li => li.classList.remove('active'));
+            match.classList.add('active');
+        }
+    }
+
+    hraInput.addEventListener('focus', showHRADropdown);
+    hraInput.addEventListener('click', showHRADropdown);
+    hraInput.addEventListener('blur', () => {
+        setTimeout(() => hraDropdown.classList.remove('show'), 150);
+    });
+    hraDropdown.addEventListener('scroll', () => {
+        if (hraDropdown.classList.contains('show')) {
+            syncSelectionOnScroll(hraDropdown, hraInput);
+        }
+    });
+
+    // Manual entry listener for HRA
+    hraInput.addEventListener('input', calculate);
 
     // --- Custom Dropdown Logic ---
     const basicPayInput = document.getElementById('basic-pay-in');
@@ -188,7 +411,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Helper to sync selection based on scroll position (Mobile friendly)
-    function syncSelectionOnScroll(dropdownEl, inputEl) {
+    // updated signature: syncSelectionOnScroll(dropdownEl, displayEl, hiddenInputEl = null, isMonth = false)
+    function syncSelectionOnScroll(dropdownEl, displayEl, hiddenInputEl = null, isMonth = false) {
         const items = dropdownEl.querySelectorAll('li');
         if (items.length === 0) return;
 
@@ -212,7 +436,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (closestItem && !closestItem.classList.contains('active')) {
             items.forEach(li => li.classList.remove('active'));
             closestItem.classList.add('active');
-            inputEl.value = closestItem.textContent;
+
+            if (isMonth && hiddenInputEl) {
+                displayEl.value = closestItem.textContent;
+                hiddenInputEl.value = closestItem.dataset.value;
+                toggleConditionalSections();
+            } else {
+                displayEl.value = closestItem.textContent;
+            }
             calculate();
         }
     }
@@ -296,6 +527,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const incMonthVal = document.getElementById('increment-month').value;
         const incMonth = incMonthVal !== "" ? parseInt(incMonthVal) : null;
 
+        // Validation: Ensure BP and Increment Month are selected
+        if (!bp || incMonth === null) {
+            return;
+        }
+
         const hasGrade = document.getElementById('grade-check')?.checked;
         const gradeMonth = parseInt(document.getElementById('grade-month').value);
         const gradeYear = parseInt(document.getElementById('grade-year').value);
@@ -334,7 +570,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     events.push({
                         type: 'grade',
                         date: new Date(checkDate),
-                        label: `Higher Grade Promotion (${monthNames[checkDate.getMonth()]} ${checkDate.getFullYear()})`,
+                        label: `If got Grade after 1/7/24 (${monthNames[checkDate.getMonth()]} ${checkDate.getFullYear()})`,
                         steps: 2
                     });
                 }
@@ -411,7 +647,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (baseIndex !== -1) {
             timelineHTML += `
                     <div class="timeline-item">
-                        <span class="label">Revised BP on 01/07/2024</span>
+                        <span class="label">Revised BP On 01/07/2024</span>
                         <span class="value">Rs. ${bpFixed}</span>
                     </div>
                 `;
@@ -427,9 +663,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 let localizedLabel = "";
 
                 if (event.type === 'increment') {
-                    localizedLabel = `${year} ${month} Annual Increment`;
+                    localizedLabel = `Increment on ${month} ${year}`;
                 } else {
-                    localizedLabel = `${year} ${month} Higher Grade`;
+                    localizedLabel = `Grade on ${month} ${year}`;
                 }
 
                 timelineHTML += `
@@ -442,7 +678,7 @@ document.addEventListener('DOMContentLoaded', () => {
             bpCurrent = revisedScale[currentIndex];
         }
 
-        if (timelineHTML && bp > 0) {
+        if (timelineHTML && bp > 0 && incMonth !== null) {
             timelineDiv.innerHTML = timelineHTML;
             timelineContainer.style.display = 'flex';
         } else {
@@ -467,14 +703,33 @@ document.addEventListener('DOMContentLoaded', () => {
         const fitmentEl = document.getElementById('res-fitment');
         if (fitmentEl) fitmentEl.textContent = fitmentVal;
 
+        // Dynamic Label for Fitment
+        const fitmentLabelEl = document.getElementById('label-res-fitment');
+        if (fitmentLabelEl) fitmentLabelEl.textContent = `Fitment Amount (${fitmentPerc}%)`;
+
         const weightageRow = document.getElementById('res-weightage-row');
         if (weightageRow) weightageRow.style.display = isWeightageEnabled ? 'grid' : 'none';
 
         const weightageEl = document.getElementById('res-weightage');
         if (weightageEl) weightageEl.textContent = weightageVal;
 
+        // Dynamic Label for Weightage
+        const weightageLabelEl = document.getElementById('label-res-weightage');
+        if (weightageLabelEl) weightageLabelEl.textContent = `Service Weightage (${weightagePerc}%)`;
+
         const actualTotalEl = document.getElementById('res-actual-total');
         if (actualTotalEl) actualTotalEl.textContent = actualTotal;
+
+        // Update After UI
+        const benchmarkMonth = monthNames[today.getMonth()];
+        const benchmarkYear = today.getFullYear();
+        const shortYear = benchmarkYear.toString().slice(-2);
+
+        const bpLabel = document.getElementById('label-bp-current');
+        if (bpLabel) bpLabel.textContent = `Revised BP on ${benchmarkMonth} ${shortYear}`;
+
+        const grossLabel = document.getElementById('label-gross-new');
+        if (grossLabel) grossLabel.textContent = `Gross Salary (${benchmarkMonth} ${benchmarkYear})`;
 
         document.getElementById('res-bp-fixed').textContent = bpFixed;
         document.getElementById('res-bp-current').textContent = bpCurrent;
@@ -551,7 +806,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 startY: 55,
                 head: [['Stage', 'Effective Date', 'Basic Pay', 'Gross Salary']],
                 body: [
-                    ['Initial Basic Pay', '01/07/2024', 'Rs. ' + bpInitial, '-'],
+                    ['PreRevised BP', '01/07/2024', 'Rs. ' + bpInitial, '-'],
                     ['Revised Basic Pay', '01/07/2024', 'Rs. ' + fixedBp, '-'],
                     ['Present Basic Pay', currentMonthYear, 'Rs. ' + currentBp, 'Rs. ' + newGross]
                 ],
@@ -584,13 +839,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const isWeightageChecked = document.getElementById('weightage-check')?.checked;
 
             const fixationRows = [
-                ['Base Basic Pay (Old)', '-', 'Rs. ' + bpInitial],
+                ['PreRevised BP', '-', 'Rs. ' + bpInitial],
                 ['DA Merged', '31 %', 'Rs. ' + daMerged],
                 ['Fitment Benefit', fitmentP + ' %', 'Rs. ' + fitmentV]
             ];
 
             if (isWeightageChecked) {
-                fixationRows.push(['Service Weightage', yearsService + ' Yrs', 'Rs. ' + weightageV]);
+                fixationRows.push(['Service Weightage (if allowed)', yearsService + ' Yrs', 'Rs. ' + weightageV]);
             }
 
             fixationRows.push(
@@ -607,8 +862,75 @@ document.addEventListener('DOMContentLoaded', () => {
                 columnStyles: { 2: { halign: 'right' } }
             });
 
-            // 5. Present Salary Breakdown (Dynamic Date)
+            // 5. Timeline Summary (Moved Up)
+            const timelineSteps = document.querySelectorAll('#timeline-steps > div');
+            if (timelineSteps && timelineSteps.length > 0) {
+                let timelineY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 15 : 240;
+
+                // Check if we need a new page
+                const estimatedHeight = (timelineSteps.length * 8) + 30;
+                if (timelineY + estimatedHeight > 285) {
+                    doc.addPage();
+                    timelineY = 20;
+                }
+
+                doc.setFontSize(14);
+                doc.setTextColor(59, 130, 246); // Primary Color
+                doc.setFont("Outfit", "bold");
+                doc.text("Detailed Pay Progression Timeline", 14, timelineY);
+
+                let timelineRows = [];
+                timelineSteps.forEach(step => {
+                    const spans = step.querySelectorAll('span');
+                    if (spans.length >= 2) {
+                        let fullLabel = spans[0].textContent.replace('• ', '').trim();
+                        let eventType = fullLabel;
+                        let dateText = "-";
+
+                        // Split "Event on Date" into two columns
+                        if (fullLabel.toLowerCase().includes(" on ")) {
+                            const parts = fullLabel.split(/ on /i);
+                            eventType = parts[0].trim();
+                            dateText = parts[1].trim();
+                        }
+
+                        const valText = spans[1].textContent.trim() || "";
+                        timelineRows.push([eventType, dateText, valText]);
+                    }
+                });
+
+                doc.autoTable({
+                    startY: timelineY + 5,
+                    head: [['Progression Event', 'Date / Period', 'Revised Pay Stage']],
+                    body: timelineRows,
+                    theme: 'grid',
+                    headStyles: {
+                        fillColor: [59, 130, 246],
+                        halign: 'center',
+                        fontSize: 10
+                    },
+                    columnStyles: {
+                        0: { cellWidth: 'auto' },
+                        1: { halign: 'center', cellWidth: 50 },
+                        2: { halign: 'right', fontStyle: 'bold', cellWidth: 50 }
+                    },
+                    styles: {
+                        fontSize: 9,
+                        cellPadding: 4,
+                        valign: 'middle'
+                    }
+                });
+            }
+
+            // 6. Present Salary Breakdown (Dynamic Date) (Moved Down)
             currentY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 15 : 200;
+
+            // Check for page break before this section too, just in case
+            if (currentY + 60 > 285) {
+                doc.addPage();
+                currentY = 20;
+            }
+
             doc.text(`Present Salary Details (${currentMonthYear})`, 14, currentY);
 
             const balDaP = document.getElementById('bal-da-perc')?.value || "0";
@@ -637,45 +959,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
 
-            // 6. Timeline Summary
-            const timelineSteps = document.querySelectorAll('#timeline-steps > div');
-            if (timelineSteps && timelineSteps.length > 0) {
-                doc.addPage();
-                doc.setFillColor(59, 130, 246);
-                doc.rect(0, 0, 210, 20, 'F');
-                doc.setFontSize(14);
-                doc.setTextColor(255);
-                doc.text("Detailed Pay Progression Timeline", 14, 13);
-
-                doc.setTextColor(40);
-                doc.setFontSize(11);
-
-                let timelineRows = [];
-                timelineSteps.forEach(step => {
-                    const spans = step.querySelectorAll('span');
-                    if (spans.length >= 2) {
-                        const labelText = spans[0].textContent.replace('• ', '').trim() || "";
-                        const valText = spans[1].textContent.trim() || "";
-                        timelineRows.push([labelText, valText]);
-                    }
-                });
-
-                doc.autoTable({
-                    startY: 30,
-                    head: [['Progression Event', 'Pay Stage']],
-                    body: timelineRows,
-                    theme: 'striped',
-                    headStyles: { fillColor: [139, 92, 246] },
-                    columnStyles: { 1: { halign: 'right' } }
-                });
-            }
-
             // 7. Footer
             if (doc.lastAutoTable) {
-                const finalY = doc.lastAutoTable.finalY + 20;
+                let finalY = doc.lastAutoTable.finalY + 15;
+                if (finalY > 275) {
+                    doc.addPage();
+                    finalY = 20;
+                }
+
+                doc.setFontSize(9);
+                doc.setTextColor(100);
+                doc.setFont("Outfit", "normal");
+                const disclaimer = "* NOTE: Calculations are approximate and for informational purposes only.";
+                doc.text(disclaimer, 14, finalY);
+
                 doc.setFontSize(10);
                 doc.setTextColor(150);
-                doc.text("Email: sreee.sreejith@gmail.com", 14, finalY < 280 ? finalY : 280);
+                doc.text("Email: sreee.sreejith@gmail.com", 14, finalY + 8);
             }
 
             return { blob: doc.output('blob'), title: reportTitle };

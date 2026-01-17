@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Apps Portal - Access all your finance and utility tools in one place">
     <title>Nithara | Portal</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=2.0">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0f172a">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -27,97 +27,38 @@
 <body>
     <div class="container">
         <header>
-            <h1> apps for employees</h1>
+            <h1>Apps</h1>
         </header>
 
-        <main>
-            <!-- Section 1: Service Matters -->
-            <h3 class="section-title">Service Matters</h3>
-            <div class="app-grid">
-                <!-- App Card: Pay Revision -->
-                <a href="./pay-revision/index.html" class="app-card">
-                    <div class="icon-wrapper">
-                        🔄
-                    </div>
-                    <h2 class="app-title">Pay Revision</h2>
-                </a>
+        <div class="app-grid" style="grid-template-columns: repeat(3, 1fr); max-width: 600px; margin: 0 auto;">
+            <!-- App Card: Pay Revision -->
+            <a href="./pay-revision/index.html" class="app-card">
+                <div class="icon-wrapper">
+                    🔄
+                </div>
+                <h2 class="app-title">Pay Revision</h2>
+            </a>
 
-                <!-- App Card: Pension/DCRG -->
-                <a href="./dcrg/index.html" class="app-card">
-                    <div class="icon-wrapper">
-                        💰
-                    </div>
-                    <h2 class="app-title">Pension/DCRG</h2>
-                </a>
+            <!-- App Card: Pension/DCRG -->
+            <a href="./dcrg/index.html" class="app-card">
+                <div class="icon-wrapper">
+                    💰
+                </div>
+                <h2 class="app-title">Pension/DCRG</h2>
+            </a>
 
-                <!-- App Card: Salary Details -->
-                <a href="./salary/index.html" class="app-card">
-                    <div class="icon-wrapper">
-                        💵
-                    </div>
-                    <h2 class="app-title">Salary Details</h2>
-                </a>
-            </div>
-
-            <!-- Section 2: Others -->
-            <h3 class="section-title">Others</h3>
-            <div class="app-grid">
-                <!-- App Card: Housing Loan -->
-                <a href="./housing/index.html" class="app-card">
-                    <div class="icon-wrapper">
-                        🏠
-                    </div>
-                    <h2 class="app-title">Housing Loan</h2>
-                </a>
-
-                <!-- App Card: EMI -->
-                <a href="./emi/index.html" class="app-card">
-                    <div class="icon-wrapper">
-                        📊
-                    </div>
-                    <h2 class="app-title">EMI Calc</h2>
-                </a>
-
-                <!-- App Card: SIP -->
-                <a href="./sip/index.html" class="app-card">
-                    <div class="icon-wrapper">
-                        📈
-                    </div>
-                    <h2 class="app-title">SIP Calc</h2>
-                </a>
-
-                <!-- App Card: Calculator -->
-                <a href="./calculator/index.html" class="app-card">
-                    <div class="icon-wrapper">
-                        🔢
-                    </div>
-                    <h2 class="app-title">Calculator</h2>
-                </a>
-            </div>
-        </main>
+            <!-- App Card: EMI -->
+            <a href="./emi/index.html" class="app-card">
+                <div class="icon-wrapper">
+                    📊
+                </div>
+                <h2 class="app-title">EMI Calc</h2>
+            </a>
+        </div>
     </div>
     <div class="footer-email" style="display: flex; flex-direction: column; gap: 0.5rem; align-items: center;">
         <div>email: sreee.sreejith@gmail.com</div>
-        <button onclick="clearAllCaches()"
-            style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #94a3b8; padding: 4px 10px; border-radius: 4px; font-size: 0.65rem; cursor: pointer;">Clear
-            Cache & Update</button>
     </div>
-
-    <script>
-        async function clearAllCaches() {
-            if (confirm("This will clear all saved data and refresh the app. Continue?")) {
-                const names = await caches.keys();
-                await Promise.all(names.map(name => caches.delete(name)));
-
-                const registrations = await navigator.serviceWorker.getRegistrations();
-                for (let registration of registrations) {
-                    await registration.unregister();
-                }
-
-                window.location.reload(true);
-            }
-        }
-    </script>
 </body>
 
 </html>

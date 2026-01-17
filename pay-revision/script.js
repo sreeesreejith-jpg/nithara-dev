@@ -862,37 +862,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 columnStyles: { 2: { halign: 'right' } }
             });
 
-            // 5. Present Salary Breakdown (Dynamic Date)
-            currentY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 15 : 200;
-            doc.text(`Present Salary Details (${currentMonthYear})`, 14, currentY);
-
-            const balDaP = document.getElementById('bal-da-perc')?.value || "0";
-            const balDaV = document.getElementById('res-bal-da')?.textContent || "0";
-            const hraP = document.getElementById('hra-perc')?.value || "0";
-            const hraV = document.getElementById('res-hra-new')?.textContent || "0";
-            const othersV = document.getElementById('res-others')?.textContent || "0";
-
-            doc.autoTable({
-                startY: currentY + 5,
-                head: [['Current Component', 'Rate/Info', 'Amount']],
-                body: [
-                    ['Current Basic Pay', 'From Progression', 'Rs. ' + currentBp],
-                    ['Dearness Allowance (DA)', balDaP + '%', 'Rs. ' + balDaV],
-                    ['House Rent Allowance (HRA)', hraP + '%', 'Rs. ' + hraV],
-                    ['Others', '-', 'Rs. ' + othersV],
-                    ['Total Monthly Gross', currentMonthYear, 'Rs. ' + newGross]
-                ],
-                theme: 'grid',
-                headStyles: { fillColor: [16, 185, 129] },
-                columnStyles: { 2: { halign: 'right' } },
-                didParseCell: function (data) {
-                    if (data.section === 'head' && data.column.index === 2) {
-                        data.cell.styles.halign = 'right';
-                    }
-                }
-            });
-
-            // 6. Timeline Summary
+            // 5. Timeline Summary (Moved Up)
             const timelineSteps = document.querySelectorAll('#timeline-steps > div');
             if (timelineSteps && timelineSteps.length > 0) {
                 let timelineY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 15 : 240;
@@ -951,6 +921,43 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 });
             }
+
+            // 6. Present Salary Breakdown (Dynamic Date) (Moved Down)
+            currentY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 15 : 200;
+
+            // Check for page break before this section too, just in case
+            if (currentY + 60 > 285) {
+                doc.addPage();
+                currentY = 20;
+            }
+
+            doc.text(`Present Salary Details (${currentMonthYear})`, 14, currentY);
+
+            const balDaP = document.getElementById('bal-da-perc')?.value || "0";
+            const balDaV = document.getElementById('res-bal-da')?.textContent || "0";
+            const hraP = document.getElementById('hra-perc')?.value || "0";
+            const hraV = document.getElementById('res-hra-new')?.textContent || "0";
+            const othersV = document.getElementById('res-others')?.textContent || "0";
+
+            doc.autoTable({
+                startY: currentY + 5,
+                head: [['Current Component', 'Rate/Info', 'Amount']],
+                body: [
+                    ['Current Basic Pay', 'From Progression', 'Rs. ' + currentBp],
+                    ['Dearness Allowance (DA)', balDaP + '%', 'Rs. ' + balDaV],
+                    ['House Rent Allowance (HRA)', hraP + '%', 'Rs. ' + hraV],
+                    ['Others', '-', 'Rs. ' + othersV],
+                    ['Total Monthly Gross', currentMonthYear, 'Rs. ' + newGross]
+                ],
+                theme: 'grid',
+                headStyles: { fillColor: [16, 185, 129] },
+                columnStyles: { 2: { halign: 'right' } },
+                didParseCell: function (data) {
+                    if (data.section === 'head' && data.column.index === 2) {
+                        data.cell.styles.halign = 'right';
+                    }
+                }
+            });
 
             // 7. Footer
             if (doc.lastAutoTable) {
