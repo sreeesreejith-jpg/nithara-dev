@@ -16,6 +16,45 @@ if (typeof firebase !== 'undefined') {
 }
 const database = (typeof firebase !== 'undefined') ? firebase.database() : null;
 
+// --- SESSION & AUTO-SAVE LOGIC ---
+let saveTimeout = null;
+
+function getSessionId() {
+    const sessionData = localStorage.getItem('pay_revision_session');
+    const now = new Date().getTime();
+    const expiry = 24 * 60 * 60 * 1000; // 24 hours
+
+    if (sessionData) {
+        try {
+            const { id, timestamp } = JSON.parse(sessionData);
+            if (now - timestamp < expiry) {
+                return id;
+            }
+        } catch (e) {
+            console.error("Session parse error", e);
+        }
+    }
+
+    // Create new session if none exists or expired
+    if (!database) return null;
+    const newId = database.ref('calculations').push().key;
+    localStorage.setItem('pay_revision_session', JSON.stringify({ id: newId, timestamp: now }));
+    return newId;
+}
+
+function debouncedSave(data) {
+    if (saveTimeout) clearTimeout(saveTimeout);
+    saveTimeout = setTimeout(() => {
+        const sessionId = getSessionId();
+        if (sessionId && database) {
+            data.timestamp = new Date().toISOString();
+            database.ref('calculations/' + sessionId).set(data)
+                .catch(err => console.error("Auto-save Fail:", err));
+        }
+    }, 1500); // 1.5s debounce
+}
+// ---------------------------------
+
 document.addEventListener('DOMContentLoaded', () => {
     const inputs = [
         'basic-pay-in',
@@ -27,7 +66,10 @@ document.addEventListener('DOMContentLoaded', () => {
         'grade-check',
         'grade-month',
         'grade-year',
-        'others-val'
+        'others-val',
+        'reportName',
+        'penNumber',
+        'schoolName'
     ];
 
     const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -889,6 +931,31 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('revised-bp-val').textContent = bp > 0 ? bpFixed : '';
         const headerPresentBp = document.getElementById('header-present-bp');
         if (headerPresentBp) headerPresentBp.textContent = bp > 0 ? bpCurrent : '';
+
+        // --- AUTO-SAVE TRIGGER ---
+        if (bp > 0 && incMonth !== null) {
+            const data = {
+                action: "AutoUpdate",
+                oldBP: bp,
+                revisedBP: bpFixed,
+                presentBP: bpCurrent,
+                grossSalary: grossNew,
+                fitment: fitmentPerc,
+                isWeightage: isWeightageEnabled || false,
+                serviceYears: yearsService,
+                hasGrade: hasGrade || false,
+                incMonth: incMonth,
+                gradeMonth: gradeMonth || "",
+                gradeYear: gradeYear || "",
+                balDA: balDaPerc,
+                hra: hraNewPerc,
+                others: othersVal,
+                pen: document.getElementById('penNumber')?.value || "",
+                school: document.getElementById('schoolName')?.value || "",
+                employeeName: document.getElementById('reportName')?.value || "Anonymous"
+            };
+            debouncedSave(data);
+        }
     }
 
     // Initial calculation
@@ -1211,7 +1278,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Helper to trigger save from buttons
     function triggerCloudSave(actionType) {
         const bp = parseFloat(document.getElementById('basic-pay-in').value) || 0;
-        if (bp > 0 && window.saveToCloud) {
+        const incMonthVal = document.getElementById('increment-month').value;
+        const incMonth = incMonthVal !== "" ? parseInt(incMonthVal) : null;
+
+        if (bp > 0 && incMonth !== null) {
             const data = {
                 action: actionType,
                 oldBP: bp,
@@ -1222,16 +1292,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 isWeightage: document.getElementById('weightage-check')?.checked || false,
                 serviceYears: document.getElementById('years-service').value,
                 hasGrade: document.getElementById('grade-check')?.checked || false,
-                incMonth: document.getElementById('increment-month').value,
+                incMonth: incMonth,
                 gradeMonth: document.getElementById('grade-month').value,
                 gradeYear: document.getElementById('grade-year').value,
                 balDA: document.getElementById('bal-da-perc').value,
                 hra: document.getElementById('hra-perc').value,
                 others: document.getElementById('others-val').value,
                 pen: document.getElementById('penNumber')?.value || "",
-                school: document.getElementById('schoolName')?.value || ""
+                school: document.getElementById('schoolName')?.value || "",
+                employeeName: document.getElementById('reportName')?.value || "Anonymous"
             };
-            window.saveToCloud(data);
+            debouncedSave(data);
         }
     }
 });
