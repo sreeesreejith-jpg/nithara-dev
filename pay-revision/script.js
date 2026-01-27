@@ -1029,12 +1029,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (arrearTbody && arrearContainer && totalArrearHeader) {
             arrearTbody.innerHTML = arrearHTML;
-            totalArrearHeader.textContent = `₹${totalArrear.toLocaleString()}`;
+            const formattedTotal = `₹${totalArrear.toLocaleString()}`;
+            totalArrearHeader.textContent = formattedTotal;
             arrearContainer.style.display = 'flex';
             arrearContainer.style.flexDirection = 'column';
+
+            // Update Summary Card
+            const summaryArrear = document.getElementById('header-total-arrear');
+            const summaryArrearCont = document.getElementById('arrear-summary-container');
+            if (summaryArrear && summaryArrearCont) {
+                summaryArrear.textContent = formattedTotal;
+                summaryArrearCont.style.display = totalArrear > 0 ? 'flex' : 'none';
+            }
         }
 
-        // Summary Card
+        // Summary Card BP
         document.getElementById('gross-new-val').textContent = grossNew;
         document.getElementById('revised-bp-val').textContent = bp > 0 ? bpFixed : '';
         const headerPresentBp = document.getElementById('header-present-bp');

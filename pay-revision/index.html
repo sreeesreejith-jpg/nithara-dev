@@ -94,6 +94,19 @@
                             style="font-size: 1.4rem; color: #fff; font-weight: 900; line-height: 1; text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);"></span>
                     </div>
                 </div>
+
+                <!-- 4. Total Arrear Summary (New) -->
+                <div id="arrear-summary-container"
+                    style="display: none; flex-direction: column; align-items: center; gap: 0.6rem; text-align: center;">
+                    <label
+                        style="font-size: 0.7rem; font-weight: 800; color: #10b981; text-transform: uppercase; letter-spacing: 1px;">Total
+                        Arrear (Drawn vs Revised)</label>
+                    <div
+                        style="width: 100%; max-width: 180px; height: 50px; border-radius: 0.8rem; border: 2px solid #10b981; background: rgba(16, 185, 129, 0.1); display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
+                        <span id="header-total-arrear"
+                            style="font-size: 1.4rem; color: #10b981; font-weight: 900; line-height: 1; text-shadow: 0 0 10px rgba(16, 185, 129, 0.3);">₹0</span>
+                    </div>
+                </div>
             </div>
 
             <!-- Configuration Parameters -->
@@ -390,7 +403,7 @@
                         </tbody>
                         <tfoot style="background: rgba(59, 130, 246, 0.1); border-top: 2px solid #3b82f6;">
                             <tr>
-                                <td colspan="5"
+                                <td colspan="11"
                                     style="padding: 15px 10px; text-align: right; font-weight: 800; color: #fff;">Grand
                                     Total Arrear</td>
                                 <td id="total-arrear-header"
