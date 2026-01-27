@@ -341,11 +341,49 @@
             </section>
         </main>
 
-
-
-
-        <!-- Detailed Progression Results (Timeline) -->
-
+        <!-- Section: Arrear Statement -->
+        <section class="revision-section arrear-card" id="arrear-container"
+            style="display: none; margin-top: 1rem; background: var(--card-bg); border-radius: 1rem; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.4);">
+            <div class="section-header"
+                style="padding: 1rem; background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: white;">
+                <h2 style="margin: 0; font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <span>📊</span> Arrear Statement (July 2024 - Present)
+                </h2>
+            </div>
+            <div style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 0.75rem; min-width: 600px;">
+                    <thead>
+                        <tr
+                            style="background: rgba(0,0,0,0.2); text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                            <th style="padding: 12px 8px; text-align: left; color: #94a3b8;">Month</th>
+                            <th style="padding: 12px 8px; text-align: right; color: #94a3b8;">Old BP</th>
+                            <th style="padding: 12px 8px; text-align: right; color: #94a3b8;">Old Gross</th>
+                            <th style="padding: 12px 8px; text-align: right; color: #94a3b8;">New BP</th>
+                            <th style="padding: 12px 8px; text-align: right; color: #94a3b8;">New Gross</th>
+                            <th style="padding: 12px 8px; text-align: right; color: #3b82f6; font-weight: 800;">Arrear
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="arrear-tbody" style="color: #f1f5f9;">
+                        <!-- Injected by JS -->
+                    </tbody>
+                    <tfoot style="background: rgba(59, 130, 246, 0.1); border-top: 2px solid #3b82f6;">
+                        <tr>
+                            <td colspan="5"
+                                style="padding: 15px 10px; text-align: right; font-weight: 800; color: #fff;">Grand
+                                Total Arrear</td>
+                            <td id="total-arrear-header"
+                                style="padding: 15px 10px; text-align: right; font-weight: 900; color: #10b981; font-size: 1rem;">
+                                ₹0</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            <div
+                style="padding: 0.75rem; text-align: center; background: rgba(0,0,0,0.1); font-size: 0.7rem; color: #64748b; border-top: 1px solid rgba(255,255,255,0.05);">
+                * Calculations based on DA rates from July 2024 to present.
+            </div>
+        </section>
 
         <p class="disclaimer"
             style="margin: 1rem 0 0.5rem 0; padding: 0 1rem; line-height: 1.4; font-size: 0.95rem; color: #ef4444; text-align: center; font-weight: 500; letter-spacing: 0.5px;">

@@ -926,6 +926,104 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('res-others').textContent = othersVal;
         document.getElementById('res-gross-new').textContent = grossNew;
 
+        // --- ARREAR CALCULATION (MONTH-BY-MONTH) ---
+        let totalArrear = 0;
+        let arrearHTML = '';
+        let monthLoop = new Date(startDate); // July 1, 2024
+        let currentOldBP = bp;
+        let currentNewBP = bpFixed;
+        let currentOldIndex = baseIndex;
+        let currentNewIndex = baseIndex;
+
+        while (monthLoop <= today) {
+            const year = monthLoop.getFullYear();
+            const month = monthLoop.getMonth(); // 0-11
+
+            // 1. Process Increments & Grades (Apply after the start month)
+            if (monthLoop.getTime() !== startDate.getTime()) {
+                // Annual Increment
+                if (incMonth !== null && month === incMonth) {
+                    currentOldIndex++;
+                    currentNewIndex++;
+                    currentOldIndex = Math.min(currentOldIndex, payStagesList.length - 1);
+                    currentNewIndex = Math.min(currentNewIndex, revisedScale.length - 1);
+                    currentOldBP = payStagesList[currentOldIndex];
+                    currentNewBP = revisedScale[currentNewIndex];
+                }
+                // Grade
+                if (hasGrade && year === gradeYear && month === gradeMonth) {
+                    currentOldIndex += 2;
+                    currentNewIndex += 2;
+                    currentOldIndex = Math.min(currentOldIndex, payStagesList.length - 1);
+                    currentNewIndex = Math.min(currentNewIndex, revisedScale.length - 1);
+                    currentOldBP = payStagesList[currentOldIndex];
+                    currentNewBP = revisedScale[currentNewIndex];
+                }
+            }
+
+            // 2. Get DA Rates for this month
+            let daOld = 0;
+            if (year === 2024) {
+                if (month >= 6 && month <= 8) daOld = 9; // Jul-Sep
+                else if (month >= 9) daOld = 12; // Oct-Dec
+            } else if (year === 2025) {
+                if (month <= 2) daOld = 12; // Jan-Mar
+                else if (month >= 3 && month <= 6) daOld = 15; // Apr-Jul
+                else if (month >= 7 && month <= 8) daOld = 18; // Aug-Sep
+                else daOld = 22; // Oct onwards
+            } else {
+                daOld = 22; // 2026 onwards
+            }
+
+            let daRev = 0;
+            if (year === 2024) daRev = 0; // Jul-Dec
+            else if (year === 2025) {
+                if (month <= 5) daRev = 2; // Jan-Jun
+                else daRev = 4; // Jul-Dec
+            } else {
+                daRev = 6; // Jan 2026 onwards
+            }
+
+            // 3. Calculate Monthly Totals
+            const oldDAVal = Math.round(currentOldBP * (daOld / 100));
+            const oldHRAVal = Math.round(currentOldBP * (hraNewPerc / 100));
+            const oldGross = currentOldBP + oldDAVal + oldHRAVal + othersVal;
+
+            const newDAVal = Math.round(currentNewBP * (daRev / 100));
+            const newHRAVal = Math.round(currentNewBP * (hraNewPerc / 100));
+            const newGross = currentNewBP + newDAVal + newHRAVal + othersVal;
+
+            const monthlyArrear = newGross - oldGross;
+            totalArrear += monthlyArrear;
+
+            arrearHTML += `
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <td style="padding: 10px 8px; font-weight: 500;">${monthShortNames[month]} ${year}</td>
+                    <td style="padding: 10px 8px; text-align: right;">${currentOldBP.toLocaleString()}</td>
+                    <td style="padding: 10px 8px; text-align: right;">${oldGross.toLocaleString()}</td>
+                    <td style="padding: 10px 8px; text-align: right;">${currentNewBP.toLocaleString()}</td>
+                    <td style="padding: 10px 8px; text-align: right;">${newGross.toLocaleString()}</td>
+                    <td style="padding: 10px 8px; text-align: right; font-weight: 700; color: ${monthlyArrear >= 0 ? '#10b981' : '#ef4444'};">
+                        ${monthlyArrear.toLocaleString()}
+                    </td>
+                </tr>
+            `;
+
+            monthLoop.setMonth(monthLoop.getMonth() + 1);
+        }
+
+        // 4. Update UI
+        const arrearTbody = document.getElementById('arrear-tbody');
+        const arrearContainer = document.getElementById('arrear-container');
+        const totalArrearHeader = document.getElementById('total-arrear-header');
+
+        if (arrearTbody && arrearContainer && totalArrearHeader) {
+            arrearTbody.innerHTML = arrearHTML;
+            totalArrearHeader.textContent = `₹${totalArrear.toLocaleString()}`;
+            arrearContainer.style.display = 'flex';
+            arrearContainer.style.flexDirection = 'column';
+        }
+
         // Summary Card
         document.getElementById('gross-new-val').textContent = grossNew;
         document.getElementById('revised-bp-val').textContent = bp > 0 ? bpFixed : '';
@@ -940,6 +1038,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 revisedBP: bpFixed,
                 presentBP: bpCurrent,
                 grossSalary: grossNew,
+                totalArrear: totalArrear,
                 fitment: fitmentPerc,
                 isWeightage: isWeightageEnabled || false,
                 serviceYears: yearsService,
@@ -1172,7 +1271,53 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
 
-            // 7. Footer
+            // 7. Arrear Statement Table
+            const arrearRows = [];
+            const rows = document.querySelectorAll('#arrear-tbody tr');
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                if (cells.length >= 6) {
+                    arrearRows.push([
+                        cells[0].textContent,
+                        cells[1].textContent,
+                        cells[2].textContent,
+                        cells[3].textContent,
+                        cells[4].textContent,
+                        cells[5].textContent
+                    ]);
+                }
+            });
+
+            if (arrearRows.length > 0) {
+                doc.addPage();
+                doc.setFontSize(16);
+                doc.setTextColor(59, 130, 246);
+                doc.text("Arrear Statement (Jul 2024 - Present)", 14, 20);
+
+                doc.autoTable({
+                    startY: 25,
+                    head: [['Month', 'Old BP', 'Old Gross', 'New BP', 'New Gross', 'Arrear']],
+                    body: arrearRows,
+                    theme: 'striped',
+                    headStyles: { fillColor: [59, 130, 246] },
+                    styles: { fontSize: 8 },
+                    columnStyles: {
+                        0: { halign: 'left' },
+                        1: { halign: 'right' },
+                        2: { halign: 'right' },
+                        3: { halign: 'right' },
+                        4: { halign: 'right' },
+                        5: { halign: 'right', fontStyle: 'bold' }
+                    }
+                });
+
+                const totalArrearText = document.getElementById('total-arrear-header')?.textContent || "₹0";
+                doc.setFontSize(12);
+                doc.setTextColor(16, 185, 129);
+                doc.text(`Grand Total Arrear: ${totalArrearText}`, 14, doc.lastAutoTable.finalY + 10);
+            }
+
+            // 8. Footer
             if (doc.lastAutoTable) {
                 let finalY = doc.lastAutoTable.finalY + 15;
                 if (finalY > 275) {
