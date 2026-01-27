@@ -1308,23 +1308,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 doc.setTextColor(59, 130, 246);
                 doc.text("Arrear Statement (Jul 2024 - Present)", 14, 20);
 
+                const totalArrearText = document.getElementById('total-arrear-header')?.textContent || "₹0";
                 doc.autoTable({
                     startY: 25,
                     head: [['Month', 'New BP', 'DA%', 'DA', 'HRA', 'NewTotal', 'Old BP', 'DA%', 'DA', 'HRA', 'OldTotal', 'Arrear']],
                     body: arrearRows,
+                    foot: [[{ content: 'arrear', colSpan: 11, styles: { halign: 'right', fontStyle: 'bold' } }, { content: totalArrearText, styles: { halign: 'right', fontStyle: 'bold', textColor: [16, 185, 129] } }]],
                     theme: 'grid',
                     headStyles: { fillColor: [59, 130, 246], fontSize: 7 },
+                    footStyles: { fillColor: [240, 253, 244], fontSize: 8 },
                     styles: { fontSize: 7, cellPadding: 2 },
                     columnStyles: {
                         0: { halign: 'left', cellWidth: 20 },
                         11: { halign: 'right', fontStyle: 'bold', fillColor: [240, 253, 244] }
                     }
                 });
-
-                const totalArrearText = document.getElementById('total-arrear-header')?.textContent || "₹0";
-                doc.setFontSize(12);
-                doc.setTextColor(16, 185, 129);
-                doc.text(`arrear: ${totalArrearText}`, 14, doc.lastAutoTable.finalY + 10);
             }
 
             // 8. Footer
