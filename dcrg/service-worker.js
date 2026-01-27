@@ -17,7 +17,6 @@ const ASSETS = [
 
 
 self.addEventListener('install', (event) => {
-    self.skipWaiting();
     event.waitUntil(
         caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
     );
@@ -65,4 +64,10 @@ self.addEventListener('fetch', (event) => {
                 return caches.match(event.request);
             })
     );
+});
+
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.action === 'skipWaiting') {
+    self.skipWaiting();
+  }
 });

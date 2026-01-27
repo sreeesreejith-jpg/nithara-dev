@@ -33,7 +33,6 @@ self.addEventListener('install', (event) => {
             return cache.addAll(ASSETS_TO_CACHE);
         })
     );
-    self.skipWaiting();
 });
 
 // Activate Event
@@ -86,5 +85,12 @@ self.addEventListener('fetch', (event) => {
                 return cachedResponse || fetchPromise;
             })
         );
+    }
+});
+
+// Listen for message to activate waiting worker
+self.addEventListener('message', (event) => {
+    if (event.data && event.data.action === 'skipWaiting') {
+        self.skipWaiting();
     }
 });
