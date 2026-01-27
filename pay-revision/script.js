@@ -378,7 +378,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Fitment Dropdown logic ---
     const fitmentInput = document.getElementById('fitment-perc');
     const fitmentDropdown = document.getElementById('fitment-dropdown');
-    const fitmentList = [7, 8, 9, 10];
+    const fitmentList = [4, 5, 6, 7, 8, 9, 10];
 
     function renderFitmentDropdown() {
         fitmentDropdown.innerHTML = "";
@@ -981,7 +981,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (month <= 5) daRev = 2; // Jan-Jun
                 else daRev = 4; // Jul-Dec
             } else {
-                daRev = 6; // Jan 2026 onwards
+                daRev = 4; // UPDATED: Jan 2026 onwards is 4% (same as Dec 2025)
             }
 
             // 3. Calculate Monthly Totals
