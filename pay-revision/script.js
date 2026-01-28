@@ -108,8 +108,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const gradeCheck = document.getElementById('grade-check');
     const gradeDetailsContainer = document.getElementById('grade-details-container');
-    const gradeDateText = document.getElementById('grade-date');
-    const gradeDatePicker = document.getElementById('grade-date-picker');
 
     if (gradeCheck && gradeDetailsContainer) {
         gradeCheck.addEventListener('change', () => {
@@ -118,52 +116,75 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if (gradeDateText && gradeDatePicker) {
-        const todayStr = new Date().toISOString().split('T')[0];
-        gradeDatePicker.max = todayStr;
-        gradeDatePicker.min = "2024-07-02";
+    // Grade Date Elements
+    const gradeDayInput = document.getElementById('grade-day');
+    const gradeDayDisplay = document.getElementById('grade-day-display');
+    const gradeDayDropdown = document.getElementById('grade-day-dropdown');
 
-        // Auto-format DD/MM/YYYY as user types
-        gradeDateText.addEventListener('input', function (e) {
-            let val = this.value.replace(/\D/g, '');
-            if (val.length > 2) val = val.slice(0, 2) + '/' + val.slice(2);
-            if (val.length > 5) val = val.slice(0, 5) + '/' + val.slice(5, 9);
-            this.value = val;
+    const gradeMonthInput = document.getElementById('grade-month');
+    const gradeMonthDisplay = document.getElementById('grade-month-display');
+    const gradeMonthDropdown = document.getElementById('grade-month-dropdown');
 
-            // Sync to picker if complete
-            if (val.length === 10) {
-                const parts = val.split('/');
-                const iso = `${parts[2]}-${parts[1]}-${parts[0]}`;
-                if (!isNaN(Date.parse(iso))) {
-                    gradeDatePicker.value = iso;
-                    calculate();
-                }
+    const gradeYearInput = document.getElementById('grade-year');
+    const gradeYearDisplay = document.getElementById('grade-year-display');
+    const gradeYearDropdown = document.getElementById('grade-year-dropdown');
+
+    function setupDayDropdown(inputEl, displayEl, dropdownEl) {
+        function renderDays(filterText = "") {
+            dropdownEl.innerHTML = "";
+            let hasMatches = false;
+
+            const selectedYear = parseInt(document.getElementById('grade-year')?.value);
+            const selectedMonth = parseInt(document.getElementById('grade-month')?.value);
+            const now = new Date();
+
+            let totalDays = 31;
+            if (!isNaN(selectedYear) && !isNaN(selectedMonth)) {
+                totalDays = new Date(selectedYear, selectedMonth + 1, 0).getDate();
             }
-        });
 
-        // Sync hidden picker to text box
-        gradeDatePicker.addEventListener('input', function () { // Changed change to input for faster response
-            if (this.value) {
-                const parts = this.value.split('-');
-                gradeDateText.value = `${parts[2]}/${parts[1]}/${parts[0]}`;
-                calculate();
-            }
-        });
+            for (let d = 1; d <= totalDays; d++) {
+                const dayStr = d.toString().padStart(2, '0');
 
-        gradeDateText.addEventListener('blur', function () {
-            if (this.value && this.value.length < 10 && this.value.length > 0) {
-                alert("Please use DD/MM/YYYY format.");
-                this.value = "";
-            } else if (this.value.length === 10) {
-                const parts = this.value.split('/');
-                const iso = `${parts[2]}-${parts[1]}-${parts[0]}`;
-                if (iso < gradeDatePicker.min || iso > gradeDatePicker.max) {
-                    alert("Date must be between 02/07/2024 and Today.");
-                    this.value = "";
-                    calculate();
-                }
+                // Filtering logic
+                if (selectedYear === 2024 && selectedMonth === 6 && d === 1) continue; // Skip July 1st
+                if (selectedYear === now.getFullYear() && selectedMonth === now.getMonth() && d > now.getDate()) continue; // Not past today
+
+                if (filterText && !dayStr.startsWith(filterText)) return;
+                hasMatches = true;
+
+                const li = document.createElement('li');
+                li.textContent = dayStr;
+                li.addEventListener('mousedown', (e) => {
+                    e.preventDefault();
+                    selectDay(dayStr);
+                });
+                dropdownEl.appendChild(li);
             }
-        });
+            dropdownEl.classList.toggle('show', hasMatches);
+        }
+
+        function selectDay(day) {
+            inputEl.value = day;
+            displayEl.value = day;
+            dropdownEl.classList.remove('show');
+            calculate();
+        }
+
+        displayEl.addEventListener('focus', () => renderDays(""));
+        displayEl.addEventListener('click', () => renderDays(""));
+        displayEl.addEventListener('input', (e) => renderDays(e.target.value));
+        displayEl.addEventListener('blur', () => setTimeout(() => dropdownEl.classList.remove('show'), 150));
+    }
+
+    if (gradeDayInput && gradeDayDisplay && gradeDayDropdown) {
+        setupDayDropdown(gradeDayInput, gradeDayDisplay, gradeDayDropdown);
+    }
+    if (gradeMonthInput && gradeMonthDisplay && gradeMonthDropdown) {
+        setupMonthDropdown(gradeMonthInput, gradeMonthDisplay, gradeMonthDropdown);
+    }
+    if (gradeYearInput && gradeYearDisplay && gradeYearDropdown) {
+        setupYearDropdown(gradeYearInput, gradeYearDisplay, gradeYearDropdown);
     }
 
     // Increment Month Conditional Display Logic
@@ -189,18 +210,32 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Generic Month Dropdown Logic with Search
+    // Generic Month Dropdown Logic with Search and Optional Filter
     function setupMonthDropdown(inputEl, displayEl, dropdownEl) {
         function renderMonths(filterText = "") {
             dropdownEl.innerHTML = "";
             let hasMatches = false;
+
+            // Get restrictions if this is the Grade Month
+            const isGradeMonth = displayEl.id === 'grade-month-display';
+            const selectedYear = parseInt(document.getElementById('grade-year')?.value);
+            const now = new Date();
+            const currentYear = now.getFullYear();
+            const currentMonth = now.getMonth();
+
             monthNames.forEach((month, index) => {
+                // Filter logic for Grade selection
+                if (isGradeMonth && selectedYear) {
+                    if (selectedYear === 2024 && index < 6) return; // July onwards
+                    if (selectedYear === currentYear && index > currentMonth) return; // Not past today
+                }
+
                 if (filterText && !month.toLowerCase().startsWith(filterText.toLowerCase())) return;
                 hasMatches = true;
 
                 const li = document.createElement('li');
                 li.textContent = month;
-                li.dataset.value = index; // Store 0-11 index
+                li.dataset.value = index;
 
                 li.addEventListener('mousedown', (e) => {
                     e.preventDefault();
@@ -210,11 +245,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 dropdownEl.appendChild(li);
             });
 
-            if (!hasMatches) {
-                dropdownEl.classList.remove('show');
-            } else {
-                dropdownEl.classList.add('show');
-            }
+            dropdownEl.classList.toggle('show', hasMatches);
         }
 
         function selectMonth(index, name) {
@@ -223,58 +254,18 @@ document.addEventListener('DOMContentLoaded', () => {
             displayEl.dataset.lastValid = name;
             inputEl.dataset.lastValid = index;
             dropdownEl.classList.remove('show');
-            toggleConditionalSections(); // Update visibility if needed
+            toggleConditionalSections();
             calculate();
         }
 
         function showDropdown() {
             renderMonths(displayEl.value === "Select" ? "" : displayEl.value);
-            const currentVal = inputEl.value;
-            if (currentVal !== "") {
-                const items = Array.from(dropdownEl.querySelectorAll('li'));
-                const match = items.find(li => li.dataset.value == currentVal);
-                if (match) {
-                    match.scrollIntoView({ block: 'center' });
-                    items.forEach(li => li.classList.remove('active'));
-                    match.classList.add('active');
-                }
-            }
         }
 
-        displayEl.addEventListener('click', function () {
-            this.select();
-            showDropdown();
-        });
-        displayEl.addEventListener('focus', function () {
-            this.select();
-            showDropdown();
-        });
-        displayEl.addEventListener('input', function () {
-            renderMonths(this.value);
-        });
-        displayEl.addEventListener('blur', () => {
-            setTimeout(() => {
-                if (!dropdownEl.classList.contains('show')) {
-                    if (inputEl.value === "") {
-                        displayEl.value = "";
-                    } else {
-                        // Restore last valid name if current text doesn't match a month
-                        const currentText = displayEl.value.toLowerCase();
-                        const matchIndex = monthNames.findIndex(m => m.toLowerCase() === currentText);
-                        if (matchIndex === -1) {
-                            displayEl.value = monthNames[inputEl.value] || "";
-                        }
-                    }
-                }
-                dropdownEl.classList.remove('show');
-            }, 150);
-        });
-
-        dropdownEl.addEventListener('scroll', () => {
-            if (dropdownEl.classList.contains('show')) {
-                syncSelectionOnScroll(dropdownEl, displayEl, inputEl, true);
-            }
-        });
+        displayEl.addEventListener('click', showDropdown);
+        displayEl.addEventListener('focus', showDropdown);
+        displayEl.addEventListener('input', function () { renderMonths(this.value); });
+        displayEl.addEventListener('blur', () => setTimeout(() => dropdownEl.classList.remove('show'), 150));
     }
 
     // Generic Year Dropdown Logic with Search
@@ -756,13 +747,15 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const gradeDateVal = document.getElementById('grade-date')?.value;
+        const gDay = document.getElementById('grade-day')?.value;
+        const gMonth = document.getElementById('grade-month')?.value;
+        const gYear = document.getElementById('grade-year')?.value;
+
         let gradeYear = null, gradeMonth = null, gradeDay = null;
-        if (hasGrade && gradeDateVal && gradeDateVal.length === 10) {
-            const parts = gradeDateVal.split('/');
-            gradeDay = parseInt(parts[0]);
-            gradeMonth = parseInt(parts[1]) - 1;
-            gradeYear = parseInt(parts[2]);
+        if (hasGrade && gDay && gMonth !== "" && gYear) {
+            gradeDay = parseInt(gDay);
+            gradeMonth = parseInt(gMonth);
+            gradeYear = parseInt(gYear);
         }
 
         // --- DYNAMIC PROGRESSION CALCULATION (TIMELINE) ---
