@@ -1904,14 +1904,82 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
 
-            // 7. Arrear Statement Table
+            // 7. DA Arrear Statement (Mar 2021 - Jun 2024)
+            const daArrearRows = [];
+            document.querySelectorAll('#da-arrear-tbody tr').forEach(row => {
+                const cells = row.querySelectorAll('td');
+                if (cells.length >= 7) {
+                    const rowData = [];
+                    // Extract values, skipping the delete button column
+                    for (let i = 0; i < 7; i++) {
+                        let text = cells[i].textContent.trim().replace('%', '');
+                        // If it's the BP input column (index 2), get input value
+                        if (i === 2) {
+                            text = row.querySelector('.da-bp-input')?.value || text;
+                        } else if (i === 3) {
+                            text = row.querySelector('.due-da-input')?.value || text;
+                        } else if (i === 4) {
+                            text = row.querySelector('.drawn-da-input')?.value || text;
+                        }
+                        rowData.push(text);
+                    }
+                    daArrearRows.push(rowData);
+                }
+            });
+
+            if (daArrearRows.length > 0) {
+                let daTotalVal = document.getElementById('total-da-arrear-val')?.textContent || "0";
+                daTotalVal = daTotalVal.replace('₹', 'Rs. ');
+
+                doc.addPage();
+                doc.setFontSize(16);
+                doc.setTextColor(5, 150, 105); // Green color for DA
+                doc.setFont("helvetica", "bold");
+                doc.text(`DA Arrear Statement (Mar 2021 - Jun 2024)`, 14, 20);
+
+                doc.setFontSize(11);
+                doc.setTextColor(100);
+                doc.setFont("helvetica", "normal");
+                doc.text(`Total DA Arrear: ${daTotalVal}`, 14, 28);
+
+                doc.autoTable({
+                    startY: 35,
+                    head: [['Sl', 'Month', 'BP', 'Due%', 'Drawn%', 'Diff%', 'Arrear']],
+                    body: daArrearRows,
+                    foot: [[{ content: 'TOTAL DA ARREAR', colSpan: 6, styles: { halign: 'right', fontStyle: 'bold', fontSize: 9 } }, { content: daTotalVal, styles: { halign: 'right', fontStyle: 'bold', fontSize: 9 } }]],
+                    theme: 'grid',
+                    headStyles: { fillColor: [5, 150, 105], fontSize: 9, halign: 'center' },
+                    footStyles: { fillColor: [240, 253, 244], textColor: [0, 0, 0] },
+                    styles: { fontSize: 8, cellPadding: 3, valign: 'middle' },
+                    columnStyles: {
+                        0: { halign: 'center', cellWidth: 10 },
+                        1: { halign: 'left', cellWidth: 35 },
+                        2: { halign: 'right' },
+                        3: { halign: 'center' },
+                        4: { halign: 'center' },
+                        5: { halign: 'center' },
+                        6: { halign: 'right', fontStyle: 'bold' }
+                    }
+                });
+            }
+
+            // 8. Pay Revision Arrear Statement Table
             const arrearRows = [];
-            const rows = document.querySelectorAll('#arrear-tbody tr');
-            rows.forEach(row => {
+            const pRows = document.querySelectorAll('#arrear-tbody tr');
+            pRows.forEach(row => {
                 const cells = row.querySelectorAll('td');
                 if (cells.length >= 12) {
                     const rowData = [];
-                    cells.forEach(c => rowData.push(c.textContent.trim()));
+                    // Handle inputs in column 2 and 7
+                    for (let i = 0; i < 13; i++) {
+                        let cellText = cells[i]?.textContent.trim() || "";
+                        if (i === 2) cellText = row.querySelector('.new-bp-input')?.value || cellText;
+                        else if (i === 3) cellText = row.querySelector('.new-da-rate-input')?.value || cellText;
+                        else if (i === 7) cellText = row.querySelector('.old-bp-input')?.value || cellText;
+                        else if (i === 8) cellText = row.querySelector('.old-da-rate-input')?.value || cellText;
+
+                        rowData.push(cellText);
+                    }
                     arrearRows.push(rowData);
                 }
             });
