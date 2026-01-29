@@ -1118,6 +1118,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let totalArrear = 0;
         let arrearHTML = '';
         let monthLoop = new Date(startDate); // July 1, 2024
+        let currentNewBP = bpFixed;
         let currentOldBP = bp;
         let currentOldIndex = baseIndex;
         let currentNewIndex = baseIndex;
