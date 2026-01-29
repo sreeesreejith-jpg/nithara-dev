@@ -138,6 +138,54 @@ document.addEventListener('DOMContentLoaded', () => {
             historyToggleIcon.textContent = isHidden ? '-' : '+';
         });
     }
+    // Global handler for DA Row Recalculation
+    window.recalcDaRow = function (input) {
+        const row = input.closest('tr');
+        if (!row) return;
+
+        const newBp = parseInt(input.value) || 0;
+        const diffDa = parseFloat(input.dataset.diff) || 0;
+
+        // Calculate Arrear
+        const arrear = Math.round(newBp * (diffDa / 100));
+
+        // Update Arrear Cell (Last cell)
+        const arrearCell = row.lastElementChild;
+        arrearCell.textContent = arrear;
+        arrearCell.style.color = arrear > 0 ? '#10b981' : '#ef4444'; // Green or Red logic if needed
+
+        // Update Table Total
+        const tbody = document.getElementById('da-arrear-tbody');
+        let newGrandTotal = 0;
+        const rows = tbody.querySelectorAll('tr');
+        rows.forEach(r => {
+            const val = parseInt(r.lastElementChild.textContent) || 0;
+            newGrandTotal += val;
+        });
+
+        const totalEl = document.getElementById('total-da-arrear-val');
+        if (totalEl) totalEl.textContent = "₹" + newGrandTotal.toLocaleString('en-IN');
+
+        // Update Global Variable
+        window.lastDaArrearTotal = newGrandTotal;
+
+        // Update Combined Grand Total
+        const payRevArrearHeader = document.getElementById('total-arrear-header'); // existing one
+        // Need to parse "Rs. 1,23,000" or "₹1,23,000" back to number
+        let payRevTotal = 0;
+        if (payRevArrearHeader) {
+            payRevTotal = parseInt(payRevArrearHeader.textContent.replace(/[^0-9-]/g, '')) || 0;
+        }
+
+        const combined = newGrandTotal + payRevTotal;
+        const grandTotalHeader = document.getElementById('grand-arrear-header');
+        const grandTotalVal = document.getElementById('grand-arrear-val');
+
+        if (grandTotalHeader && grandTotalVal) {
+            grandTotalVal.textContent = "₹" + combined.toLocaleString('en-IN');
+            grandTotalHeader.style.display = combined > 0 ? 'flex' : 'none';
+        }
+    };
 
     function initPopupSelectors() {
         calYearSelect.innerHTML = yearsAllowed.map(y => `<option value="${y}">${y}</option>`).join('');
@@ -1233,7 +1281,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 tr.innerHTML = `
                 <td style="padding: 10px 5px; text-align: center; color: #64748b;">${slNo}</td>
                 <td style="padding: 10px 5px;">${mNames[currM]} ${currY}</td>
-                <td style="padding: 10px 5px; text-align: right; color: #94a3b8;">${currentBp}</td>
+                <td style="padding: 10px 5px; text-align: right;">
+                    <input type="number" class="da-bp-input" value="${currentBp}" data-diff="${diffDA}" oninput="recalcDaRow(this)"
+                        style="width: 80px; background: rgba(0,0,0,0.3); border: 1px solid #475569; color: #fff; padding: 4px; border-radius: 4px; text-align: right; font-weight: bold;">
+                </td>
                 <td style="padding: 10px 5px; text-align: center;">${dueDA}%</td>
                 <td style="padding: 10px 5px; text-align: center;">${drawnDA}%</td>
                 <td style="padding: 10px 5px; text-align: right; font-weight: 700;">${diffDA}%</td>
