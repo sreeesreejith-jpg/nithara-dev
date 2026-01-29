@@ -362,8 +362,11 @@
                 style="margin-top: 1.5rem; background: var(--card-bg); border-radius: 1rem; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.4); display: none;">
                 <div class="section-header" id="history-header"
                     style="padding: 1rem; background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); color: white; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
-                    <h2 style="margin: 0; font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem;">
-                        <span>📜</span> Pay History (Mar 2021 - Jun 2024)
+                    <h2 style="margin: 0; font-size: 1rem; display: flex; flex-direction: column; gap: 0.2rem;">
+                        <span style="display: flex; align-items: center; gap: 0.5rem;">📜 Pay History (Mar 2021 - Jun
+                            2024)</span>
+                        <span style="font-size: 0.75rem; font-weight: 400; opacity: 0.9;">If different, edit your DA
+                            Arrear chart below</span>
                     </h2>
                     <span id="history-toggle-icon" style="font-size: 1.2rem; font-weight: 800;">+</span>
                 </div>
@@ -389,8 +392,11 @@
                 style="margin-top: 1.5rem; background: var(--card-bg); border-radius: 1rem; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.4); display: none;">
                 <div class="section-header"
                     style="padding: 1rem; background: linear-gradient(135deg, #059669 0%, #047857 100%); color: white;">
-                    <h2 style="margin: 0; font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem;">
-                        <span>📈</span> DA Arrear (Mar 2021 - Jun 2024)
+                    <h2 style="margin: 0; font-size: 1rem; display: flex; flex-direction: column; gap: 0.2rem;">
+                        <span style="display: flex; align-items: center; gap: 0.5rem;">📈 DA Arrear (Mar 2021 - Jun
+                            2024)</span>
+                        <span style="font-size: 0.75rem; font-weight: 400; opacity: 0.9;">Edit with your own
+                            details</span>
                     </h2>
                 </div>
                 <div style="overflow-x: auto; -webkit-overflow-scrolling: touch; max-height: 400px;">
@@ -404,6 +410,7 @@
                                 <th style="padding: 10px 5px; text-align: center;">Drawn %</th>
                                 <th style="padding: 10px 5px; text-align: right;">Diff %</th>
                                 <th style="padding: 10px 5px; text-align: right; color: #10b981;">Arrear</th>
+                                <th style="padding: 10px 5px; text-align: center;">Actions</th>
                             </tr>
                         </thead>
                         <tbody id="da-arrear-tbody" style="color: #f1f5f9;">
@@ -430,8 +437,10 @@
                 style="margin-top: 1.5rem; background: var(--card-bg); border-radius: 1rem; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.4);">
                 <div class="section-header"
                     style="padding: 1rem; background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: white;">
-                    <h2 style="margin: 0; font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem;">
-                        <span>📊</span> Pay Revision Arrear (July 2024 - Present)
+                    <h2 style="margin: 0; font-size: 1rem; display: flex; flex-direction: column; gap: 0.2rem;">
+                        <span style="display: flex; align-items: center; gap: 0.5rem;">📊 Pay Revision Arrear (July 2024
+                            - Present)</span>
+                        <span style="font-size: 0.75rem; font-weight: 400; opacity: 0.9;">Edit BP / Delete Months</span>
                     </h2>
                 </div>
                 <div style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
@@ -454,6 +463,8 @@
                                 <th rowspan="2"
                                     style="padding: 10px 5px; text-align: right; color: #10b981; font-weight: 900;">
                                     Arrear</th>
+                                <th rowspan="2" style="padding: 10px 5px; text-align: center; width: 40px;">
+                                    Act</th>
                             </tr>
                             <tr
                                 style="background: rgba(0,0,0,0.2); font-size: 0.65rem; border-bottom: 1px solid rgba(255,255,255,0.1);">

@@ -139,6 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     // Global handler for DA Row Recalculation
+    // Global handler for DA Row Recalculation
     window.recalcDaRow = function (input) {
         const row = input.closest('tr');
         if (!row) return;
@@ -149,17 +150,32 @@ document.addEventListener('DOMContentLoaded', () => {
         // Calculate Arrear
         const arrear = Math.round(newBp * (diffDa / 100));
 
-        // Update Arrear Cell (Last cell)
-        const arrearCell = row.lastElementChild;
-        arrearCell.textContent = arrear;
-        arrearCell.style.color = arrear > 0 ? '#10b981' : '#ef4444'; // Green or Red logic if needed
+        // Update Arrear Cell (Index 6, considering Sl, Month, BP, Due, Drawn, Diff, Arrear)
+        const arrearCell = row.children[6];
+        if (arrearCell) {
+            arrearCell.textContent = arrear;
+            arrearCell.style.color = arrear > 0 ? '#10b981' : '#ef4444';
+        }
 
+        updateDaTotal();
+    };
+
+    window.deleteDaRow = function (btn) {
+        const row = btn.closest('tr');
+        if (row) {
+            row.remove();
+            updateDaTotal();
+        }
+    };
+
+    function updateDaTotal() {
         // Update Table Total
         const tbody = document.getElementById('da-arrear-tbody');
         let newGrandTotal = 0;
         const rows = tbody.querySelectorAll('tr');
         rows.forEach(r => {
-            const val = parseInt(r.lastElementChild.textContent) || 0;
+            // Arrear is at index 6
+            const val = parseInt(r.children[6]?.textContent) || 0;
             newGrandTotal += val;
         });
 
@@ -169,15 +185,107 @@ document.addEventListener('DOMContentLoaded', () => {
         // Update Global Variable
         window.lastDaArrearTotal = newGrandTotal;
 
-        // Update Combined Grand Total
-        const payRevArrearHeader = document.getElementById('total-arrear-header'); // existing one
-        // Need to parse "Rs. 1,23,000" or "₹1,23,000" back to number
-        let payRevTotal = 0;
-        if (payRevArrearHeader) {
-            payRevTotal = parseInt(payRevArrearHeader.textContent.replace(/[^0-9-]/g, '')) || 0;
+        updateCombinedGrandTotal();
+    }
+
+    // Pay Revision Edit/Delete Logic
+    window.recalcPayRevRow = function (input) {
+        const row = input.closest('tr');
+        if (!row) return;
+
+        const newBpInput = row.querySelector('.new-bp-input');
+        const oldBpInput = row.querySelector('.old-bp-input');
+
+        const newBp = parseInt(newBpInput.value) || 0;
+        const oldBp = parseInt(oldBpInput.value) || 0;
+
+        const daRev = parseFloat(newBpInput.dataset.da) || 0;
+        const daOld = parseFloat(oldBpInput.dataset.da) || 0;
+        const hraRev = parseFloat(newBpInput.dataset.hra) || 0;
+        const hraOld = parseFloat(oldBpInput.dataset.hra) || 0;
+        const others = parseFloat(newBpInput.dataset.others) || 0;
+
+        // Calc New Side (Revised)
+        const newDaVal = Math.round(newBp * (daRev / 100));
+        // Recalc HRA Amount based on NEW BP (Assuming HRA % applies to new BP)
+        const newHraVal = Math.round(newBp * (hraRev / 100));
+        const newGross = newBp + newDaVal + newHraVal + others;
+
+        // Calc Old Side (Pre-Revised)
+        const oldDaVal = Math.round(oldBp * (daOld / 100));
+        const oldHraVal = Math.round(oldBp * (hraOld / 100));
+        const oldGross = oldBp + oldDaVal + oldHraVal + others;
+
+        // Update UI Cells by Index
+        // 0: Sl, 1: Month
+        // 2: New BP (Input), 3: DA%, 4: DA Val, 5: HRA Val, 6: New Gross
+        // 7: Old BP (Input), 8: DA%, 9: DA Val, 10: HRA Val, 11: Old Gross
+        // 12: Arrear, 13: Action
+
+        const cells = row.children;
+        // New Side Updates
+        if (cells[4]) cells[4].textContent = newDaVal.toLocaleString();
+        if (cells[5]) cells[5].textContent = newHraVal.toLocaleString();
+        if (cells[6]) cells[6].textContent = newGross.toLocaleString();
+
+        // Old Side Updates
+        if (cells[9]) cells[9].textContent = oldDaVal.toLocaleString();
+        if (cells[10]) cells[10].textContent = oldHraVal.toLocaleString();
+        if (cells[11]) cells[11].textContent = oldGross.toLocaleString();
+
+        // Arrear Update
+        const arrear = newGross - oldGross;
+        if (cells[12]) {
+            cells[12].textContent = arrear.toLocaleString();
+            cells[12].style.color = arrear >= 0 ? '#10b981' : '#ef4444';
         }
 
-        const combined = newGrandTotal + payRevTotal;
+        updatePayRevTotal();
+    };
+
+    window.deletePayRevRow = function (btn) {
+        const row = btn.closest('tr');
+        if (row) {
+            row.remove();
+            updatePayRevTotal();
+        }
+    };
+
+    function updatePayRevTotal() {
+        const tbody = document.getElementById('arrear-tbody');
+        let total = 0;
+        const rows = tbody.querySelectorAll('tr');
+        rows.forEach(r => {
+            // Arrear is at index 12 (13th column)
+            const cell = r.children[12];
+            if (cell) {
+                const val = parseInt(cell.textContent.replace(/,/g, '')) || 0;
+                total += val;
+            }
+        });
+
+        const totalEl = document.getElementById('total-arrear-header');
+        if (totalEl) totalEl.textContent = "₹" + total.toLocaleString('en-IN');
+
+        const summaryArrear = document.getElementById('header-total-arrear');
+        const summaryArrearCont = document.getElementById('arrear-summary-container');
+        if (summaryArrear && summaryArrearCont) {
+            summaryArrear.textContent = "₹" + total.toLocaleString('en-IN');
+            summaryArrearCont.style.display = total > 0 ? 'flex' : 'none';
+        }
+
+        updateCombinedGrandTotal();
+    }
+
+    function updateCombinedGrandTotal() {
+        const daTotal = window.lastDaArrearTotal || 0;
+        const payRevHeader = document.getElementById('total-arrear-header');
+        let payRevTotal = 0;
+        if (payRevHeader) {
+            payRevTotal = parseInt(payRevHeader.textContent.replace(/[^0-9-]/g, '')) || 0;
+        }
+
+        const combined = daTotal + payRevTotal;
         const grandTotalHeader = document.getElementById('grand-arrear-header');
         const grandTotalVal = document.getElementById('grand-arrear-val');
 
@@ -185,7 +293,7 @@ document.addEventListener('DOMContentLoaded', () => {
             grandTotalVal.textContent = "₹" + combined.toLocaleString('en-IN');
             grandTotalHeader.style.display = combined > 0 ? 'flex' : 'none';
         }
-    };
+    }
 
     function initPopupSelectors() {
         calYearSelect.innerHTML = yearsAllowed.map(y => `<option value="${y}">${y}</option>`).join('');
@@ -1290,6 +1398,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td style="padding: 10px 5px; text-align: center;">${drawnDA}%</td>
                 <td style="padding: 10px 5px; text-align: right; font-weight: 700;">${diffDA}%</td>
                 <td style="padding: 10px 5px; text-align: right; color: #10b981; font-weight: 700;">${arrearAmount}</td>
+                <td style="padding: 10px 5px; text-align: center;">
+                    <button onclick="deleteDaRow(this)" style="background: none; border: none; cursor: pointer; font-size: 0.9rem;">🗑️</button>
+                </td>
             `;
                 tbody.appendChild(tr);
 
@@ -1424,13 +1535,23 @@ document.addEventListener('DOMContentLoaded', () => {
                     <td style="padding: 8px 5px; font-weight: 500; border-right: 1px solid rgba(255,255,255,0.05);">
                         ${monthShortNames[month]} ${year}${isProRataMonth ? ' <span style="font-size: 0.6rem; color: #8b5cf6;">(Avg)</span>' : ''}
                     </td>
-                    <td style="padding: 8px 5px; text-align: right; color: #3b82f6;">${activeNewBP.toLocaleString()}</td>
+                    <td style="padding: 8px 5px; text-align: right;">
+                         <input type="number" class="new-bp-input" value="${activeNewBP}" 
+                           data-da="${daRev}" data-hra="${hraNewPerc}" data-others="${othersVal}"
+                           oninput="recalcPayRevRow(this)"
+                           style="width: 70px; background: rgba(0,0,0,0.3); border: 1px solid #3b82f6; color: #fff; padding: 4px; border-radius: 4px; text-align: right; font-weight: bold;">
+                    </td>
                     <td style="padding: 8px 5px; text-align: right; color: #3b82f6;">${daRev}%</td>
                     <td style="padding: 8px 5px; text-align: right; color: #3b82f6;">${newDAVal.toLocaleString()}</td>
                     <td style="padding: 8px 5px; text-align: right; color: #3b82f6;">${newHRAVal.toLocaleString()}</td>
                     <td style="padding: 8px 5px; text-align: right; font-weight: 600; border-right: 1px solid rgba(255,255,255,0.1); color: #fff;">${newGross.toLocaleString()}</td>
                     
-                    <td style="padding: 8px 5px; text-align: right; color: #94a3b8;">${activeOldBP.toLocaleString()}</td>
+                    <td style="padding: 8px 5px; text-align: right;">
+                        <input type="number" class="old-bp-input" value="${activeOldBP}" 
+                           data-da="${daOld}" data-hra="${hraNewPerc}" data-others="${othersVal}"
+                           oninput="recalcPayRevRow(this)"
+                           style="width: 70px; background: rgba(0,0,0,0.3); border: 1px solid #94a3b8; color: #fff; padding: 4px; border-radius: 4px; text-align: right;" >
+                    </td>
                     <td style="padding: 8px 5px; text-align: right; color: #94a3b8;">${daOld}%</td>
                     <td style="padding: 8px 5px; text-align: right; color: #94a3b8;">${oldDAVal.toLocaleString()}</td>
                     <td style="padding: 8px 5px; text-align: right; color: #94a3b8;">${oldHRAVal.toLocaleString()}</td>
@@ -1438,6 +1559,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     
                     <td style="padding: 8px 5px; text-align: right; font-weight: 800; color: ${monthlyArrear >= 0 ? '#10b981' : '#ef4444'};">
                         ${monthlyArrear.toLocaleString()}
+                    </td>
+                     <td style="padding: 10px 5px; text-align: center;">
+                        <button onclick="deletePayRevRow(this)" style="background: none; border: none; cursor: pointer; font-size: 0.9rem;">🗑️</button>
                     </td>
                 </tr>
             `;
