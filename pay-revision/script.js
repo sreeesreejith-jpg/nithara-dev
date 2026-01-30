@@ -120,12 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const maxDate = new Date(2026, 3, 1); // April 1, 2026 (Local Time)
     const yearsAllowed = [2021, 2022, 2023, 2024, 2025, 2026];
 
-    if (gradeCheck && gradeDetailsContainer) {
-        gradeCheck.addEventListener('change', () => {
-            gradeDetailsContainer.style.display = gradeCheck.checked ? 'flex' : 'none';
-            calculate();
-        });
-    }
+
 
     // Toggle Listener for Pay History
     const historyHeader = document.getElementById('history-header');
@@ -976,7 +971,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const incMonthVal = document.getElementById('increment-month').value;
         const incMonth = incMonthVal !== "" ? parseInt(incMonthVal) : null;
 
-        const hasGrade = document.getElementById('grade-check')?.checked;
+
 
         // HRA Logic (Global)
         const globalHraPerc = parseFloat(document.getElementById('hra-percentage-select')?.value) || 4;
@@ -996,9 +991,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const gradeDateVal = document.getElementById('grade-date')?.value;
+        const hasGrade = gradeDateVal && gradeDateVal.length === 10;
+
         let gradeYear = null, gradeMonth = null, gradeDay = null;
         let isPreRevisedGrade = false;
-        if (hasGrade && gradeDateVal && gradeDateVal.length === 10) {
+        if (hasGrade) {
             const parts = gradeDateVal.split('/');
             gradeDay = parseInt(parts[0]);
             gradeMonth = parseInt(parts[1]) - 1;
