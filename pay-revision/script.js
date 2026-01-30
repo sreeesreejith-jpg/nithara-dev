@@ -1885,7 +1885,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const rowData = [];
                     // Extract values, skipping the delete button column
                     for (let i = 0; i < 7; i++) {
-                        let text = cells[i].textContent.trim().replace('%', '');
+                        let text = cells[i].textContent.trim().replace('%', '').replace('(Avg)', '').trim();
                         // If it's the BP input column (index 2), get input value
                         if (i === 2) {
                             text = row.querySelector('.da-bp-input')?.value || text;
@@ -1910,10 +1910,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 doc.setFont("helvetica", "bold");
                 doc.text(`DA Arrear Statement (Mar 2021 - Jun 2024)`, 14, 20);
 
-                doc.setFontSize(11);
-                doc.setTextColor(100);
-                doc.setFont("helvetica", "normal");
-                doc.text(`Total DA Arrear: ${daTotalVal}`, 14, 28);
+                // Removed header total as per request, consistent with only showing footer total
+
 
                 doc.autoTable({
                     startY: 35,
@@ -1989,6 +1987,41 @@ document.addEventListener('DOMContentLoaded', () => {
                         12: { halign: 'right', fontStyle: 'bold', fillColor: [235, 245, 255] }
                     }
                 });
+            }
+
+            // 8b. GRAND TOTAL ARREAR (New Section)
+            // Parse values to numbers
+            let totalRevArrearNum = 0;
+            let totalDaArrearNum = 0;
+
+            const totalRevStr = document.getElementById('total-arrear-header')?.textContent || "0";
+            const totalDaStr = document.getElementById('total-da-arrear-val')?.textContent || "0";
+
+            totalRevArrearNum = parseFloat(totalRevStr.replace(/[^\d.]/g, '')) || 0;
+            totalDaArrearNum = parseFloat(totalDaStr.replace(/[^\d.]/g, '')) || 0;
+            const grandTotalArrear = totalRevArrearNum + totalDaArrearNum;
+
+            if (grandTotalArrear > 0) {
+                if (doc.lastAutoTable) {
+                    let finalY = doc.lastAutoTable.finalY + 15;
+                    // Check page break
+                    if (finalY + 30 > 275) {
+                        doc.addPage();
+                        finalY = 20;
+                    }
+
+                    doc.setFillColor(15, 23, 42); // Dark background
+                    doc.rect(14, finalY, 182, 25, 'F');
+
+                    doc.setFontSize(10);
+                    doc.setTextColor(148, 163, 184); // Gray text
+                    doc.setFont("helvetica", "bold");
+                    doc.text("TOTAL COMBINED ARREAR (DA + Pay Revision)", 105, finalY + 8, { align: "center" });
+
+                    doc.setFontSize(18);
+                    doc.setTextColor(255, 255, 255); // White text
+                    doc.text("Rs. " + grandTotalArrear.toLocaleString('en-IN'), 105, finalY + 18, { align: "center" });
+                }
             }
 
             // 8. Footer
